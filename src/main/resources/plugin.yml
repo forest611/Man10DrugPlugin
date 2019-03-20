@@ -1,3 +1,8 @@
 name: Man10DrugPlugin
-version: @version@
+version: 1.0
 main: red.man10.man10drugplugin.Man10DrugPlugin
+commands:
+  mdp:
+    description: Man10DrugPlugin
+    usage: /<command>
+    default: op

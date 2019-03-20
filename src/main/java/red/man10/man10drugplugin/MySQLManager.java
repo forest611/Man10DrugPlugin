@@ -84,7 +84,7 @@ public class MySQLManager {
     }
 
     ////////////////////////////////
-    //       接続
+    //
     ////////////////////////////////
     public Boolean Connect(String host, String db, String user, String pass,String port) {
         this.HOST = host;
@@ -147,7 +147,7 @@ public class MySQLManager {
         return count;
     }
     ////////////////////////////////
-    //      実行
+    //
     ////////////////////////////////
     public boolean execute(String query) {
         this.MySQL = new MySQLFunc(this.HOST, this.DB, this.USER, this.PASS,this.PORT);

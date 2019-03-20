@@ -1,23 +1,22 @@
 package red.man10.man10drugplugin
 
+import org.bukkit.Bukkit
 import org.bukkit.configuration.file.YamlConfiguration
-import org.bukkit.inventory.ItemStack
 import java.io.File
 import java.util.*
 
 class MDPConfig(val plugin: Man10DrugPlugin) {
 
-
     var drugData = HashMap<String,drugData>()
 
+    /////////////////
+    //config 読み込み
+    ///////////////
     fun loadConfig(drug:File){
-
 
         val config = YamlConfiguration.loadConfiguration(drug)
 
         val data = get(config.getString("DataName"))
-
-
         //コマンド用の名前を登録
         plugin.drugName.add(config.getString("DataName"))
 
@@ -25,19 +24,13 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
         data.material = config.getString("Material")
         data.damage = config.getInt("Damage").toShort()
         data.type =  config.getInt("Type")
-        data.isEnchantParticle = config.getBoolean("IsEnchantParticle")
         data.isChange = config.getBoolean("IsChange")
-        data.changeItem = config.getItemStack("ChangeItem")
-
+        if(data.isChange)data.changeItem = config.getString("ChangeItem")
 
         data.lore = config.getStringList("Lore")
-
         //use message
         data.useMsg = config.getStringList("UseMsg")
         data.useMsgDelay = config.getStringList("UseMsgDelay")
-
-
-
         //command
         for (i in 0 until config.getStringList("Command").size){
             data.command[i] = config.getStringList("Command.Level$i")
@@ -51,9 +44,6 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
         for (i in 0 until config.getStringList("CommandDelayRandom").size){
             data.commandRandomDelay[i] = config.getStringList("CommandDelayRandom.Level$i")
         }
-
-
-
         //buff
         for (i in 0 until config.getStringList("Buff").size){
             data.buff[i] = config.getStringList("Buff.Level$i")
@@ -68,32 +58,24 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
             data.buffRandomDelay[i] = config.getStringList("BuffDelayRandom.Level$i")
         }
 
-
         //particle
         data.particle = config.getStringList("Particle")
         data.particleRandom = config.getStringList("ParticleRandom")
         data.particleDelay = config.getStringList("ParticleDelay")
         data.particleRandomDelay = config.getStringList("ParticleDelayRandom")
-
-
         //sound
         data.sound = config.getStringList("Sound")
         data.soundDelay = config.getStringList("SoundDelay")
 
-
-
-
+        //type 0 only
         if (data.type == 0){
-            data.isDependence = config.getBoolean("IsDependence")
+            data.isDependence = config.getBoolean("IsDependence") //禁断症状が出るか
             data.dependenceLevel = config.getInt("DependenceLevel")
-            data.isDieCancel = config.getBoolean("IsDieCancel")
-            data.isLeftServerStopDep = config.getBoolean("IsLeftServerStopDep")
             data.nextLevelCount = config.getInt("NextLevelCount")
 
             data.symptomsTime = config.getLongList("SymptomsTime")
             data.symptomsNextTime = config.getLongList("SymptomsNextTime")
             data.symptomsCount = config.getLongList("SymptomsCount")
-
 
             for (i in 0 until config.getStringList("BuffSymptoms").size){
                 data.buffSymptoms[i] = config.getStringList("BuffSymptoms.Level$i")
@@ -102,8 +84,6 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
                 data.buffSymptomsRandom[i] = config.getStringList("BuffSymptomsRandom.Level$i")
             }
 
-
-
             for (i in 0 until config.getStringList("CommandSymptoms").size){
                 data.commandSymptoms[i] = config.getStringList("CommandSymptoms.Level$i")
             }
@@ -111,21 +91,15 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
                 data.commandSymptomsRandom[i] = config.getStringList("CommandSymptomsRandom.Level$i")
             }
 
-
             data.particleSymptoms = config.getStringList("ParticleSymptoms")
             data.particleSymptomsRandom = config.getStringList("ParticleSymptomsRandom")
 
-
             data.msgSymptoms = config.getStringList("MsgSymptoms")
-
 
             data.soundSymptoms = config.getStringList("SoundSymptoms")
 
-
-
-
-
         }
+
         //type1
         if (data.type == 1 || data.type == 2){
             data.weakDrug = config.getString("WeakDrug") //DataName
@@ -134,24 +108,22 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
             data.stopTask = config.getBoolean("StopTask")
         }
 
-
         drugData[config.getString("DataName")] = data
-
-
-
     }
 
     fun get(key:String):drugData{
         var data = drugData[key]
         if (data == null){
+            Bukkit.getLogger().info("new drugData")
             data = drugData()
         }
         return data
     }
-
-
 }
 
+//////////////
+//ドラッグデータ用クラス
+////////////////
 class drugData{
 
     //必須
@@ -162,20 +134,18 @@ class drugData{
     var type = 0
 
     //任意
-    var isEnchantParticle = false
-    lateinit var changeItem : ItemStack //使用後、アイテムを変更する場合
+    var changeItem = "none" //使用後、アイテムを変更する場合
     var isChange = false //変えるか
-
 
     //HashMap key...Level,value...mutableList<String>
     //type0 以外はレベルがないので、Level0のみをかく
 
     //全レベル使用可
     //lore
-    lateinit var lore : MutableList<String>
+    var lore : MutableList<String>? = null
     //message
-    lateinit var useMsg : MutableList<String>
-    lateinit var useMsgDelay : MutableList<String>
+    var useMsg : MutableList<String>? = null
+    var useMsgDelay : MutableList<String>? = null
     //command
     val command = HashMap<Int,MutableList<String>>()
     val commandRandom = HashMap<Int,MutableList<String>>()
@@ -187,26 +157,23 @@ class drugData{
     val buffDelay = HashMap<Int,MutableList<String>>()
     val buffRandomDelay = HashMap<Int,MutableList<String>>()
     //particle
-    lateinit var particle : MutableList<String>
-    lateinit var particleRandom : MutableList<String>
-    lateinit var particleDelay : MutableList<String>
-    lateinit var particleRandomDelay : MutableList<String>
+    var particle : MutableList<String>? = null
+    var particleRandom : MutableList<String>? = null
+    var particleDelay : MutableList<String>? = null
+    var particleRandomDelay : MutableList<String>? = null
     //sound
-    lateinit var sound : MutableList<String>
-    lateinit var soundDelay : MutableList<String>
-
+    var sound : MutableList<String>? = null
+    var soundDelay : MutableList<String>? = null
 
     //type0
     var isDependence = false
     var dependenceLevel = 0  //依存レベル
-    var isDieCancel = false
-    var isLeftServerStopDep = false
     var nextLevelCount = 100 //次のレベルに上がるまでの回数
 
     //type0 HM
-    lateinit var symptomsTime : MutableList<Long>
-    lateinit var symptomsNextTime : MutableList<Long>
-    lateinit var symptomsCount : MutableList<Long> //何回禁断症状が出るか (終わるまでの回数)
+    var symptomsTime : MutableList<Long>? = null
+    var symptomsNextTime : MutableList<Long>? = null
+    var symptomsCount : MutableList<Long>? = null //何回禁断症状が出るか (終わるまでの回数)
 
     val buffSymptoms = HashMap<Int,MutableList<String>>()
     val buffSymptomsRandom = HashMap<Int,MutableList<String>>()
@@ -214,25 +181,17 @@ class drugData{
     val commandSymptoms = HashMap<Int,MutableList<String>>()
     val commandSymptomsRandom = HashMap<Int,MutableList<String>>()
 
-    lateinit var msgSymptoms : MutableList<String>
+    var msgSymptoms : MutableList<String>? = null
 
-    lateinit var particleSymptoms : MutableList<String>
-    lateinit var particleSymptomsRandom : MutableList<String>
+    var particleSymptoms : MutableList<String>? = null
+    var particleSymptomsRandom : MutableList<String>? = null
 
-    lateinit var soundSymptoms : MutableList<String>
-
+    var soundSymptoms : MutableList<String>? = null
 
     //type1
     var weakDrug = "drug" //type2
     var weakCount = 10  //指定値カウントを減らす
     var medicineCount = 0 //弱めるのに必要な量
     var stopTask = false //薬で依存を止めるか
-
-
-
-
-    //random の設定
-    //バフの数
-    //
 
 }
