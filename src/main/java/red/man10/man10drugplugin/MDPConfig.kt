@@ -7,7 +7,7 @@ import java.util.*
 
 class MDPConfig(val plugin: Man10DrugPlugin) {
 
-    var drugData = HashMap<String,drugData>()
+    val drugData = HashMap<String,Data>()
 
     /////////////////
     //config 読み込み
@@ -109,13 +109,13 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
         }
 
         drugData[config.getString("DataName")] = data
+        Bukkit.getLogger().info("${config.getString("DataName")} ... saved")
     }
 
-    fun get(key:String):drugData{
+    fun get(key:String):Data{
         var data = drugData[key]
         if (data == null){
-            Bukkit.getLogger().info("new drugData")
-            data = drugData()
+            data = Data()
         }
         return data
     }
@@ -124,7 +124,7 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
 //////////////
 //ドラッグデータ用クラス
 ////////////////
-class drugData{
+class Data{
 
     //必須
     var displayName = "drug"

@@ -5,11 +5,10 @@ import org.bukkit.entity.Player
 import java.sql.ResultSet
 import java.util.*
 
-class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager){
+class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:MDPConfig){
 
     var playerMap = HashMap<String,playerData>()
     var canConnect = true
-    val config = MDPConfig(plugin)
 
     ////////////////////////
     //DBのデータを読み込む
@@ -82,8 +81,8 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager){
 
                 //禁断症状
                 if (drugData.isDependence){
-                    data.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin,SymptomsTask(plugin,player,mysql
-                            ,plugin.drugName[i])
+                    data.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin,SymptomsTask(player
+                            ,drugData,data)
                             ,drugData.symptomsTime!![data.level],drugData.symptomsNextTime!![1])
                     data.isDependence = true
                 }

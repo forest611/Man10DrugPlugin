@@ -16,6 +16,7 @@ class Man10DrugPlugin : JavaPlugin() {
     lateinit var mysql : MySQLManager
     lateinit var db : MDPDataBase
 
+
     private val mdpConfig = MDPConfig(this  )
 
     var canMilk = true // milkを使えるか
@@ -40,7 +41,6 @@ class Man10DrugPlugin : JavaPlugin() {
         }
 
         val drugFiles = drugFolder.listFiles().toMutableList()
-        Bukkit.getLogger().info("${drugFiles.size}")
 
         //////////////////////////////////
         //ファイルを読み込んでデータをメモリに保存
@@ -123,10 +123,14 @@ class Man10DrugPlugin : JavaPlugin() {
         //drug load
         load()
 
-        db = MDPDataBase(this,mysql)
+        for (i in 0 until drugName.size){
+            Bukkit.getLogger().info(drugName[i])
+        }
 
-        Bukkit.getServer().pluginManager.registerEvents(MDPEvent(this,mysql),this)
-        getCommand("mdp").executor = MDPCommand(this,mysql)
+        db = MDPDataBase(this,mysql,mdpConfig)
+
+        Bukkit.getServer().pluginManager.registerEvents(MDPEvent(this,mysql,db,mdpConfig),this)
+        getCommand("mdp").executor = MDPCommand(this,db)
 
         //再起動時にオンラインプレイヤーがいた場合
         for (player in Bukkit.getServer().onlinePlayers){

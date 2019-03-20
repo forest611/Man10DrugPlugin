@@ -18,10 +18,8 @@ import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
 import java.util.*
 
-class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager) : Listener {
+class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDataBase,val config:MDPConfig) : Listener {
 
-    val db = MDPDataBase(plugin,mysql)
-    val config = MDPConfig(plugin)
 
 
     @EventHandler
@@ -47,11 +45,12 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager) : Listener 
         if (event.action == Action.RIGHT_CLICK_AIR ||
                 event.action == Action.RIGHT_CLICK_BLOCK){
 
+
             val item = event.item
 
-            if (item.type == Material.AIR)return
             if (item.itemMeta.lore == null)return
             if (item.itemMeta.lore.isEmpty())return
+            if (item.type == Material.AIR)return
 
             event.isCancelled = true
 
@@ -81,19 +80,14 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager) : Listener 
     ///drugData = プレイヤーが使用したドラッグのデータ
     fun useDrug(player: Player,item: ItemStack){
 
-        Bukkit.getLogger().info("useDrug0")
-
         object : BukkitRunnable() {
             override fun run() {
 
                 val drug = item.itemMeta.lore[item.itemMeta.lore.size -1].replace("§","")
-                Bukkit.getLogger().info("useDrug1")
 
                 if(plugin.drugName.indexOf(drug) == -1){
                     return
                 }
-
-                Bukkit.getLogger().info("useDrug2")
 
                 val key = player.name + drug
 
@@ -141,7 +135,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager) : Listener 
 
                         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
 
-                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command[0])
+                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command[0].replace("<player>",player.name))
 
                         },command[1].toLong())
                     }
@@ -157,7 +151,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager) : Listener 
 
                     Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
 
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command[0])
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command[0].replace("<player>",player.name))
 
                     },command[1].toLong())
                 }
@@ -231,7 +225,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager) : Listener 
                 ////////////////////////
                 //particle
                 ///////////////////////
-                if(drugData.particle != null && !drugData.particle!![pd.level].isEmpty()){
+                if(drugData.particle != null && size(drugData.particle!!,pd)){
                     val particle = drugData.particle!![pd.level].split(",")
 
                     player.world.spawnParticle(Particle.valueOf(particle[0]),player.location,particle[1].toInt())
@@ -241,7 +235,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager) : Listener 
                 ////////////////////////
                 //particle random
                 ///////////////////////
-                if(drugData.particleRandom != null && !drugData.particleRandom!![pd.level].isEmpty()) {
+                if(drugData.particleRandom != null && size(drugData.particleRandom!!,pd)) {
 
                     val particle = drugData.particleRandom!![Random()
                             .nextInt(drugData.particleRandom!!.size - 1)].split(",")
@@ -252,7 +246,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager) : Listener 
                 ////////////////////////
                 //particle delay
                 ///////////////////////
-                if (drugData.particleDelay != null  && !drugData.particleDelay!![pd.level].isEmpty()){
+                if (drugData.particleDelay != null  && size(drugData.particleDelay!!,pd)){
                     val times = drugData.particleDelay!![pd.level].split(";")
 
                     val particle = times[0].split(",")
@@ -266,7 +260,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager) : Listener 
                 ////////////////////////
                 //particle random delay
                 ///////////////////////
-                if(drugData.particleRandomDelay != null && !drugData.particleRandomDelay!![pd.level].isEmpty()){
+                if(drugData.particleRandomDelay != null && size(drugData.particleRandomDelay!!,pd)){
                     val times = drugData.particleRandomDelay!![Random()
                             .nextInt(drugData.particleRandomDelay!!.size -1)].split(";")
 
@@ -281,7 +275,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager) : Listener 
                 ////////////////////////
                 //sound
                 ///////////////////////
-                if (drugData.sound != null && !drugData.sound!![pd.level].isEmpty()){
+                if (drugData.sound != null && size(drugData.sound!!,pd)){
                     val sound = drugData.sound!![pd.level].split(",")
 
                     player.world.playSound(player.location, Sound.valueOf(sound[0]),sound[1].toFloat(),sound[2].toFloat())
@@ -291,7 +285,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager) : Listener 
                 ////////////////////////
                 //sound delay
                 ///////////////////////
-                if (drugData.soundDelay != null && !drugData.soundDelay!![pd.level].isEmpty()){
+                if (drugData.soundDelay != null && size(drugData.soundDelay!!,pd)){
                     val times = drugData.soundDelay!![pd.level].split(";")
 
                     val sound = times[0].split(",")
@@ -325,7 +319,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager) : Listener 
                             Bukkit.getScheduler().cancelTask(pd.taskId)
                             pd.times = 0
                         }
-                        pd.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin,SymptomsTask(plugin,player,mysql,drug)
+                        pd.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin,SymptomsTask(player,drugData,pd)
                         ,drugData.symptomsTime!![pd.level],drugData.symptomsNextTime!![1])
 
                         pd.isDependence = true
@@ -368,7 +362,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager) : Listener 
 
                         //levelがぜろになったらタスクを走らせない
                         if (pd2.level > 0){
-                            pd2.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin,SymptomsTask(plugin,player,mysql,drugData.weakDrug)
+                            pd2.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin,SymptomsTask(player,drug2,pd2)
                                     ,drug2.symptomsTime!![pd.level],drug2.symptomsNextTime!![1])
                             pd2.isDependence = true
 
@@ -449,5 +443,12 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager) : Listener 
             }
         }.run()
 
+    }
+
+    fun size(list:MutableList<String>,pd:playerData):Boolean{
+        if (list.size>pd.level){
+            return true
+        }
+        return false
     }
 }

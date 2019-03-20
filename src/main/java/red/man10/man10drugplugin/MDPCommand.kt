@@ -8,13 +8,12 @@ import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitRunnable
 
 
-class MDPCommand (val plugin: Man10DrugPlugin,val mysql :MySQLManager) : CommandExecutor {
+class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecutor {
 
 
     val permissionError = "§4§lYou don't have permission."
     val permission = "man10drug.cmd"
     val chatMessage = "§5[Man10DrugPlugin]"
-    val db = MDPDataBase(plugin,mysql)
 
 
     override fun onCommand(sender: CommandSender?, command: Command?, label: String?, args: Array<out String>?): Boolean {
@@ -64,22 +63,23 @@ class MDPCommand (val plugin: Man10DrugPlugin,val mysql :MySQLManager) : Command
         }
 
         if (args[0] == "reload"){
-            val th = object : BukkitRunnable() {
+            object : BukkitRunnable() {
                 override fun run() {
                     Bukkit.getScheduler().cancelTasks(plugin)
                     for (p in Bukkit.getServer().onlinePlayers){
                         db.saveDataBase(p,true)
                     }
 
+                    player.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを保存しました")
                     plugin.load()
 
                     for (p in Bukkit.getServer().onlinePlayers){
                         db.loadDataBase(p)
                     }
+                    player.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを読み込みました")
                 }
 
-            }
-            th.run()
+            }.run()
 
         }
 

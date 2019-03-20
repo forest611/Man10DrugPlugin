@@ -9,15 +9,9 @@ import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
 import java.util.*
 
-class SymptomsTask (val plugin: Man10DrugPlugin,val player: Player,mysql:MySQLManager,val drug:String): BukkitRunnable() {
-
-    val config = MDPConfig(plugin)
-    val playerData = MDPDataBase(plugin,mysql)
+class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData): BukkitRunnable() {
 
     override fun run() {
-
-        val pd = playerData.get(player.name+drug)
-        val drugData = config.get(drug)
 
         ////////////////
         //buff
