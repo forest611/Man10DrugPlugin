@@ -131,7 +131,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
 
                     for (i in 0 until drugData.commandDelay[pd.level]!!.size){
 
-                        val command = drugData.commandDelay[pd.level]!![i].split(",")
+                        val command = drugData.commandDelay[pd.level]!![i].split(";")
 
                         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
 
@@ -147,7 +147,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 if (drugData.commandRandomDelay[pd.level] != null){
 
                     val command = drugData.commandRandomDelay[pd.level]!![
-                            drugData.commandRandomDelay[pd.level]!!.size - 1].split(",")
+                            drugData.commandRandomDelay[pd.level]!!.size - 1].split(";")
 
                     Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
 

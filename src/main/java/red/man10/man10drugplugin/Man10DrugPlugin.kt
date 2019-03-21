@@ -123,9 +123,6 @@ class Man10DrugPlugin : JavaPlugin() {
         //drug load
         load()
 
-        for (i in 0 until drugName.size){
-            Bukkit.getLogger().info(drugName[i])
-        }
 
         db = MDPDataBase(this,mysql,mdpConfig)
 

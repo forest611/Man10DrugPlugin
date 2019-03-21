@@ -1,6 +1,7 @@
 package red.man10.man10drugplugin
 
 import org.bukkit.Bukkit
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
 import java.util.*
@@ -13,6 +14,7 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
     //config 読み込み
     ///////////////
     fun loadConfig(drug:File){
+
 
         val config = YamlConfiguration.loadConfiguration(drug)
 
@@ -31,32 +33,17 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
         //use message
         data.useMsg = config.getStringList("UseMsg")
         data.useMsgDelay = config.getStringList("UseMsgDelay")
+
         //command
-        for (i in 0 until config.getStringList("Command").size){
-            data.command[i] = config.getStringList("Command.Level$i")
-        }
-        for (i in 0 until config.getStringList("CommandRandom").size){
-            data.commandRandom[i] = config.getStringList("CommandRandom.Level$i")
-        }
-        for (i in 0 until config.getStringList("CommandDelay").size){
-            data.commandDelay[i] = config.getStringList("CommandDelay.Level$i")
-        }
-        for (i in 0 until config.getStringList("CommandDelayRandom").size){
-            data.commandRandomDelay[i] = config.getStringList("CommandDelayRandom.Level$i")
-        }
+        getHashMap("Command",config,data.command)
+        getHashMap("CommandRandom",config,data.commandRandom)
+        getHashMap("CommandDelay",config,data.commandDelay)
+        getHashMap("CommandRandomDelay",config,data.commandRandomDelay)
         //buff
-        for (i in 0 until config.getStringList("Buff").size){
-            data.buff[i] = config.getStringList("Buff.Level$i")
-        }
-        for (i in 0 until config.getStringList("BuffRandom").size){
-            data.buffRandom[i] = config.getStringList("BuffRandom.Level$i")
-        }
-        for (i in 0 until config.getStringList("BuffDelay").size){
-            data.buffDelay[i] = config.getStringList("BuffDelay.Level$i")
-        }
-        for (i in 0 until config.getStringList("BuffDelayRandom").size){
-            data.buffRandomDelay[i] = config.getStringList("BuffDelayRandom.Level$i")
-        }
+        getHashMap("Buff",config,data.buff)
+        getHashMap("BuffRandom",config,data.buffRandom)
+        getHashMap("BuffDelay",config,data.buffDelay)
+        getHashMap("BuffRandomDelay",config,data.buffRandomDelay)
 
         //particle
         data.particle = config.getStringList("Particle")
@@ -77,19 +64,10 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
             data.symptomsNextTime = config.getLongList("SymptomsNextTime")
             data.symptomsCount = config.getLongList("SymptomsCount")
 
-            for (i in 0 until config.getStringList("BuffSymptoms").size){
-                data.buffSymptoms[i] = config.getStringList("BuffSymptoms.Level$i")
-            }
-            for (i in 0 until config.getStringList("BuffSymptomsRandom").size){
-                data.buffSymptomsRandom[i] = config.getStringList("BuffSymptomsRandom.Level$i")
-            }
-
-            for (i in 0 until config.getStringList("CommandSymptoms").size){
-                data.commandSymptoms[i] = config.getStringList("CommandSymptoms.Level$i")
-            }
-            for (i in 0 until config.getStringList("CommandSymptomsRandom").size){
-                data.commandSymptomsRandom[i] = config.getStringList("CommandSymptomsRandom.Level$i")
-            }
+            getHashMap("BuffSymptoms",config,data.buffSymptoms)
+            getHashMap("BuffSymptomsRandom",config,data.buffSymptomsRandom)
+            getHashMap("CommandSymptoms",config,data.commandSymptoms)
+            getHashMap("CommandSymptomsRandom",config,data.commandSymptomsRandom)
 
             data.particleSymptoms = config.getStringList("ParticleSymptoms")
             data.particleSymptomsRandom = config.getStringList("ParticleSymptomsRandom")
@@ -109,7 +87,6 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
         }
 
         drugData[config.getString("DataName")] = data
-        Bukkit.getLogger().info("${config.getString("DataName")} ... saved")
     }
 
     fun get(key:String):Data{
@@ -118,6 +95,17 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
             data = Data()
         }
         return data
+    }
+
+    /////////////////////////////////
+    //list in list をhashmapに保存する
+    fun getHashMap(path:String,config:FileConfiguration,map:HashMap<Int, MutableList<String>>) {
+
+        var i = 0
+        while (!config.getStringList("$path.$i").isEmpty()){
+            map[i] = config.getStringList("$path.$i")
+            i++
+        }
     }
 }
 
@@ -128,7 +116,6 @@ class Data{
 
     //必須
     var displayName = "drug"
-//    var dataName = "drug"// コマンドで呼び出すときの名前 (アイテム識別に使う) §禁止
     var material = "DIAMOND_HOE"
     var damage : Short = 0
     var type = 0
