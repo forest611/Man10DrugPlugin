@@ -24,14 +24,12 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
         }
 
         for (i in 0 until plugin.drugName.size){
-            // type0以外はsqlに残さない
 
             val drugData = config.get(plugin.drugName[i])
 
-            if (drugData.type != 0 || drugData.type != 1){
+            if (drugData.type != 0 && drugData.type != 1){
                 continue
             }
-
 
             val key = player.name+plugin.drugName[i]
 
@@ -49,35 +47,33 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
 
             rs = mysql.query(sql)
 
-            try{
-                if (rs==null||!rs.next()){
-                    sql = "INSERT INTO man10drugPlugin.drug " +
-                            "VALUES('${player.uniqueId}'," +
-                            "'${player.name}'," +
-                            "'${plugin.drugName[i]}',0,0,0);"
+            if (!rs.next()){
+                sql = "INSERT INTO man10drugPlugin.drug " +
+                        "VALUES('${player.uniqueId}'," +
+                        "'${player.name}'," +
+                        "'${plugin.drugName[i]}',0,0,0);"
 
+                mysql.execute(sql)
 
-                    mysql.execute(sql)
-
-
-                    Bukkit.getLogger().info("${player.name} inserted DB")
-
-
-                    sql = "SELECT " +
-                            "count," +
-                            "level," +
-                            "times" +
-                            " FROM man10drugPlugin.drug" +
-                            " WHERE uuid='${player.uniqueId}' " +
-                            "and drug_name='${plugin.drugName[i]}';"
-
-                }
+                sql = "SELECT " +
+                        "count," +
+                        "level," +
+                        "times" +
+                        " FROM man10drugPlugin.drug" +
+                        " WHERE uuid='"+player.uniqueId +
+                        "' and drug_name='"+ plugin.drugName[i]+"';"
                 rs = mysql.query(sql)
-                rs.next()
 
-                data.count = rs.getInt("count")
-                data.level = rs.getInt("level")
-                data.times= rs.getInt("times")
+            }
+
+            try{
+
+                while (rs.next()){
+                    data.count = rs.getInt("count")
+                    data.level = rs.getInt("level")
+                    data.times= rs.getInt("times")
+                }
+
 
                 rs.close()
 
