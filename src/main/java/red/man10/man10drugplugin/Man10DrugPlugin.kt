@@ -3,9 +3,11 @@ package red.man10.man10drugplugin
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.configuration.file.FileConfiguration
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.scheduler.BukkitRunnable
 import java.io.File
 import java.util.*
 
@@ -13,11 +15,12 @@ class Man10DrugPlugin : JavaPlugin() {
 
     var drugName = ArrayList<String>()  //command name
     var drugItemStack = HashMap<String,ItemStack>()//key drugName
+    var playerLog = HashMap<Player,MutableList<String>>()//log
     lateinit var mysql : MySQLManager
     lateinit var db : MDPDataBase
 
 
-    private val mdpConfig = MDPConfig(this  )
+    private val mdpConfig = MDPConfig(this)
 
     var canMilk = true // milkを使えるか
 
@@ -59,7 +62,6 @@ class Man10DrugPlugin : JavaPlugin() {
             i++
 
         }
-
     }
 
     /////////////////////////////////
@@ -123,15 +125,18 @@ class Man10DrugPlugin : JavaPlugin() {
         //drug load
         load()
 
-
         db = MDPDataBase(this,mysql,mdpConfig)
 
         Bukkit.getServer().pluginManager.registerEvents(MDPEvent(this,mysql,db,mdpConfig),this)
         getCommand("mdp").executor = MDPCommand(this,db)
 
         //再起動時にオンラインプレイヤーがいた場合
-        for (player in Bukkit.getServer().onlinePlayers){
-            db.loadDataBase(player)
+        object : BukkitRunnable() {
+            override fun run() {
+                for (player in Bukkit.getServer().onlinePlayers){
+                    db.loadDataBase(player)
+                }
+            }
         }
 
     }
@@ -139,14 +144,11 @@ class Man10DrugPlugin : JavaPlugin() {
     ////////////////////////
     //シャットダウン、ストップ時
     override fun onDisable() {
-        // Plugin shutdown logic
-
-
         //鯖落ち時にオンラインプレイヤーがいた場合
         for (player in Bukkit.getServer().onlinePlayers){
             db.saveDataBase(player,true)
         }
-        Bukkit.getScheduler().cancelTasks(this)
 
+        Bukkit.getScheduler().cancelTasks(this)
     }
 }

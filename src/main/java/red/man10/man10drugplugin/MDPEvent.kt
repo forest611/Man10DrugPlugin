@@ -46,7 +46,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 event.action == Action.RIGHT_CLICK_BLOCK){
 
 
-            val item = event.item
+            val item = event.item ?: return
 
             if (item.itemMeta.lore == null)return
             if (item.itemMeta.lore.isEmpty())return
@@ -398,12 +398,12 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 ////////////////////////
                 //message
                 ///////////////////////
-                if (drugData.useMsg != null && !drugData.useMsg!![pd.level].isEmpty()){
+                if (drugData.useMsg != null && size(drugData.useMsg!!,pd)){
                     player.sendMessage(drugData.useMsg!![pd.level])
                 }
 
-
-                if (drugData.useMsgDelay != null && !drugData.useMsgDelay!![pd.level].isEmpty()){
+                //Delay message
+                if (drugData.useMsgDelay != null && size(drugData.useMsgDelay!!,pd)){
                     val times = drugData.useMsgDelay!![pd.level].split(";")
 
                     Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
@@ -417,25 +417,10 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 player.inventory.itemInMainHand = item
 
                 ////////////////
-                //アイテムを帰る場合
-                if (drugData.isChange){
+                //アイテムを変える
+                if (drugData.isChange){ player.inventory.addItem(plugin.drugItemStack[drugData.changeItem]) }
 
-                    player.inventory.addItem(plugin.drugItemStack[drugData.changeItem])
-
-                }
-
-                db.saveDataBase(player,false)
-
-                ////////////////
-                //save using log
-                val sql = "INSERT INTO man10drugPlugin.log " +
-                        "VALUES('${player.uniqueId}', " +
-                        "'${player.name}', " +
-                        "'$key'," +
-                        "now());"
-
-                mysql.execute(sql)
-
+                db.addLog(player,drug)
 
                 //player data save memory
                 db.playerMap[key] = pd

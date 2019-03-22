@@ -101,10 +101,10 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
     //list in list をhashmapに保存する
     fun getHashMap(path:String,config:FileConfiguration,map:HashMap<Int, MutableList<String>>) {
 
-        var i = 0
-        while (!config.getStringList("$path.$i").isEmpty()){
-            map[i] = config.getStringList("$path.$i")
-            i++
+        if (config.getConfigurationSection(path) == null)return
+
+        for (i in config.getConfigurationSection(path).getKeys(false)) {
+            map[i.toInt()] = config.getStringList("$path.$i")
         }
     }
 }

@@ -26,15 +26,16 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
         val player = sender as Player
 
         //help
-        if (args == null){
+        if (args == null|| args.isEmpty()){
             helpChat(player)
             return true
         }
+        val cmd = args[0]
 
-        if (args[0] == "show" && args.size == 2){
+        if (cmd == "show" && args.size == 2){
 
             try {
-                player.sendMessage("$chatMessage§e+${args[1]}の使用情報(カウント、レベル)")
+                player.sendMessage("$chatMessage§e${args[1]}の使用情報(カウント、レベル)")
                 for (i in 0 until plugin.drugName.size){
                     player.sendMessage(
                             "$chatMessage${plugin.drugName[i]}" +
@@ -49,7 +50,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
 
         }
 
-        if (args[0] == "get" && args.size == 2){
+        if (cmd == "get" && args.size == 2){
 
             if (plugin.drugItemStack[args[1]] == null){
                 player.sendMessage("$chatMessage§4${args[1]}§aという名前の薬は見つかりませんでした。")
@@ -62,7 +63,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
 
         }
 
-        if (args[0] == "reload"){
+        if (cmd == "reload"){
             object : BukkitRunnable() {
                 override fun run() {
                     Bukkit.getScheduler().cancelTasks(plugin)
@@ -72,6 +73,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
 
                     player.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを保存しました")
                     plugin.load()
+                    player.sendMessage("$chatMessage§eドラッグのデータを読み込みました")
 
                     for (p in Bukkit.getServer().onlinePlayers){
                         db.loadDataBase(p)
@@ -83,12 +85,42 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
 
         }
 
-        if (args[0] == "list"){
+        if (cmd == "list"){
             player.sendMessage("${chatMessage}§e読み込まれているドラッグ一覧")
 
-            for (i in 0 until plugin.drugName.size){
-                player.sendMessage("${chatMessage}§e${plugin.drugName[i]}")
+            object : BukkitRunnable() {
+                override fun run() {
+                    for (i in 0 until plugin.drugName.size){
+                        player.sendMessage("${chatMessage}§e${plugin.drugName[i]}")
+                    }
+                }
             }
+        }
+
+        if (cmd == "log"){
+            if (args.size == 1)return false
+
+            if (args[1] == "save"){
+                for (p in Bukkit.getServer().onlinePlayers){
+                    db.saveLog(p)
+                }
+                player.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグ使用ログを保存しました")
+                return true
+            }
+
+                val data = plugin.playerLog[Bukkit.getPlayer(args[1])]
+
+                if (data == null){
+                    player.sendMessage("$chatMessage§e指定したプレイヤーはオフラインの可能性があります")
+                    return false
+                }
+
+                player.sendMessage("$chatMessage§e${args[1]}の直近10回のドラッグ使用ログ")
+                for(i in data.size - 10 until data.size ){
+                    player.sendMessage("$chatMessage§e${data[i]}")
+                }
+
+
         }
 
         return true
@@ -102,6 +134,8 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
         player.sendMessage("$chatMessage§e/mdp reload 薬の設定ファイルを再読込みします")
         player.sendMessage("$chatMessage§e/mdp show [player名] 薬の使用情報を見ることができます")
         player.sendMessage("$chatMessage§e/mdp list 読み込まれている薬の名前を表示します")
+        player.sendMessage("$chatMessage§e/mdp log [player名]プレイヤーの使用ログを見ることができます \n" +
+                "プレイヤー名を[save]にすると、オンラインプレイヤーのドラッグデータをDBに保存することができます")
 
     }
 

@@ -2,7 +2,9 @@ package red.man10.man10drugplugin
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import org.bukkit.scheduler.BukkitRunnable
 import java.sql.ResultSet
+import java.text.SimpleDateFormat
 import java.util.*
 
 class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:MDPConfig){
@@ -131,11 +133,34 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
                     " WHERE uuid='${player.uniqueId}' and drug_name='${plugin.drugName[i]}';"
 
             mysql.execute(sql)
+            Bukkit.getLogger().info("${player.name}...save DB")
+            saveLog(player)
+            Bukkit.getLogger().info("${player.name}...save Logs")
+
             if(remove){
                 playerMap.remove(key)
             }
         }
-        Bukkit.getLogger().info("${player.name}...save DB")
+
+    }
+
+    /////////////////////////
+    //DBにログを保存
+    fun saveLog(player: Player){
+
+        val log = plugin.playerLog[player] ?: return
+
+        for (i in 0 until log.size){
+            val logs = log[i].split(",")
+
+            mysql.execute("INSERT INTO man10drugPlugin.log " +
+                    "VALUES('${player.uniqueId}', " +
+                    "'${player.name}', " +
+                    "'${logs[0]}'," +
+                    "'${logs[1]}');")
+        }
+        plugin.playerLog.remove(player)
+
     }
 
     fun get(key:String):playerData{
@@ -145,6 +170,20 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
         }
         return data
     }
+
+    ////////////////////
+    //ログをメモリに保存
+    fun addLog(player: Player,drug:String){
+        val date = Date()
+        val format = SimpleDateFormat("yyyy/MM/dd/HH:mm:ss", Locale.getDefault())
+
+        if (plugin.playerLog[player] == null){
+            plugin.playerLog[player] = mutableListOf("$drug,${format.format(date)}")
+            return
+        }
+        plugin.playerLog[player]!!.add("$drug,${format.format(date)}")
+    }
+
 }
 
 class playerData{
