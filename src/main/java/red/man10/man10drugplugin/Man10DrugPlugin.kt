@@ -22,6 +22,8 @@ class Man10DrugPlugin : JavaPlugin() {
 
     private val mdpConfig = MDPConfig(this)
 
+    val mdpfunc = MDPFunction(this)
+
     var canMilk = true // milkを使えるか
 
     ////////////////////////
@@ -50,7 +52,7 @@ class Man10DrugPlugin : JavaPlugin() {
         var i = 0
         while (i<drugFiles.size){
 
-            if (drugFiles[i].name == "config.yml"){
+            if (drugFiles[i].name == "config.yml"||drugFiles[i].isDirectory){
                 drugFiles.removeAt(i)
                 continue
             }

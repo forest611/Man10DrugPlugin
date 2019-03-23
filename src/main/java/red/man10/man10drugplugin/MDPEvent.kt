@@ -16,6 +16,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
+import java.security.SecureRandom
 import java.util.*
 
 class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDataBase,val config:MDPConfig) : Listener {
@@ -449,6 +450,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
 
                 ////////////////
                 //アイテムを変える
+                ////////////////
                 if (drugData.isChange){ player.inventory.addItem(plugin.drugItemStack[drugData.changeItem]) }
 
                 db.addLog(player,drug)
@@ -456,6 +458,46 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 //player data save memory
                 db.playerMap[key] = pd
 
+                ////////////////////////
+                // Func
+                ///////////////////////
+                if(drugData.func!=null){
+                    for(funcname in drugData.func!!){
+                        plugin.mdpfunc.runFunc(player,funcname)
+                    }
+                }
+                ////////////////////////
+                // FuncDelay
+                ///////////////////////
+                if(drugData.funcDelay!=null){
+                    for(funcname in drugData.funcDelay!!){
+                        val times = funcname.split(";")
+                        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
+                            plugin.mdpfunc.runFunc(player,times[0])
+                        },times[1].toLong())
+                    }
+                }
+                ////////////////////////
+                // FuncRandom
+                ///////////////////////
+                if(drugData.funcRandom!=null&&drugData.funcRandom!!.size>0){
+                    val rnd = SecureRandom()
+                    val r = rnd.nextInt(drugData.funcRandom!!.size)
+                    val s = drugData.funcRandom!![r]
+                    plugin.mdpfunc.runFunc(player,s)
+                }
+                ////////////////////////
+                // FuncRandomDelay
+                ///////////////////////
+                if(drugData.funcRandomDelay!=null&&drugData.funcRandomDelay!!.size>0){
+                    val rnd = SecureRandom()
+                    val r = rnd.nextInt(drugData.funcRandomDelay!!.size)
+                    val funcname = drugData.funcRandomDelay!![r]
+                    val times = funcname.split(";")
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
+                        plugin.mdpfunc.runFunc(player,times[0])
+                    },times[1].toLong())
+                }
             }
         }.run()
 

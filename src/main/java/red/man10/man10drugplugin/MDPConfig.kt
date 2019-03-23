@@ -34,6 +34,12 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
         data.useMsg = config.getStringList("UseMsg")
         data.useMsgDelay = config.getStringList("UseMsgDelay")
 
+        //func lists
+        data.func = config.getStringList("func")
+        data.funcRandom = config.getStringList("funcrandom")
+        data.funcDelay = config.getStringList("funcdelay")
+        data.funcRandomDelay = config.getStringList("funcrandomdelay")
+
         //command
         getHashMap("Command",config,data.command)
         getHashMap("CommandRandom",config,data.commandRandom)
@@ -137,6 +143,22 @@ class Data{
     //message
     var useMsg : MutableList<String>? = null
     var useMsgDelay : MutableList<String>? = null
+
+    /*
+    Func: 機能をまとめられる機能
+    あらゆるコマンド実行やメッセージ、サウンドプレイを一括にまとめる機能。
+    */
+
+    //func
+    var func : MutableList<String>? = null
+    //funcDelay
+    var funcDelay : MutableList<String>? = null
+    //funcRandom
+    var funcRandom : MutableList<String>? = null
+    //funcRandomDelay
+    var funcRandomDelay : MutableList<String>? = null
+
+
     //command
     val command = HashMap<Int,MutableList<String>>()
     val commandRandom = HashMap<Int,MutableList<String>>()
