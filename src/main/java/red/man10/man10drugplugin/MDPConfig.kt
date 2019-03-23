@@ -28,6 +28,8 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
         data.isChange = config.getBoolean("IsChange")
         if(data.isChange)data.changeItem = config.getString("ChangeItem")
 
+        data.cooldown = config.getLong("cooldown")
+
         data.lore = config.getStringList("Lore")
         //use message
         data.useMsg = config.getStringList("UseMsg")
@@ -128,6 +130,10 @@ class Data{
     var material = "DIAMOND_HOE"
     var damage : Short = 0
     var type = 0
+
+
+    //クールダウン
+    var cooldown : Long = 0
 
     //任意
     var changeItem = "none" //使用後、アイテムを変更する場合

@@ -21,7 +21,7 @@ import java.util.*
 
 class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDataBase,val config:MDPConfig) : Listener {
 
-
+    var cooldownMap : MutableList<String> = ArrayList()
 
     @EventHandler
     fun joinEvent(event:PlayerJoinEvent){
@@ -90,11 +90,27 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                     return
                 }
 
+                if(cooldownMap.contains(player.uniqueId.toString()+" "+drug)){
+                    return
+                }
+
                 val key = player.name + drug
 
                 val pd = db.get(key)
                 val drugData = config.get(drug)
 
+
+                ////////////////////////
+                //cooldown
+                ///////////////////////
+
+                cooldownMap.add(player.uniqueId.toString()+" "+drug)
+
+                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
+
+                    cooldownMap.remove(player.uniqueId.toString()+" "+drug)
+
+                },drugData.cooldown)
 
                 ////////////////////////
                 //command
