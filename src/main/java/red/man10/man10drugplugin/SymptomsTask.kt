@@ -127,7 +127,7 @@ class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData): Bu
         pd.times ++
 
         //一定回数禁断症状が出た時
-        if(drugData.symptomsCount!![pd.level] <= pd.times&&drugData.symptomsCount!![pd.level] !=0.toLong()){
+        if(drugData.symptomsCount!![pd.level] <= pd.times&&drugData.symptomsCount!![pd.level] !=0){
 
             Bukkit.getScheduler().cancelTask(pd.taskId)
             pd.isDependence = false

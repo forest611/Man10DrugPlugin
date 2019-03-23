@@ -132,7 +132,6 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
 
         player.sendMessage("$chatMessage§e§lMan10DrugPlugin HELP")
         player.sendMessage("$chatMessage§e/mdp get [drugName] 薬を手に入れる drugNameは設定ファイルの名前を入力してください(拡張子を含まない)")
-        player.sendMessage("$chatMessage§e/mdp cancel ドラッグの依存を止めます")
         player.sendMessage("$chatMessage§e/mdp reload 薬の設定ファイルを再読込みします")
         player.sendMessage("$chatMessage§e/mdp show [player名] 薬の使用情報を見ることができます")
         player.sendMessage("$chatMessage§e/mdp list 読み込まれている薬の名前を表示します")

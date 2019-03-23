@@ -216,11 +216,15 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                             .nextInt(drugData.buffRandomDelay[pd.level]!!.size -1)].split(";")
                     val buff = time[0].split(",")
 
-                    player.addPotionEffect(PotionEffect(
-                            PotionEffectType.getByName(buff[0]),
-                            buff[1].toInt(),
-                            buff[2].toInt()
-                    ))
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
+                        player.addPotionEffect(PotionEffect(
+                                PotionEffectType.getByName(buff[0]),
+                                buff[1].toInt(),
+                                buff[2].toInt()
+                        ))
+
+                    },time[1].toLong())
+
                 }
 
                 ////////////////////////

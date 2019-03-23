@@ -69,7 +69,7 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
 
             data.symptomsTime = config.getLongList("SymptomsTime")
             data.symptomsNextTime = config.getLongList("SymptomsNextTime")
-            data.symptomsCount = config.getLongList("SymptomsCount")
+            data.symptomsCount = config.getIntegerList("SymptomsCount")
 
             getHashMap("BuffSymptoms",config,data.buffSymptoms)
             getHashMap("BuffSymptomsRandom",config,data.buffSymptomsRandom)
@@ -187,7 +187,7 @@ class Data{
     //type0 HM
     var symptomsTime : MutableList<Long>? = null
     var symptomsNextTime : MutableList<Long>? = null
-    var symptomsCount : MutableList<Long>? = null //何回禁断症状が出るか (終わるまでの回数)
+    var symptomsCount : MutableList<Int>? = null //何回禁断症状が出るか (終わるまでの回数)
 
     val buffSymptoms = HashMap<Int,MutableList<String>>()
     val buffSymptomsRandom = HashMap<Int,MutableList<String>>()
