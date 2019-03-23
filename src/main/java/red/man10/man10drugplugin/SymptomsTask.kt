@@ -72,32 +72,51 @@ class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData): Bu
 
         }
 
-        ////////////////////
+        ////////////////////////
         //sound
-        ///////////////////
-        if (drugData.soundSymptoms != null && !drugData.soundSymptoms!![pd.level].isEmpty()){
-            val sound = drugData.soundSymptoms!![pd.level].split(",")
+        ///////////////////////
+        if (drugData.soundSymptoms[pd.level] != null){
+
+            for (i in 0 until drugData.soundSymptoms[pd.level]!!.size){
+                val sound = drugData.soundSymptoms[pd.level]!![i].split(",")
+
+                player.world.playSound(player.location, Sound.valueOf(sound[0]),sound[1].toFloat(),sound[2].toFloat())
+            }
+        }
+
+        ////////////////////////
+        //sound random
+        ///////////////////////
+        if (drugData.soundSymptomsRandom[pd.level] != null){
+
+            val sound = drugData.soundSymptomsRandom[pd.level]!![Random()
+                    .nextInt(drugData.soundSymptomsRandom[pd.level]!!.size -1)].split(",")
 
             player.world.playSound(player.location, Sound.valueOf(sound[0]),sound[1].toFloat(),sound[2].toFloat())
         }
 
-        /////////////////////
+        ////////////////////////
         //particle
-        ////////////////////
-        if(drugData.particleSymptoms != null && !drugData.particleSymptoms!![pd.level].isEmpty()){
-            val particle = drugData.particleSymptoms!![pd.level].split(",")
+        ///////////////////////
+        if(drugData.particleSymptoms[pd.level] != null){
+            for(i in 0 until drugData.particleSymptoms[pd.level]!!.size){
+                val particle = drugData.particleSymptoms[pd.level]!![i].split(",")
+                player.world.spawnParticle(Particle.valueOf(particle[0]),player.location,particle[1].toInt())
 
-            player.world.spawnParticle(Particle.valueOf(particle[0]),player.location,particle[1].toInt())
+            }
+
+
         }
 
-        ///////////////////
+        ////////////////////////
         //particle random
-        ///////////////////
-        if(drugData.particleSymptomsRandom != null && !drugData.particleSymptomsRandom!![pd.level].isEmpty()) {
-            val particle = drugData.particleSymptomsRandom!![Random()
-                    .nextInt(drugData.particleSymptomsRandom!!.size - 1)].split(",")
+        ///////////////////////
+        if (drugData.particleSymptomsRandom[pd.level] != null){
 
+            val particle = drugData.particleSymptomsRandom[pd.level]!![Random()
+                    .nextInt(drugData.particleSymptomsRandom[pd.level]!!.size -1)].split(",")
             player.world.spawnParticle(Particle.valueOf(particle[0]), player.location, particle[1].toInt())
+
         }
 
         //send msg

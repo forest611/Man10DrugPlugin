@@ -145,12 +145,8 @@ class Man10DrugPlugin : JavaPlugin() {
     //シャットダウン、ストップ時
     override fun onDisable() {
         //鯖落ち時にオンラインプレイヤーがいた場合
-        object : BukkitRunnable() {
-            override fun run() {
-                for (player in Bukkit.getServer().onlinePlayers){
-                    db.saveDataBase(player,true)
-                }
-            }
+        for (player in Bukkit.getServer().onlinePlayers){
+            db.saveDataBase(player,true)
         }
         Bukkit.getScheduler().cancelTasks(this)
     }

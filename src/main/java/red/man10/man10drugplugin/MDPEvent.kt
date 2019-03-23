@@ -177,8 +177,8 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 ///////////////////////
                 if (drugData.buffRandom[pd.level] != null){
 
-                    val buff = drugData.buff[pd.level]!![Random()
-                            .nextInt(drugData.buff[pd.level]!!.size -1)].split(",")
+                    val buff = drugData.buffRandom[pd.level]!![Random()
+                            .nextInt(drugData.buffRandom[pd.level]!!.size -1)].split(",")
 
                     player.addPotionEffect(PotionEffect(
                             PotionEffectType.getByName(buff[0]),
@@ -208,11 +208,11 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 }
 
                 ////////////////////////
-                //buff delay random
+                //buff random delay
                 ///////////////////////
                 if (drugData.buffRandomDelay[pd.level] != null){
-                    val time = drugData.buffDelay[pd.level]!![Random()
-                            .nextInt(drugData.buff[pd.level]!!.size -1)].split(";")
+                    val time = drugData.buffRandomDelay[pd.level]!![Random()
+                            .nextInt(drugData.buffRandomDelay[pd.level]!!.size -1)].split(";")
                     val buff = time[0].split(",")
 
                     player.addPotionEffect(PotionEffect(
@@ -225,75 +225,106 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 ////////////////////////
                 //particle
                 ///////////////////////
-                if(drugData.particle != null && size(drugData.particle!!,pd)){
-                    val particle = drugData.particle!![pd.level].split(",")
+                if(drugData.particle[pd.level] != null){
+                    for(i in 0 until drugData.particle[pd.level]!!.size){
+                        val particle = drugData.particle[pd.level]!![i].split(",")
+                        player.world.spawnParticle(Particle.valueOf(particle[0]),player.location,particle[1].toInt())
 
-                    player.world.spawnParticle(Particle.valueOf(particle[0]),player.location,particle[1].toInt())
+                    }
+
 
                 }
 
                 ////////////////////////
                 //particle random
                 ///////////////////////
-                if(drugData.particleRandom != null && size(drugData.particleRandom!!,pd)) {
+                if (drugData.particleRandom[pd.level] != null){
 
-                    val particle = drugData.particleRandom!![Random()
-                            .nextInt(drugData.particleRandom!!.size - 1)].split(",")
-
+                    val particle = drugData.particleRandom[pd.level]!![Random()
+                            .nextInt(drugData.particleRandom[pd.level]!!.size -1)].split(",")
                     player.world.spawnParticle(Particle.valueOf(particle[0]), player.location, particle[1].toInt())
+
                 }
+
 
                 ////////////////////////
                 //particle delay
                 ///////////////////////
-                if (drugData.particleDelay != null  && size(drugData.particleDelay!!,pd)){
-                    val times = drugData.particleDelay!![pd.level].split(";")
+                if (drugData.particleDelay[pd.level] != null){
+                    for(i in 0 until drugData.particleDelay[pd.level]!!.size){
+                        val times = drugData.particleDelay[pd.level]!![i].split(";")
 
-                    val particle = times[0].split(",")
+                        val particle = times[0].split(",")
 
-                    Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
-                        player.world.spawnParticle(Particle.valueOf(particle[0]),player.location,particle[1].toInt())
-                    },times[1].toLong())
+                        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
+                            player.world.spawnParticle(Particle.valueOf(particle[0]),player.location,particle[1].toInt())
+                        },times[1].toLong())
 
+                    }
                 }
 
                 ////////////////////////
                 //particle random delay
                 ///////////////////////
-                if(drugData.particleRandomDelay != null && size(drugData.particleRandomDelay!!,pd)){
-                    val times = drugData.particleRandomDelay!![Random()
-                            .nextInt(drugData.particleRandomDelay!!.size -1)].split(";")
-
-                    val particle = times[0].split(",")
+                if(drugData.particleRandomDelay[pd.level] != null){
+                    val time = drugData.particleRandomDelay[pd.level]!![Random()
+                            .nextInt(drugData.particleRandomDelay[pd.level]!!.size -1)].split(";")
+                    val particle = time[0].split(",")
 
                     Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
                         player.world.spawnParticle(Particle.valueOf(particle[0]),player.location,particle[1].toInt())
-                    },times[1].toLong())
+                    },time[1].toLong())
 
                 }
 
                 ////////////////////////
                 //sound
                 ///////////////////////
-                if (drugData.sound != null && size(drugData.sound!!,pd)){
-                    val sound = drugData.sound!![pd.level].split(",")
+                if (drugData.sound[pd.level] != null){
+
+                    for (i in 0 until drugData.sound[pd.level]!!.size){
+                        val sound = drugData.sound[pd.level]!![i].split(",")
+
+                        player.world.playSound(player.location, Sound.valueOf(sound[0]),sound[1].toFloat(),sound[2].toFloat())
+                    }
+                }
+
+                ////////////////////////
+                //sound random
+                ///////////////////////
+                if (drugData.soundRandom[pd.level] != null){
+
+                    val sound = drugData.soundRandom[pd.level]!![Random()
+                            .nextInt(drugData.soundRandom[pd.level]!!.size -1)].split(",")
 
                     player.world.playSound(player.location, Sound.valueOf(sound[0]),sound[1].toFloat(),sound[2].toFloat())
-
                 }
 
                 ////////////////////////
                 //sound delay
                 ///////////////////////
-                if (drugData.soundDelay != null && size(drugData.soundDelay!!,pd)){
-                    val times = drugData.soundDelay!![pd.level].split(";")
+                if (drugData.soundDelay[pd.level] != null){
 
-                    val sound = times[0].split(",")
+                    for (i in 0 until drugData.soundDelay[pd.level]!!.size){
 
-                    Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
-                        player.world.playSound(player.location, Sound.valueOf(sound[0]),sound[1].toFloat(),sound[2].toFloat())
-                    },times[1].toLong())
+                        val time = drugData.soundDelay[pd.level]!![i].split(";")
+                        val sound = time[0].split(",")
 
+                        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
+                            player.world.playSound(player.location, Sound.valueOf(sound[0]),sound[1].toFloat(),sound[2].toFloat())
+                        },time[1].toLong())
+                    }
+                }
+
+                ////////////////////////
+                //sound random delay
+                ///////////////////////
+                if (drugData.soundRandomDelay[pd.level] != null){
+                    val time = drugData.soundRandomDelay[pd.level]!![Random()
+                            .nextInt(drugData.soundRandomDelay[pd.level]!!.size -1)].split(";")
+                    val sound = time[0].split(",")
+
+                    player.world.playSound(player.location, Sound.valueOf(sound[0]),sound[1].toFloat(),sound[2].toFloat())
                 }
 
                 ////////////////////////
@@ -303,7 +334,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
 
                     pd.count ++
 
-                    if (pd.count >= drugData.nextLevelCount){
+                    if (pd.count >= drugData.nextLevelCount!![pd.level]){
                         pd.count = 0
                         pd.level ++
 
@@ -349,7 +380,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                         //countがゼロになったら
                         if (pd2.count <=0){
                             pd2.level -= 1
-                            pd2.count +=  drug2.nextLevelCount
+                            pd2.count +=  drug2.nextLevelCount!![pd.level]
                         }
                     }
 

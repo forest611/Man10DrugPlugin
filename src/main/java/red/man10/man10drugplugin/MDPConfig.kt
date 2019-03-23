@@ -46,19 +46,21 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
         getHashMap("BuffRandomDelay",config,data.buffRandomDelay)
 
         //particle
-        data.particle = config.getStringList("Particle")
-        data.particleRandom = config.getStringList("ParticleRandom")
-        data.particleDelay = config.getStringList("ParticleDelay")
-        data.particleRandomDelay = config.getStringList("ParticleDelayRandom")
+        getHashMap("Particle",config,data.particle)
+        getHashMap("ParticleRandom",config,data.particleRandom)
+        getHashMap("ParticleDelay",config,data.particleDelay)
+        getHashMap("ParticleRandomDelay",config,data.particleRandomDelay)
         //sound
-        data.sound = config.getStringList("Sound")
-        data.soundDelay = config.getStringList("SoundDelay")
+        getHashMap("Sound",config,data.sound)
+        getHashMap("SoundRandom",config,data.soundRandom)
+        getHashMap("SoundDelay",config,data.soundDelay)
+        getHashMap("SoundRandomDelay",config,data.soundRandomDelay)
 
         //type 0 only
         if (data.type == 0){
             data.isDependence = config.getBoolean("IsDependence") //禁断症状が出るか
             data.dependenceLevel = config.getInt("DependenceLevel")
-            data.nextLevelCount = config.getInt("NextLevelCount")
+            data.nextLevelCount = config.getIntegerList("NextLevelCount")
 
             data.symptomsTime = config.getLongList("SymptomsTime")
             data.symptomsNextTime = config.getLongList("SymptomsNextTime")
@@ -66,15 +68,17 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
 
             getHashMap("BuffSymptoms",config,data.buffSymptoms)
             getHashMap("BuffSymptomsRandom",config,data.buffSymptomsRandom)
+
             getHashMap("CommandSymptoms",config,data.commandSymptoms)
             getHashMap("CommandSymptomsRandom",config,data.commandSymptomsRandom)
 
-            data.particleSymptoms = config.getStringList("ParticleSymptoms")
-            data.particleSymptomsRandom = config.getStringList("ParticleSymptomsRandom")
+            getHashMap("ParticleSymptoms",config,data.particleSymptoms)
+            getHashMap("ParticleSymptomsRandom",config,data.particleSymptomsRandom)
+
+            getHashMap("SoundSymptoms",config,data.soundSymptoms)
+            getHashMap("SoundSymptomsRandom",config,data.soundSymptomsRandom)
 
             data.msgSymptoms = config.getStringList("MsgSymptoms")
-
-            data.soundSymptoms = config.getStringList("SoundSymptoms")
 
         }
 
@@ -144,18 +148,20 @@ class Data{
     val buffDelay = HashMap<Int,MutableList<String>>()
     val buffRandomDelay = HashMap<Int,MutableList<String>>()
     //particle
-    var particle : MutableList<String>? = null
-    var particleRandom : MutableList<String>? = null
-    var particleDelay : MutableList<String>? = null
-    var particleRandomDelay : MutableList<String>? = null
+    var particle = HashMap<Int,MutableList<String>>()
+    var particleRandom = HashMap<Int,MutableList<String>>()
+    var particleDelay = HashMap<Int,MutableList<String>>()
+    var particleRandomDelay = HashMap<Int,MutableList<String>>()
     //sound
-    var sound : MutableList<String>? = null
-    var soundDelay : MutableList<String>? = null
+    var sound = HashMap<Int,MutableList<String>>()
+    var soundRandom = HashMap<Int,MutableList<String>>()
+    var soundDelay = HashMap<Int,MutableList<String>>()
+    var soundRandomDelay = HashMap<Int,MutableList<String>>()
 
     //type0
     var isDependence = false
     var dependenceLevel = 0  //依存レベル
-    var nextLevelCount = 100 //次のレベルに上がるまでの回数
+    var nextLevelCount : MutableList<Int>? = null //次のレベルに上がるまでの回数
 
     //type0 HM
     var symptomsTime : MutableList<Long>? = null
@@ -170,10 +176,11 @@ class Data{
 
     var msgSymptoms : MutableList<String>? = null
 
-    var particleSymptoms : MutableList<String>? = null
-    var particleSymptomsRandom : MutableList<String>? = null
+    var particleSymptoms = HashMap<Int,MutableList<String>>()
+    var particleSymptomsRandom = HashMap<Int,MutableList<String>>()
 
-    var soundSymptoms : MutableList<String>? = null
+    var soundSymptoms = HashMap<Int,MutableList<String>>()
+    var soundSymptomsRandom = HashMap<Int,MutableList<String>>()
 
     //type1
     var weakDrug = "drug" //type2
