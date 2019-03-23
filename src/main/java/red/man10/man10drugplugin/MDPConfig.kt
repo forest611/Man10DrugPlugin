@@ -1,6 +1,5 @@
 package red.man10.man10drugplugin
 
-import org.bukkit.Bukkit
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File

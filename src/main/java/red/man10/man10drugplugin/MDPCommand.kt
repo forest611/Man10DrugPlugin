@@ -96,7 +96,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
                         player.sendMessage("${chatMessage}§e${plugin.drugName[i]}")
                     }
                 }
-            }
+            }.run()
         }
 
         if (cmd == "log"){

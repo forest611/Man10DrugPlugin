@@ -139,7 +139,7 @@ class Man10DrugPlugin : JavaPlugin() {
                     db.loadDataBase(player)
                 }
             }
-        }
+        }.run()
 
     }
 
@@ -147,9 +147,14 @@ class Man10DrugPlugin : JavaPlugin() {
     //シャットダウン、ストップ時
     override fun onDisable() {
         //鯖落ち時にオンラインプレイヤーがいた場合
-        for (player in Bukkit.getServer().onlinePlayers){
-            db.saveDataBase(player,true)
-        }
+        object : BukkitRunnable(){
+            override fun run() {
+                for (player in Bukkit.getServer().onlinePlayers){
+                    db.saveDataBase(player,true)
+                }
+            }
+        }.run()
         Bukkit.getScheduler().cancelTasks(this)
+
     }
 }
