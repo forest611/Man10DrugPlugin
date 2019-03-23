@@ -117,7 +117,7 @@ public class MDPFunction {
                 playSound(p,ss);
             }
             //soundDelay
-            for(String ss : data.sound){
+            for(String ss : data.soundDelay){
                 String[] timess = ss.split(";");
                 Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,()->{
                     playSound(p,timess[0]);
@@ -128,7 +128,7 @@ public class MDPFunction {
                 runFunc(p,ss);
             }
             //func Delay
-            for(String ss : data.func){
+            for(String ss : data.funcDelay){
                 String[] timess = ss.split(";");
                 Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,()->{
                     runFunc(p,timess[0]);
@@ -143,12 +143,11 @@ public class MDPFunction {
             //func Random Delay
             if(data.funcRandomDelay.size()!=0) {
                 Random rnd = new SecureRandom();
-                int r = rnd.nextInt(data.funcRandom.size());
-                String[] timess = data.funcRandom.get(r).split(";");
+                int r = rnd.nextInt(data.funcRandomDelay.size());
+                String[] timess = data.funcRandomDelay.get(r).split(";");
                 Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,()->{
                     runFunc(p,timess[0]);
                 },Long.parseLong(timess[1]));
-                runFunc(p,data.funcRandom.get(r));
             }
         });
         return true;
@@ -156,7 +155,7 @@ public class MDPFunction {
 
     public void playSound(Player p ,String s){
         String[] sounds = s.split(",");
-        p.playSound(p.getLocation(), Sound.valueOf(sounds[0]),Float.parseFloat(sounds[1]),Float.parseFloat(sounds[2]));
+        p.getWorld().playSound(p.getLocation(), Sound.valueOf(sounds[0]),Float.parseFloat(sounds[1]),Float.parseFloat(sounds[2]));
     }
 
     public String rep(Player p,String s){
