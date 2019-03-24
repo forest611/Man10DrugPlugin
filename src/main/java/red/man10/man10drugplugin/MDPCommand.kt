@@ -38,7 +38,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
                 player.sendMessage("$chatMessage§e${args[1]}の使用情報(カウント、レベル)")
                 for (i in 0 until plugin.drugName.size){
                     player.sendMessage(
-                            "$chatMessage${plugin.drugName[i]}" +
+                            "$chatMessage§e${plugin.drugName[i]}" +
                             ",${db.playerMap[player.name+plugin.drugName[i]]!!.count}" +
                             ",${db.playerMap[player.name+plugin.drugName[i]]!!.level}"
                     )
@@ -118,18 +118,28 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
                 return true
             }
 
-            player.sendMessage("$chatMessage§e修正中です")
-//                val data = plugin.playerLog[Bukkit.getPlayer(args[1])]
-//
-//                if (data == null){
-//                    player.sendMessage("$chatMessage§e指定したプレイヤーはオフラインの可能性があります")
-//                    return false
-//                }
-//
-//                player.sendMessage("$chatMessage§e${args[1]}の直近10回のドラッグ使用ログ")
-//                for(i in data.size - 10 until data.size ){
-//                    player.sendMessage("$chatMessage§e${data[i]}")
-//                }
+            if (args.size != 3){
+                player.sendMessage("$chatMessage§e/mdp log player名 回数 で入力してください")
+                return true
+            }
+
+            val data = plugin.playerLog[Bukkit.getPlayer(args[1])]
+
+            if (data == null){
+                player.sendMessage("$chatMessage§e指定したプレイヤーはオフラインの可能性があります")
+                return false
+            }
+
+            if (args[2].toInt() > data.size){
+                player.sendMessage("$chatMessage§e指定回数以上ドラッグを使用していません")
+                return  true
+            }
+
+
+            player.sendMessage("$chatMessage§e${args[1]}の直近${args[2]}回のドラッグ使用ログ")
+            for(i in data.size - args[2].toInt() until data.size ){
+                player.sendMessage("$chatMessage§e${data[i]}")
+            }
 
 
         }
@@ -150,8 +160,8 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
         player.sendMessage("$chatMessage§e/mdp reload 薬の設定ファイルを再読込みします")
         player.sendMessage("$chatMessage§e/mdp show [player名] 薬の使用情報を見ることができます")
         player.sendMessage("$chatMessage§e/mdp list 読み込まれている薬の名前を表示します")
-        player.sendMessage("$chatMessage§e/mdp log [player名]プレイヤーの使用ログを見ることができます \n" +
-                "プレイヤー名を[save]にすると、オンラインプレイヤーのドラッグデータをDBに保存することができます")
+        player.sendMessage("$chatMessage§e/mdp log [player名] [回数]プレイヤーの使用ログを見ることができます \n" +
+                "プレイヤー名を[save]にすると、オンラインプレイヤーのログをDBに保存することができます")
         player.sendMessage("$chatMessage§e/mdp cancel オンラインプレイヤーのタスクを止めます（デバッグ用)")
 
     }

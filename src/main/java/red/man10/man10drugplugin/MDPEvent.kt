@@ -396,11 +396,9 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
 
                     pd.count ++
 
-                    if (pd.count >= drugData.nextLevelCount!![pd.level]){
+                    if (pd.count >= drugData.nextLevelCount!![pd.level]&&pd.level<=drugData.nextLevelCount!![pd.level]){
                         pd.count = 0
-                        if(pd.level < drugData.dependenceLevel){
-                            pd.level ++
-                        }
+                        pd.level ++
                     }
 
                     ////////

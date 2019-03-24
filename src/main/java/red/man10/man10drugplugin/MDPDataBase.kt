@@ -27,22 +27,28 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
         for (i in 0 until plugin.drugName.size){
 
             val drugData = config.get(plugin.drugName[i])
-
-            if (drugData.type != 0 && drugData.type != 1){
-                continue
-            }
-
             val key = player.name+plugin.drugName[i]
 
             val data = get(key)
 
+
+            if (drugData.type != 0 && drugData.type != 1){
+                data.level = 0
+                data.count = 0
+                data.times = 0
+                playerMap[key] = data
+
+                continue
+            }
+
+
             var sql = "SELECT " +
                     "count," +
                     "level," +
-                    "times" +
-                    " FROM drug" +
-                    " WHERE uuid='"+player.uniqueId +
-                    "' and drug_name='"+ plugin.drugName[i]+"';"
+                    "times " +
+                    "FROM drug " +
+                    "WHERE uuid='${player.uniqueId}' "
+            "and drug_name='${plugin.drugName[i]}';"
 
             var rs : ResultSet
 
@@ -59,21 +65,20 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
                 sql = "SELECT " +
                         "count," +
                         "level," +
-                        "times" +
-                        " FROM drug" +
-                        " WHERE uuid='"+player.uniqueId +
-                        "' and drug_name='"+ plugin.drugName[i]+"';"
+                        "times " +
+                        "FROM drug " +
+                        "WHERE uuid='${player.uniqueId}' "
+                        "and drug_name='${plugin.drugName[i]}';"
                 rs = mysql.query(sql)
+                Bukkit.getLogger().info("${player.name}...insert ${plugin.drugName[i]}")
 
             }
 
             try{
-
-                while (rs.next()){
-                    data.count = rs.getInt("count")
-                    data.level = rs.getInt("level")
-                    data.times= rs.getInt("times")
-                }
+                rs.next()
+                data.count = rs.getInt("count")
+                data.level = rs.getInt("level")
+                data.times= rs.getInt("times")
 
 
                 rs.close()
@@ -110,12 +115,14 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
             return
         }
 
+
+
         for (i in 0 until plugin.drugName.size){
 
             val drugData = config.get(plugin.drugName[i])
 
 
-            if (drugData.type != 0){
+            if (drugData.type != 0 && drugData.type != 1){
                 continue
             }
 
@@ -130,14 +137,15 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
                     " WHERE uuid='${player.uniqueId}' and drug_name='${plugin.drugName[i]}';"
 
             mysql.execute(sql)
-            Bukkit.getLogger().info("${player.name}...save DB")
-            saveLog(player)
-            Bukkit.getLogger().info("${player.name}...save Logs")
 
             if(remove){
                 playerMap.remove(key)
             }
         }
+        Bukkit.getLogger().info("${player.name}...save DB")
+        saveLog(player)
+        Bukkit.getLogger().info("${player.name}...save Logs")
+
 
     }
 
