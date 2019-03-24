@@ -1,5 +1,7 @@
 package red.man10.man10drugplugin;
 
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -14,6 +16,7 @@ import java.util.List;
 import java.util.Random;
 
 import jp.hishidama.eval.*;
+import org.bukkit.plugin.Plugin;
 
 public class MDPFunction {
 
@@ -76,23 +79,60 @@ public class MDPFunction {
     }
 
     public boolean runFunc(Player p, String name){
-        if(!list.containsKey(name)){
-            if(name.startsWith("vault:")){
-                String dorw = name.replaceFirst("vault:","");
-                String[] dw = dorw.split(" ");
-                if(dw[0].equalsIgnoreCase("deposit")){
-                    Double r = calcString(dw[1].replaceAll("<player_balance>",plugin.getVault().getBalance(p.getUniqueId())+""));
-                    plugin.getVault().deposit(p.getUniqueId(),r);
-                    return true;
-                }else if(dw[0].equalsIgnoreCase("withdraw")){
-                    Double r = calcString(dw[1].replaceAll("<player_balance>",plugin.getVault().getBalance(p.getUniqueId())+""));
-                    plugin.getVault().withdraw(p.getUniqueId(),r);
-                }
+        if(name.startsWith("vault:")){
+            String dorw = name.replaceFirst("vault:","");
+            String[] dw = dorw.split(" ");
+            if(dw[0].equalsIgnoreCase("deposit")){
+                Double r = calcString(dw[1].replaceAll("<player_balance>",plugin.getVault().getBalance(p.getUniqueId())+""));
+                plugin.getVault().deposit(p.getUniqueId(),r);
+                return true;
+            }else if(dw[0].equalsIgnoreCase("withdraw")){
+                Double r = calcString(dw[1].replaceAll("<player_balance>",plugin.getVault().getBalance(p.getUniqueId())+""));
+                plugin.getVault().withdraw(p.getUniqueId(),r);
+                return true;
             }
+        }
+        if(!list.containsKey(name)){
             return false;
         }
         Bukkit.getScheduler().runTaskAsynchronously(plugin,()->{
             FuncData data = list.get(name);
+
+            //conditions
+            for(String s: data.conditions){
+                String[] r = s.split(";");
+                if(r[0].equalsIgnoreCase("balance")){
+                    Double result = calcString(r[1].replaceAll("<player_balance>",plugin.getVault().getBalance(p.getUniqueId())+""));
+                    if(result!=1){
+                        if(r.length >= 3){
+                            runFunc(p,r[2]);
+                        }
+                        return;
+                    }
+                }else if(r[0].equalsIgnoreCase("haspermission")){
+                    if(!p.hasPermission(r[1])){
+                        if(r.length >= 3){
+                            runFunc(p,r[2]);
+                        }
+                        return;
+                    }
+                }else if(r[0].equalsIgnoreCase("nothaspermission")){
+                    if(p.hasPermission(r[1])){
+                        if(r.length >= 3){
+                            runFunc(p,r[2]);
+                        }
+                        return;
+                    }
+                }else if(r[0].equalsIgnoreCase("inregion")){
+                    if(!playerInRegion(p,r[1])){
+                        if(r.length >= 3){
+                            runFunc(p,r[2]);
+                        }
+                        return;
+                    }
+                }
+            }
+
             //msg
             for(String s:data.msg){
                 p.sendMessage(rep(p,s));
@@ -172,6 +212,31 @@ public class MDPFunction {
         return true;
     }
 
+    private WorldGuardPlugin getWorldGuard() {
+        Plugin plugins = plugin.getServer().getPluginManager().getPlugin("WorldGuard");
+
+        // WorldGuard may not be loaded
+        if (plugin == null || !(plugins instanceof WorldGuardPlugin)) {
+            return null; // Maybe you want throw an exception instead
+        }
+
+        return (WorldGuardPlugin) plugins;
+    }
+
+    public boolean playerInRegion(Player player,String id) {
+        ProtectedRegion region = getWorldGuard().getRegionManager(player.getWorld()).getRegion(id);
+
+        int x = player.getLocation().getBlockX();
+        int y = player.getLocation().getBlockY();
+        int z = player.getLocation().getBlockZ();
+
+        if (region.contains(x, y, z)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public void playSound(Player p ,String s){
         String[] sounds = s.split(",");
         p.getWorld().playSound(p.getLocation(), Sound.valueOf(sounds[0]),Float.parseFloat(sounds[1]),Float.parseFloat(sounds[2]));
@@ -185,6 +250,9 @@ public class MDPFunction {
 
         //Name
         String name;
+
+        //conditions
+        List<String> conditions = new ArrayList<>();
 
         //msg
         List<String> msg = new ArrayList<>();
@@ -208,6 +276,12 @@ public class MDPFunction {
             FileConfiguration data = YamlConfiguration.loadConfiguration(f);
             //name get
             name = data.getString("name","exampleFunc");
+
+            //conditions get
+            if(data.contains("conditions")){
+                conditions = data.getStringList("conditions");
+            }
+
             //msg get
             if(data.contains("msg")){
                 msg = data.getStringList("msg");
