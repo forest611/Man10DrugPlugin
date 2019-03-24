@@ -81,6 +81,8 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
                     player.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを読み込みました")
                     plugin.mdpfunc.reloadAllFile()
                     player.sendMessage("$chatMessage§e全関数を再読み込みしました")
+                    plugin.event!!.clearCooldown()
+                    player.sendMessage("$chatMessage§e全クールダウンをリセットしました")
                 }
 
             }.run()

@@ -21,7 +21,7 @@ import java.util.*
 
 class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDataBase,val config:MDPConfig) : Listener {
 
-    var cooldownMap : MutableList<String> = ArrayList()
+    public var cooldownMap : MutableList<String> = ArrayList()
 
     @EventHandler
     fun joinEvent(event:PlayerJoinEvent){
@@ -73,6 +73,10 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
 
         useDrug(event.player,event.item)
 
+    }
+
+    fun clearCooldown(){
+        cooldownMap.clear()
     }
 
     ////////////////////////

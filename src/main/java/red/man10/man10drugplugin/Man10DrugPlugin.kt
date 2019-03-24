@@ -21,6 +21,7 @@ class Man10DrugPlugin : JavaPlugin() {
 
 
     private val mdpConfig = MDPConfig(this)
+    var event: MDPEvent? = null
 
     val mdpfunc = MDPFunction(this)
     var vault : VaultManager? = null
@@ -130,7 +131,8 @@ class Man10DrugPlugin : JavaPlugin() {
 
         db = MDPDataBase(this,mysql,mdpConfig)
 
-        Bukkit.getServer().pluginManager.registerEvents(MDPEvent(this,mysql,db,mdpConfig),this)
+        event = MDPEvent(this,mysql,db,mdpConfig)
+        Bukkit.getServer().pluginManager.registerEvents(event,this)
         getCommand("mdp").executor = MDPCommand(this,db)
 
         vault = VaultManager(this)
