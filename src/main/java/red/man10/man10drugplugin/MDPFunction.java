@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
+import jp.hishidama.eval.*;
+
 public class MDPFunction {
 
     Man10DrugPlugin plugin;
@@ -67,9 +69,26 @@ public class MDPFunction {
         loadAllFile();
     }
 
+    public Double calcString(String str){
+        Rule rule = ExpRuleFactory.getDefaultRule();
+        Expression exp = rule.parse(str);	//解析
+        return exp.evalDouble();
+    }
+
     public boolean runFunc(Player p, String name){
         if(!list.containsKey(name)){
-            p.sendMessage("FuncDebug: false");
+            if(name.startsWith("vault:")){
+                String dorw = name.replaceFirst("vault:","");
+                String[] dw = dorw.split(" ");
+                if(dw[0].equalsIgnoreCase("deposit")){
+                    Double r = calcString(dw[1].replaceAll("<player_balance>",plugin.getVault().getBalance(p.getUniqueId())+""));
+                    plugin.getVault().deposit(p.getUniqueId(),r);
+                    return true;
+                }else if(dw[0].equalsIgnoreCase("withdraw")){
+                    Double r = calcString(dw[1].replaceAll("<player_balance>",plugin.getVault().getBalance(p.getUniqueId())+""));
+                    plugin.getVault().withdraw(p.getUniqueId(),r);
+                }
+            }
             return false;
         }
         Bukkit.getScheduler().runTaskAsynchronously(plugin,()->{

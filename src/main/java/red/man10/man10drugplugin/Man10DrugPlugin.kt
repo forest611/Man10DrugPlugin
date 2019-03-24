@@ -23,6 +23,7 @@ class Man10DrugPlugin : JavaPlugin() {
     private val mdpConfig = MDPConfig(this)
 
     val mdpfunc = MDPFunction(this)
+    var vault : VaultManager? = null
 
     var canMilk = true // milkを使えるか
 
@@ -131,6 +132,8 @@ class Man10DrugPlugin : JavaPlugin() {
 
         Bukkit.getServer().pluginManager.registerEvents(MDPEvent(this,mysql,db,mdpConfig),this)
         getCommand("mdp").executor = MDPCommand(this,db)
+
+        vault = VaultManager(this)
 
         //再起動時にオンラインプレイヤーがいた場合
         object : BukkitRunnable() {

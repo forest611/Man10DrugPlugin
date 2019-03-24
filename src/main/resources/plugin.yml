@@ -1,6 +1,7 @@
 name: Man10DrugPlugin
 version: 1.0
 main: red.man10.man10drugplugin.Man10DrugPlugin
+depend: [Vault]
 commands:
   mdp:
     description: Man10DrugPlugin
