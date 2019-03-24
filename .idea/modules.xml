@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Man10DrugPlugin.red.man10.Man10DrugPlugin.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Man10DrugPlugin.red.man10.Man10DrugPlugin.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/red.man10.Man10DrugPlugin.iml" filepath="$PROJECT_DIR$/.idea/modules/red.man10.Man10DrugPlugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/red.man10.Man10DrugPlugin.main.iml" filepath="$PROJECT_DIR$/.idea/modules/red.man10.Man10DrugPlugin.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/red.man10.Man10DrugPlugin.test.iml" filepath="$PROJECT_DIR$/.idea/modules/red.man10.Man10DrugPlugin.test.iml" />

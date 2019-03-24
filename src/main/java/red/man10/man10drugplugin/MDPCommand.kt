@@ -127,6 +127,12 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
 
         }
 
+        if(cmd == "cancel"){
+            Bukkit.getScheduler().cancelTasks(plugin)
+            player.sendMessage("$chatMessage§eオンラインプレイヤーのタスクを止めました")
+            return true
+        }
+
         return true
     }
 
@@ -139,6 +145,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
         player.sendMessage("$chatMessage§e/mdp list 読み込まれている薬の名前を表示します")
         player.sendMessage("$chatMessage§e/mdp log [player名]プレイヤーの使用ログを見ることができます \n" +
                 "プレイヤー名を[save]にすると、オンラインプレイヤーのドラッグデータをDBに保存することができます")
+        player.sendMessage("$chatMessage§e/mdp cancel オンラインプレイヤーのタスクを止めます（デバッグ用)")
 
     }
 
