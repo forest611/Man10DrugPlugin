@@ -46,12 +46,17 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
         if (event.action == Action.RIGHT_CLICK_AIR ||
                 event.action == Action.RIGHT_CLICK_BLOCK){
 
-
             val item = event.item ?: return
 
             if (item.itemMeta.lore == null)return
             if (item.itemMeta.lore.isEmpty())return
             if (item.type == Material.AIR)return
+
+            val drug = item.itemMeta.lore[item.itemMeta.lore.size -1].replace("§","")
+
+            if(plugin.drugName.indexOf(drug) == -1){
+                return
+            }
 
             event.isCancelled = true
 
@@ -354,7 +359,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
 
                 ////////////////////////
                 //db
-                if(drugData.saveData !=null&& drugData.saveData!![0]=="usedrug"){
+                if(drugData.saveData !=null&&!drugData.saveData!!.isEmpty()&&drugData.saveData!![0]=="usedrug"){
                     val data = drugData.saveData!!
                     val set = data[1].split(";")
                     val k = "$drug,${data[0]}"
