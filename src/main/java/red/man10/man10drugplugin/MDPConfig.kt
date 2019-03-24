@@ -41,6 +41,11 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
         data.funcDelay = config.getStringList("funcdelay")
         data.funcRandomDelay = config.getStringList("funcrandomdelay")
 
+        data.saveData = config.getStringList("SaveData")
+        //(type,set,timing)
+        //type(text,value,bool)
+        //timing(usedrug,symptoms)
+
         //command
         getHashMap("Command",config,data.command)
         getHashMap("CommandRandom",config,data.commandRandom)
@@ -185,6 +190,7 @@ class Data{
     var soundDelay = HashMap<Int,MutableList<String>>()
     var soundRandomDelay = HashMap<Int,MutableList<String>>()
 
+    var saveData : MutableList<String>? = null
     //type0
     var isDependence = false
     var dependenceLevel = 0  //依存レベル

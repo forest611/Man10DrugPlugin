@@ -72,17 +72,23 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
                     }
 
                     player.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを保存しました")
+
+                    db.saveDrugDB()
                     plugin.load()
+                    db.loadDrugDB()
                     player.sendMessage("$chatMessage§eドラッグのデータを読み込みました")
 
                     for (p in Bukkit.getServer().onlinePlayers){
                         db.loadDataBase(p)
                     }
                     player.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを読み込みました")
+
                     plugin.mdpfunc.reloadAllFile()
                     player.sendMessage("$chatMessage§e全関数を再読み込みしました")
                     plugin.event!!.clearCooldown()
                     player.sendMessage("$chatMessage§e全クールダウンをリセットしました")
+
+
                 }
 
             }.run()
@@ -112,17 +118,18 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
                 return true
             }
 
-                val data = plugin.playerLog[Bukkit.getPlayer(args[1])]
-
-                if (data == null){
-                    player.sendMessage("$chatMessage§e指定したプレイヤーはオフラインの可能性があります")
-                    return false
-                }
-
-                player.sendMessage("$chatMessage§e${args[1]}の直近10回のドラッグ使用ログ")
-                for(i in data.size - 10 until data.size ){
-                    player.sendMessage("$chatMessage§e${data[i]}")
-                }
+            player.sendMessage("$chatMessage§e修正中です")
+//                val data = plugin.playerLog[Bukkit.getPlayer(args[1])]
+//
+//                if (data == null){
+//                    player.sendMessage("$chatMessage§e指定したプレイヤーはオフラインの可能性があります")
+//                    return false
+//                }
+//
+//                player.sendMessage("$chatMessage§e${args[1]}の直近10回のドラッグ使用ログ")
+//                for(i in data.size - 10 until data.size ){
+//                    player.sendMessage("$chatMessage§e${data[i]}")
+//                }
 
 
         }

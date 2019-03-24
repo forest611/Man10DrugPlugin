@@ -353,6 +353,43 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 }
 
                 ////////////////////////
+                //db
+                if(drugData.saveData !=null&& drugData.saveData!![0]=="usedrug"){
+                    val data = drugData.saveData!!
+                    val set = data[1].split(";")
+                    val k = "$drug,${data[0]}"
+
+//                    if (data[0] == "text"){
+//                        db.drugDB[k] = ""
+//                        break
+//                    }
+//
+//                    if(data[0] == "bool"){
+//                        db.drugDB[k] = false
+//                        break
+//                    }
+
+                    when(set[0]){
+                        "plus" -> {
+                            db.drugDB[k] = set[1].toInt() + db.drugDB[k] as Int
+                        }
+
+                        "minus" -> {
+                            db.drugDB[k] = set[1].toInt() - db.drugDB[k] as Int
+                        }
+
+                        "times" -> {
+                            db.drugDB[k] = set[1].toInt() * db.drugDB[k] as Int
+                        }
+
+                        "division" -> {
+                            db.drugDB[k] = set[1].toInt() / db.drugDB[k] as Int
+                        }
+                        else ->Bukkit.getLogger().info("save drugDB error")
+                    }
+                }
+
+                ////////////////////////
                 // type 0 only
                 ///////////////////////
                 if (drugData.type == 0){
@@ -361,8 +398,9 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
 
                     if (pd.count >= drugData.nextLevelCount!![pd.level]){
                         pd.count = 0
-                        pd.level ++
-
+                        if(pd.level < drugData.dependenceLevel){
+                            pd.level ++
+                        }
                     }
 
                     ////////

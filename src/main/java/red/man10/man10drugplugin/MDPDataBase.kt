@@ -10,6 +10,7 @@ import java.util.*
 class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:MDPConfig){
 
     var playerMap = HashMap<String,playerData>()
+    var drugDB = HashMap<String,Any>() //key drug,type
     var canConnect = true
 
     ////////////////////////
@@ -39,7 +40,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
                     "count," +
                     "level," +
                     "times" +
-                    " FROM man10drugPlugin.drug" +
+                    " FROM drug" +
                     " WHERE uuid='"+player.uniqueId +
                     "' and drug_name='"+ plugin.drugName[i]+"';"
 
@@ -48,7 +49,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
             rs = mysql.query(sql)
 
             if (!rs.next()){
-                sql = "INSERT INTO man10drugPlugin.drug " +
+                sql = "INSERT INTO drug " +
                         "VALUES('${player.uniqueId}'," +
                         "'${player.name}'," +
                         "'${plugin.drugName[i]}',0,0,0);"
@@ -59,7 +60,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
                         "count," +
                         "level," +
                         "times" +
-                        " FROM man10drugPlugin.drug" +
+                        " FROM drug" +
                         " WHERE uuid='"+player.uniqueId +
                         "' and drug_name='"+ plugin.drugName[i]+"';"
                 rs = mysql.query(sql)
@@ -122,7 +123,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
 
             val data = get(key)
 
-            val sql = "UPDATE man10drugPlugin.drug " +
+            val sql = "UPDATE drug " +
                     "SET count=${data.count}"+
                     ",level=${data.level}"+
                     ",times=${data.times}" +
@@ -149,7 +150,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
         for (i in 0 until log.size){
             val logs = log[i].split(",")
 
-            mysql.execute("INSERT INTO man10drugPlugin.log " +
+            mysql.execute("INSERT INTO log " +
                     "VALUES('${player.uniqueId}', " +
                     "'${player.name}', " +
                     "'${logs[0]}'," +
@@ -178,6 +179,66 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
             return
         }
         plugin.playerLog[player]!!.add("$drug,${format.format(date)}")
+    }
+
+    //////////////////////
+    //drugDataをdbに保存
+    fun saveDrugDB(){
+        val keys = drugDB.keys.toMutableList()
+
+        for(i in 0 until keys.size){
+            val drugtype = keys[i].split(",")
+            val sql = "UPDATE data " +
+                    "SET ${drugtype[1]}='${drugDB[keys[i]]}' " +
+                    "WHERE drug_name='${drugtype[0]}';"
+
+            mysql.execute(sql)
+        }
+    }
+
+    /////////////////////////
+    //drugDataをdbから読み込む
+    fun loadDrugDB(){
+        for (i in 0 until plugin.drugName.size){
+            val d = config.get(plugin.drugName[i])
+            if (d.saveData == null || d.saveData!!.isEmpty()){
+                continue
+            }
+
+            var sql = "SELECT ${d.saveData!![0]} " +
+                    "FROM data " +
+                    "WHERE drug='${plugin.drugName[i]}';"
+
+            var rs = mysql.query(sql)
+
+            if (!rs.next()||rs == null){
+                sql = "INSERT INTO data " +
+                       "VALUES('${plugin.drugName[i]}'," +
+                       "'none'," +
+                       "false," +
+                       "0);"
+
+                mysql.execute(sql)
+
+                sql = "SELECT ${d.saveData!![0]} " +
+                        "FROM data " +
+                        "WHERE drug='${plugin.drugName[i]}';"
+                rs = mysql.query(sql)
+            }
+
+            try {
+                rs.next()
+                when(d.saveData!![0]){
+                    "text" ->drugDB[d.saveData!![0]] = rs.getString("text")
+                    "bool" ->drugDB[d.saveData!![0]] = rs.getBoolean("bool")
+                    "int" ->drugDB[d.saveData!![0]] = rs.getString("value")
+                }
+
+
+            }catch (e:Exception){
+                Bukkit.getLogger().info(e.message)
+            }
+        }
     }
 
 }
