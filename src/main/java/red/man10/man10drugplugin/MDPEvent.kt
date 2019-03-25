@@ -43,7 +43,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
     @EventHandler
     fun useEvent(event: PlayerInteractEvent){
 
-        if(plugin.stop){
+        if(plugin.stop||!db.canConnect){
             event.player.sendMessage("§e今は使う気分ではないようだ")
             return
         }
@@ -364,50 +364,78 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 }
 
                 ////////////////////////
-                //db
-                if(drugData.saveData !=null&&!drugData.saveData!!.isEmpty()&&drugData.saveData!![0]=="usedrug"){
-                    val data = drugData.saveData!!
-                    val set = data[1].split(";")
-                    val k = "$drug,${data[0]}"
-
-//                    if (data[0] == "text"){
-//                        db.drugDB[k] = ""
-//                        break
-//                    }
-//
-//                    if(data[0] == "bool"){
-//                        db.drugDB[k] = false
-//                        break
-//                    }
-
-                    when(set[0]){
-                        "plus" -> {
-                            db.drugDB[k] = set[1].toInt() + db.drugDB[k] as Int
-                        }
-
-                        "minus" -> {
-                            db.drugDB[k] = set[1].toInt() - db.drugDB[k] as Int
-                        }
-
-                        "times" -> {
-                            db.drugDB[k] = set[1].toInt() * db.drugDB[k] as Int
-                        }
-
-                        "division" -> {
-                            db.drugDB[k] = set[1].toInt() / db.drugDB[k] as Int
-                        }
-                        else ->Bukkit.getLogger().info("save drugDB error")
-                    }
-                }
-
-                ////////////////////////
                 // type 0 only
                 ///////////////////////
                 if (drugData.type == 0){
 
                     pd.count ++
 
+                    //レベルアップ
                     if (pd.count >= drugData.nextLevelCount!![pd.level]&&pd.level<=drugData.nextLevelCount!![pd.level]){
+
+                        ////////////////////////
+                        //command
+                        ///////////////////////
+                        if (drugData.command[pd.level] != null){
+
+                            for (i in 0 until drugData.commandLvUp[pd.level]!!.size){
+
+                                val cmd = drugData.commandLvUp[pd.level]!![i].replace("<player>",player.name)
+
+                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
+
+                            }
+
+                        }
+
+                        ////////////////////////
+                        //command random
+                        ///////////////////////
+                        if (drugData.commandRandomLvUp[pd.level] != null){
+
+                            val cmd = drugData.commandRandomLvUp[pd.level]!![Random().nextInt(
+                                    drugData.commandRandomLvUp[pd.level]!!.size
+                            )].replace("<player>",player.name)
+
+                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
+
+                        }
+
+
+                        ////////////////////////
+                        // FuncDelay
+                        ///////////////////////
+                        if(drugData.funcDelayLvUp!=null){
+                            for(funcname in drugData.funcDelayLvUp!!){
+                                val times = funcname.split(";")
+                                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
+                                    plugin.mdpfunc.runFunc(player,times[0])
+                                },times[1].toLong())
+                            }
+                        }
+                        ////////////////////////
+                        // FuncRandom
+                        ///////////////////////
+                        if(drugData.funcRandomLvUp!=null&&drugData.funcRandomLvUp!!.size>0){
+                            val rnd = SecureRandom()
+                            val r = rnd.nextInt(drugData.funcRandomLvUp!!.size)
+                            val s = drugData.funcRandomLvUp!![r]
+                            plugin.mdpfunc.runFunc(player,s)
+                        }
+                        ////////////////////////
+                        // FuncRandomDelay
+                        ///////////////////////
+                        if(drugData.funcRandomDelayLvUp!=null&&drugData.funcRandomDelayLvUp!!.size>0){
+                            val rnd = SecureRandom()
+                            val r = rnd.nextInt(drugData.funcRandomDelayLvUp!!.size)
+                            val funcname = drugData.funcRandomDelayLvUp!![r]
+                            val times = funcname.split(";")
+                            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
+                                plugin.mdpfunc.runFunc(player,times[0])
+                            },times[1].toLong())
+                        }
+
+                        //count reset レベルアップ
                         pd.count = 0
                         pd.level ++
                     }

@@ -73,9 +73,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
 
                     player.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを保存しました")
 
-                    db.saveDrugDB()
                     plugin.load()
-                    db.loadDrugDB()
                     player.sendMessage("$chatMessage§eドラッグのデータを読み込みました")
 
                     for (p in Bukkit.getServer().onlinePlayers){

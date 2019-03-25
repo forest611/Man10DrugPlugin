@@ -41,10 +41,6 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
         data.funcDelay = config.getStringList("funcdelay")
         data.funcRandomDelay = config.getStringList("funcrandomdelay")
 
-        data.saveData = config.getStringList("SaveData")
-        //(type,set,timing)
-        //type(text,value,bool)
-        //timing(usedrug,symptoms)
 
         //command
         getHashMap("Command",config,data.command)
@@ -89,6 +85,16 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
 
             getHashMap("SoundSymptoms",config,data.soundSymptoms)
             getHashMap("SoundSymptomsRandom",config,data.soundSymptomsRandom)
+
+            getHashMap("CommandLvUp",config,data.commandLvUp)
+            getHashMap("CommandRandomLvUp",config,data.commandRandomLvUp)
+
+            data.funcLvUp = config.getStringList("funcLvUp")
+            data.funcRandomLvUp = config.getStringList("funcrandomLvUp")
+            data.funcDelayLvUp = config.getStringList("funcdelayLvUp")
+            data.funcRandomDelayLvUp = config.getStringList("funcrandomdelayLvUp")
+
+
 
             data.msgSymptoms = config.getStringList("MsgSymptoms")
 
@@ -190,7 +196,6 @@ class Data{
     var soundDelay = HashMap<Int,MutableList<String>>()
     var soundRandomDelay = HashMap<Int,MutableList<String>>()
 
-    var saveData : MutableList<String>? = null
     //type0
     var isDependence = false
     var dependenceLevel = 0  //依存レベル
@@ -214,6 +219,20 @@ class Data{
 
     var soundSymptoms = HashMap<Int,MutableList<String>>()
     var soundSymptomsRandom = HashMap<Int,MutableList<String>>()
+
+    val commandLvUp = HashMap<Int,MutableList<String>>()
+    val commandRandomLvUp = HashMap<Int,MutableList<String>>()
+
+
+    //func
+    var funcLvUp : MutableList<String>? = null
+    //funcDelay
+    var funcDelayLvUp : MutableList<String>? = null
+    //funcRandom
+    var funcRandomLvUp : MutableList<String>? = null
+    //funcRandomDelay
+    var funcRandomDelayLvUp : MutableList<String>? = null
+
 
     //type1
     var weakDrug = "drug" //type2

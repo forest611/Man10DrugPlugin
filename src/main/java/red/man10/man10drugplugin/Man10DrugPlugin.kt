@@ -141,7 +141,6 @@ class Man10DrugPlugin : JavaPlugin() {
         getCommand("mdp").executor = MDPCommand(this,db)
 
         vault = VaultManager(this)
-        db.loadDrugDB()
 
         //再起動時にオンラインプレイヤーがいた場合
         object : BukkitRunnable() {
@@ -157,7 +156,6 @@ class Man10DrugPlugin : JavaPlugin() {
     ////////////////////////
     //シャットダウン、ストップ時
     override fun onDisable() {
-        db.saveDrugDB()
 
 //        //鯖落ち時にオンラインプレイヤーがいた場合
 //        object : BukkitRunnable(){

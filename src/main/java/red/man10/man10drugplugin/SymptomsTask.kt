@@ -120,7 +120,7 @@ class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData): Bu
         }
 
         //send msg
-        if (drugData.msgSymptoms != null && !drugData.msgSymptoms!![pd.level].isEmpty()){
+        if (drugData.msgSymptoms != null && size(drugData.msgSymptoms!!,pd)){
             player.sendMessage(drugData.msgSymptoms!![pd.level])
         }
 
@@ -135,4 +135,13 @@ class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData): Bu
         }
 
     }
+
+
+    fun size(list:MutableList<String>,pd:playerData):Boolean{
+        if (list.size>pd.level){
+            return true
+        }
+        return false
+    }
+
 }
