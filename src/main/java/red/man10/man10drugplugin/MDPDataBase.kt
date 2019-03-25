@@ -75,10 +75,12 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
             }
 
             try{
-                rs.next()
-                data.count = rs.getInt("count")
-                data.level = rs.getInt("level")
-                data.times= rs.getInt("times")
+                while (rs.next()){
+                    data.count = rs.getInt("count")
+                    data.level = rs.getInt("level")
+                    data.times= rs.getInt("times")
+
+                }
 
 
                 rs.close()
