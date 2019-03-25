@@ -53,6 +53,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
 
             val item = event.player.inventory.itemInMainHand ?: return
 
+            if (item.itemMeta == null)return
             if (item.itemMeta.lore == null)return
             if (item.itemMeta.lore.isEmpty())return
             if (item.type == Material.AIR)return
