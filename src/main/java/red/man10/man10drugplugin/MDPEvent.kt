@@ -43,6 +43,11 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
     @EventHandler
     fun useEvent(event: PlayerInteractEvent){
 
+        if(plugin.stop){
+            event.player.sendMessage("§e今は使う気分ではないようだ")
+            return
+        }
+
         if (event.action == Action.RIGHT_CLICK_AIR ||
                 event.action == Action.RIGHT_CLICK_BLOCK){
 

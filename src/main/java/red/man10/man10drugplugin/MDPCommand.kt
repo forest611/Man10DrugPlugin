@@ -150,6 +150,18 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
             return true
         }
 
+        if (cmd =="on"){
+            plugin.stop = false
+            player.sendMessage("$chatMessage§eプラグインをスタートしました")
+            return true
+        }
+
+        if (cmd == "off"){
+            plugin.stop = true
+            player.sendMessage("$chatMessage§eプラグインをストップしました")
+            return true
+        }
+
         return true
     }
 
@@ -163,6 +175,12 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
         player.sendMessage("$chatMessage§e/mdp log [player名] [回数]プレイヤーの使用ログを見ることができます \n" +
                 "プレイヤー名を[save]にすると、オンラインプレイヤーのログをDBに保存することができます")
         player.sendMessage("$chatMessage§e/mdp cancel オンラインプレイヤーのタスクを止めます（デバッグ用)")
+        player.sendMessage("$chatMessage§e/mdp on/off プラグインの on off を切り替えます")
+        when(plugin.stop){
+            false -> player.sendMessage("$chatMessage§e§l現在プラグインは可動しています")
+            true -> player.sendMessage("$chatMessage§e§l現在プラグインはストップしています")
+
+        }
 
     }
 

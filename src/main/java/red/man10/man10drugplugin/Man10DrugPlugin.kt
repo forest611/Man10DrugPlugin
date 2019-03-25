@@ -16,6 +16,7 @@ class Man10DrugPlugin : JavaPlugin() {
     var drugName = ArrayList<String>()  //command name
     var drugItemStack = HashMap<String,ItemStack>()//key drugName
     var playerLog = HashMap<Player,MutableList<String>>()//log
+
     lateinit var mysql : MySQLManager
     lateinit var db : MDPDataBase
 
@@ -27,6 +28,7 @@ class Man10DrugPlugin : JavaPlugin() {
     var vault : VaultManager? = null
 
     var canMilk = true // milkを使えるか
+    var stop = false //止まっているか
 
     ////////////////////////
     //config load
@@ -120,7 +122,10 @@ class Man10DrugPlugin : JavaPlugin() {
         val config:FileConfiguration = config
 
         canMilk = config.getBoolean("CanUseMilk",false)
+        stop = config.getBoolean("Stop",false)
+
         config.set("CanUseMilk",canMilk)
+        config.set("Stop",stop)
 
         mysql = MySQLManager(this,"man10DrugPlugin")
 
