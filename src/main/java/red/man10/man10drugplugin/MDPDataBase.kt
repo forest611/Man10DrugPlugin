@@ -88,7 +88,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
                 //禁断症状
                 if (drugData.isDependence){
                     data.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin,SymptomsTask(player
-                            ,drugData,data)
+                            ,drugData,data,plugin)
                             ,drugData.symptomsTime!![data.level],drugData.symptomsNextTime!![1])
                     data.isDependence = true
                 }

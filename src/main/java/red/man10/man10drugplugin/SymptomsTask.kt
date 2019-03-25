@@ -9,7 +9,7 @@ import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
 import java.util.*
 
-class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData): BukkitRunnable() {
+class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData,val plugin: Man10DrugPlugin): BukkitRunnable() {
 
     override fun run() {
 
@@ -52,7 +52,7 @@ class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData): Bu
 
             for (i in 0 until drugData.commandSymptoms[pd.level]!!.size){
 
-                val cmd = drugData.commandSymptoms[pd.level]!![i].replace("<player>",player.name)
+                val cmd = plugin.repStr(drugData.commandSymptoms[pd.level]!![i],player,pd)
 
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
 
@@ -64,9 +64,9 @@ class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData): Bu
         ////////////////
         if (drugData.commandSymptomsRandom[pd.level] != null){
 
-            val cmd = drugData.commandSymptomsRandom[pd.level]!![Random().nextInt(
+            val cmd = plugin.repStr(drugData.commandSymptomsRandom[pd.level]!![Random().nextInt(
                     drugData.commandSymptomsRandom[pd.level]!!.size
-            )].replace("<player>",player.name)
+            )],player,pd)
 
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
 
@@ -120,8 +120,8 @@ class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData): Bu
         }
 
         //send msg
-        if (drugData.msgSymptoms != null && size(drugData.msgSymptoms!!,pd)){
-            player.sendMessage(drugData.msgSymptoms!![pd.level])
+        if (drugData.msgSymptoms != null && plugin.size(drugData.msgSymptoms!!,pd)){
+            player.sendMessage(plugin.repStr(drugData.msgSymptoms!![pd.level],player,pd))
         }
 
         pd.times ++
@@ -136,12 +136,5 @@ class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData): Bu
 
     }
 
-
-    fun size(list:MutableList<String>,pd:playerData):Boolean{
-        if (list.size>pd.level){
-            return true
-        }
-        return false
-    }
 
 }

@@ -167,4 +167,23 @@ class Man10DrugPlugin : JavaPlugin() {
 //        }.run()
         Bukkit.getScheduler().cancelTasks(this)
     }
+
+
+
+    ///////////////////////////////
+    //複数のクラスで使うメソッド
+    fun size(list:MutableList<String>,pd:playerData):Boolean{
+        if (list.size>pd.level){
+            return true
+        }
+        return false
+    }
+
+    fun repStr(str:String,player: Player,pd:playerData):String{
+        return str.replace("<player>",player.name).replace("<level>",pd.level.toString())
+                .replace("<count>",pd.count.toString()).replace("<times>",pd.times.toString())
+    }
+
+
+
 }

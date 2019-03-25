@@ -134,7 +134,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
 
                     for (i in 0 until drugData.command[pd.level]!!.size){
 
-                        val cmd = drugData.command[pd.level]!![i].replace("<player>",player.name)
+                        val cmd = plugin.repStr(drugData.command[pd.level]!![i],player,pd)
 
                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
 
@@ -147,9 +147,9 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 ///////////////////////
                 if (drugData.commandRandom[pd.level] != null){
 
-                    val cmd = drugData.commandRandom[pd.level]!![Random().nextInt(
+                    val cmd = plugin.repStr(drugData.commandRandom[pd.level]!![Random().nextInt(
                             drugData.commandRandom[pd.level]!!.size
-                    )].replace("<player>",player.name)
+                    )],player,pd)
 
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
 
@@ -167,7 +167,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
 
                         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
 
-                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command[0].replace("<player>",player.name))
+                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.repStr(command[0],player,pd))
 
                         },command[1].toLong())
                     }
@@ -183,7 +183,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
 
                     Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
 
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command[0].replace("<player>",player.name))
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.repStr(command[0],player,pd))
 
                     },command[1].toLong())
                 }
@@ -380,7 +380,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
 
                             for (i in 0 until drugData.commandLvUp[pd.level]!!.size){
 
-                                val cmd = drugData.commandLvUp[pd.level]!![i].replace("<player>",player.name)
+                                val cmd = plugin.repStr(drugData.commandLvUp[pd.level]!![i],player,pd)
 
                                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
 
@@ -393,9 +393,9 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                         ///////////////////////
                         if (drugData.commandRandomLvUp[pd.level] != null){
 
-                            val cmd = drugData.commandRandomLvUp[pd.level]!![Random().nextInt(
+                            val cmd = plugin.repStr(drugData.commandRandomLvUp[pd.level]!![Random().nextInt(
                                     drugData.commandRandomLvUp[pd.level]!!.size
-                            )].replace("<player>",player.name)
+                            )],player,pd)
 
                             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
 
@@ -450,7 +450,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                             Bukkit.getScheduler().cancelTask(pd.taskId)
                             pd.times = 0
                         }
-                        pd.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin,SymptomsTask(player,drugData,pd)
+                        pd.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin,SymptomsTask(player,drugData,pd,plugin)
                         ,drugData.symptomsTime!![pd.level],drugData.symptomsNextTime!![1])
 
                         pd.isDependence = true
@@ -493,7 +493,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
 
                         //levelがぜろになったらタスクを走らせない
                         if (pd2.level > 0){
-                            pd2.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin,SymptomsTask(player,drug2,pd2)
+                            pd2.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin,SymptomsTask(player,drug2,pd2,plugin)
                                     ,drug2.symptomsTime!![pd.level],drug2.symptomsNextTime!![1])
                             pd2.isDependence = true
 
@@ -529,16 +529,16 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 ////////////////////////
                 //message
                 ///////////////////////
-                if (drugData.useMsg != null && size(drugData.useMsg!!,pd)){
-                    player.sendMessage(drugData.useMsg!![pd.level])
+                if (drugData.useMsg != null && plugin.size(drugData.useMsg!!,pd)){
+                    player.sendMessage(plugin.repStr(drugData.useMsg!![pd.level],player,pd))
                 }
 
                 //Delay message
-                if (drugData.useMsgDelay != null && size(drugData.useMsgDelay!!,pd)){
+                if (drugData.useMsgDelay != null && plugin.size(drugData.useMsgDelay!!,pd)){
                     val times = drugData.useMsgDelay!![pd.level].split(";")
 
                     Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
-                        player.sendMessage(times[0])
+                        player.sendMessage(plugin.repStr(times[0],player,pd))
                     },times[1].toLong())
 
                 }
@@ -602,10 +602,4 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
 
     }
 
-    fun size(list:MutableList<String>,pd:playerData):Boolean{
-        if (list.size>pd.level){
-            return true
-        }
-        return false
-    }
 }
