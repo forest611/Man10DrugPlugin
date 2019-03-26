@@ -10,7 +10,6 @@ import java.util.*
 class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:MDPConfig){
 
     var playerMap = HashMap<String,playerData>()
-    var drugDB = HashMap<String,Any>() //key drug,type
     var canConnect = true
 
     ////////////////////////
@@ -31,6 +30,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
 
             val data = get(key)
 
+            Bukkit.getLogger().info(key)
 
             if (drugData.type != 0 && drugData.type != 1){
                 data.level = 0
@@ -41,37 +41,17 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
                 continue
             }
 
+            var rs : ResultSet = selectRecord(mysql,player,plugin.drugName[i])
 
-            var sql = "SELECT " +
-                    "count," +
-                    "level," +
-                    "times " +
-                    "FROM drug " +
-                    "WHERE uuid='${player.uniqueId}' "
-            "and drug_name='${plugin.drugName[i]}';"
+            if (!rs.next()){
 
-            var rs : ResultSet
+                addRecord(mysql,player,plugin.drugName[i])
 
-            rs = mysql.query(sql)
+                rs = selectRecord(mysql,player,plugin.drugName[i])
 
-            if (!rs.next()||rs==null){
-                sql = "INSERT INTO drug " +
-                        "VALUES('${player.uniqueId}'," +
-                        "'${player.name}'," +
-                        "'${plugin.drugName[i]}',0,0,0);"
-
-                mysql.execute(sql)
-
-                sql = "SELECT " +
-                        "count," +
-                        "level," +
-                        "times " +
-                        "FROM drug " +
-                        "WHERE uuid='${player.uniqueId}' "
-                "and drug_name='${plugin.drugName[i]}';"
-                rs = mysql.query(sql)
                 Bukkit.getLogger().info("${player.name}...insert ${plugin.drugName[i]}")
 
+                rs.next()
             }
 
             try{
@@ -79,10 +59,6 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
                 data.count = rs.getInt("count")
                 data.level = rs.getInt("level")
                 data.times = rs.getInt("times")
-
-                Bukkit.getLogger().info("if")
-
-
 
                 rs.close()
 
@@ -192,6 +168,31 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
         plugin.playerLog[player]!!.add("$drug,${format.format(date)}")
     }
 
+    ////////////////////////
+    //レコード追加
+    private fun addRecord(mysql:MySQLManager,player:Player,drug:String){
+        val sql = "INSERT INTO drug " +
+                "VALUES('${player.uniqueId}'," +
+                "'${player.name}'," +
+                "'$drug',0,0,0);"
+
+        mysql.execute(sql)
+
+    }
+
+    //////////////////
+    //select
+    private fun selectRecord(mysql:MySQLManager,player: Player,drug:String):ResultSet{
+        val sql = "SELECT " +
+                "count," +
+                "level," +
+                "times " +
+                "FROM drug " +
+                "WHERE uuid='${player.uniqueId}' "+
+                "and drug_name='$drug';"
+
+        return mysql.query(sql)
+    }
 
 }
 
