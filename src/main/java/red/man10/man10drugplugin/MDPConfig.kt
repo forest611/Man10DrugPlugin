@@ -34,6 +34,7 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
         //use message
         data.useMsg = config.getStringList("UseMsg")
         data.useMsgDelay = config.getStringList("UseMsgDelay")
+        data.enchantEffect = config.getBoolean("EnchantEffect")
 
         //func lists
         data.func = config.getStringList("func")
@@ -159,6 +160,8 @@ class Data{
     //message
     var useMsg : MutableList<String>? = null
     var useMsgDelay : MutableList<String>? = null
+
+    var enchantEffect = false
 
     /*
     Func: 機能をまとめられる機能

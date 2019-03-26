@@ -3,6 +3,7 @@ package red.man10.man10drugplugin
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.configuration.file.FileConfiguration
+import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
@@ -105,6 +106,7 @@ class Man10DrugPlugin : JavaPlugin() {
             meta.isUnbreakable = true
             meta.itemFlags.add(ItemFlag.HIDE_UNBREAKABLE)
         }
+        if(data.enchantEffect){ meta.addEnchant(Enchantment.LOOT_BONUS_BLOCKS,1,true)}
 
         drug.itemMeta = meta
 
@@ -157,15 +159,16 @@ class Man10DrugPlugin : JavaPlugin() {
     //シャットダウン、ストップ時
     override fun onDisable() {
 
-//        //鯖落ち時にオンラインプレイヤーがいた場合
-//        object : BukkitRunnable(){
-//            override fun run() {
-//                for (player in Bukkit.getServer().onlinePlayers){
-//                    db.saveDataBase(player,true)
-//                }
-//            }
-//        }.run()
+        //鯖落ち時にオンラインプレイヤーがいた場合
         Bukkit.getScheduler().cancelTasks(this)
+
+        object : BukkitRunnable(){
+            override fun run() {
+                for (player in Bukkit.getServer().onlinePlayers){
+                    db.saveDataBase(player,true)
+                }
+            }
+        }.run()
     }
 
 

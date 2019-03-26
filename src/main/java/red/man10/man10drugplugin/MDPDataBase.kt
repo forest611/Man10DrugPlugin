@@ -54,7 +54,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
 
             rs = mysql.query(sql)
 
-            if (!rs.next()){
+            if (!rs.next()||rs==null){
                 sql = "INSERT INTO drug " +
                         "VALUES('${player.uniqueId}'," +
                         "'${player.name}'," +
@@ -68,25 +68,26 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
                         "times " +
                         "FROM drug " +
                         "WHERE uuid='${player.uniqueId}' "
-                        "and drug_name='${plugin.drugName[i]}';"
+                "and drug_name='${plugin.drugName[i]}';"
                 rs = mysql.query(sql)
                 Bukkit.getLogger().info("${player.name}...insert ${plugin.drugName[i]}")
 
             }
 
             try{
-                while (rs.next()){
-                    data.count = rs.getInt("count")
-                    data.level = rs.getInt("level")
-                    data.times= rs.getInt("times")
 
-                }
+                data.count = rs.getInt("count")
+                data.level = rs.getInt("level")
+                data.times = rs.getInt("times")
+
+                Bukkit.getLogger().info("if")
+
 
 
                 rs.close()
 
                 //禁断症状
-                if (drugData.isDependence){
+                if (drugData.isDependence&&data.times!=0){
                     data.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin,SymptomsTask(player
                             ,drugData,data,plugin)
                             ,drugData.symptomsTime!![data.level],drugData.symptomsNextTime!![1])
