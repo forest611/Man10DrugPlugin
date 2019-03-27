@@ -65,6 +65,10 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
         getHashMap("SoundDelay",config,data.soundDelay)
         getHashMap("SoundRandomDelay",config,data.soundRandomDelay)
 
+
+        data.isCrashChat = config.getBoolean("IsCrashChat")
+        data.crashChance = config.getStringList("CrashChance")
+
         //type 0 only
         if (data.type == 0){
             data.isDependence = config.getBoolean("IsDependence") //禁断症状が出るか
@@ -94,8 +98,6 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
             data.funcRandomLvUp = config.getStringList("funcrandomLvUp")
             data.funcDelayLvUp = config.getStringList("funcdelayLvUp")
             data.funcRandomDelayLvUp = config.getStringList("funcrandomdelayLvUp")
-
-
 
             data.msgSymptoms = config.getStringList("MsgSymptoms")
 
@@ -198,6 +200,10 @@ class Data{
     var soundRandom = HashMap<Int,MutableList<String>>()
     var soundDelay = HashMap<Int,MutableList<String>>()
     var soundRandomDelay = HashMap<Int,MutableList<String>>()
+
+    var isCrashChat = false
+
+    var crashChance : MutableList<String>? = null
 
     //type0
     var isDependence = false

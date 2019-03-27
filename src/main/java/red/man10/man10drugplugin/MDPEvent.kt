@@ -8,10 +8,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
-import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerItemConsumeEvent
-import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.*
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
@@ -78,12 +75,75 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
             event.isCancelled = true
             return
         }
+        val i = event.player.inventory.itemInMainHand ?: return
 
-        //lore check1
-        if (event.item.itemMeta.lore.isEmpty())return
+        if (i.itemMeta == null)return
+        if (i.itemMeta.lore == null)
+        if (i.itemMeta.lore.isEmpty())return
 
         useDrug(event.player,event.item)
 
+    }
+
+    //チャット破壊イベント
+    @EventHandler
+    fun onChat(event: AsyncPlayerChatEvent){
+
+        event.message = crashChat(event)
+
+    }
+
+    /////////////////////////
+    //メッセージを壊す
+    fun crashChat(event:AsyncPlayerChatEvent):String{
+
+        val msg = StringBuilder()
+        msg.append(event.message)
+
+        object : BukkitRunnable() {
+            override fun run() {
+
+                val player = event.player
+
+                //ドラッグの数だけ実行
+                for (i in 0 until plugin.drugName.size) {
+                    val drug = config.get(plugin.drugName[i])
+
+                    //壊すか
+                    if (drug.isCrashChat || drug.crashChance == null) { continue }
+
+                    val key = player.name + plugin.drugName[i]
+
+                    val pd = db.get(key)
+
+                    if (pd.count == 0 && pd.level ==0){continue}
+
+                    //指定レベルが無い、もしくは壊さない場合
+                    if (!plugin.size(drug.crashChance!!, pd) || drug.crashChance!![pd.level] == "false"){ continue }
+
+                    val value = drug.crashChance!![pd.level].split(",")
+
+                    val size = event.message.length
+
+
+                    //value なん文字以上か,百分率,何箇所壊すか,壊す文字の範囲
+
+                    if (size < value[0].toInt()||value[1].toInt()>Random().nextInt(99)+1){ continue }
+
+                    //破壊部分
+                    for (i1 in 0 until value[2].toInt()){
+
+                        val r = Random().nextInt(size - 1)
+                        msg.insert(r,"&k")
+
+                        if(r+value[3].toInt() < size){
+                            msg.insert(r+value[3].toInt(),"&r")
+                        }
+                    }
+                }
+            }
+        }.run()
+        return event.message
     }
 
     fun clearCooldown(){
@@ -371,7 +431,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                     pd.count ++
 
                     //レベルアップ
-                    if (pd.count >= drugData.nextLevelCount!![pd.level]&&pd.level<=drugData.nextLevelCount!![pd.level]){
+                    if (pd.count >= drugData.nextLevelCount!![pd.level]&&pd.level<=drugData.dependenceLevel){
 
                         ////////////////////////
                         //command
