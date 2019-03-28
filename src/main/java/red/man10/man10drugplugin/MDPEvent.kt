@@ -40,10 +40,6 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
     @EventHandler
     fun useEvent(event: PlayerInteractEvent){
 
-        if(plugin.stop||!db.canConnect){
-            event.player.sendMessage("§e今は使う気分ではないようだ")
-            return
-        }
 
         if (event.action == Action.RIGHT_CLICK_AIR ||
                 event.action == Action.RIGHT_CLICK_BLOCK){
@@ -63,27 +59,27 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
 
             event.isCancelled = true
 
-            useDrug(event.player,item)
+            useDrug(event.player,item,event)
         }
     }
 
-    @EventHandler
-    fun foodEvent(event: PlayerItemConsumeEvent){
-
-        //can milk
-        if (event.item.type == Material.MILK_BUCKET&&!plugin.canMilk){
-            event.isCancelled = true
-            return
-        }
-        val i = event.player.inventory.itemInMainHand ?: return
-
-        if (i.itemMeta == null)return
-        if (i.itemMeta.lore == null)
-        if (i.itemMeta.lore.isEmpty())return
-
-        useDrug(event.player,event.item)
-
-    }
+//    @EventHandler
+//    fun foodEvent(event: PlayerItemConsumeEvent){
+//
+//        //can milk
+//        if (event.item.type == Material.MILK_BUCKET&&!plugin.canMilk){
+//            event.isCancelled = true
+//            return
+//        }
+//        val i = event.player.inventory.itemInMainHand ?: return
+//
+//        if (i.itemMeta == null)return
+//        if (i.itemMeta.lore == null)
+//        if (i.itemMeta.lore.isEmpty())return
+//
+//        useDrug(event.player,event.item)
+//
+//    }
 
     //チャット破壊イベント
     @EventHandler
@@ -167,7 +163,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
     ///ドラッグ使用時
     ///pd = ドラッグを使用したプレイヤーのデータ
     ///drugData = プレイヤーが使用したドラッグのデータ
-    fun useDrug(player: Player,item: ItemStack){
+    fun useDrug(player: Player,item: ItemStack,event:PlayerInteractEvent){
 
         object : BukkitRunnable() {
             override fun run() {
@@ -179,6 +175,11 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 }
 
                 if(cooldownMap.contains(player.uniqueId.toString()+" "+drug)){
+                    return
+                }
+
+                if(plugin.stop||!db.canConnect){
+                    event.player.sendMessage("§e今は使う気分ではないようだ")
                     return
                 }
 
