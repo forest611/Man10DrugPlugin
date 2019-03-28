@@ -100,50 +100,63 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
         val msg = StringBuilder()
         msg.append(event.message)
 
-        object : BukkitRunnable() {
-            override fun run() {
+        Bukkit.getLogger().info("msg1")
 
-                val player = event.player
+        val player = event.player
 
-                //ドラッグの数だけ実行
-                for (i in 0 until plugin.drugName.size) {
-                    val drug = config.get(plugin.drugName[i])
+        //ドラッグの数だけ実行
+        for (i in 0 until plugin.drugName.size) {
+            val drug = config.get(plugin.drugName[i])
 
-                    //壊すか
-                    if (drug.isCrashChat || drug.crashChance == null) { continue }
+            val key = player.name + plugin.drugName[i]
 
-                    val key = player.name + plugin.drugName[i]
-
-                    val pd = db.get(key)
-
-                    if (pd.count == 0 && pd.level ==0){continue}
-
-                    //指定レベルが無い、もしくは壊さない場合
-                    if (!plugin.size(drug.crashChance!!, pd) || drug.crashChance!![pd.level] == "false"){ continue }
-
-                    val value = drug.crashChance!![pd.level].split(",")
-
-                    val size = event.message.length
+            val pd = db.get(key)
 
 
-                    //value なん文字以上か,百分率,何箇所壊すか,壊す文字の範囲
+            //壊すか
+            if (!drug.isCrashChat || drug.crashChance == null) {
+                continue
+            }
 
-                    if (size < value[0].toInt()||value[1].toInt()>Random().nextInt(99)+1){ continue }
+            if (pd.count == 0 && pd.level == 0) {
+                continue
+            }
 
-                    //破壊部分
-                    for (i1 in 0 until value[2].toInt()){
+            //指定レベルが無い、もしくは壊さない場合
+            if (drug.crashChance!![pd.level] == "false") {
+                continue
+            }
 
-                        val r = Random().nextInt(size - 1)
-                        msg.insert(r,"&k")
+            Bukkit.getLogger().info("msg2")
 
-                        if(r+value[3].toInt() < size){
-                            msg.insert(r+value[3].toInt(),"&r")
-                        }
-                    }
+
+            val value = drug.crashChance!![pd.level].split(",")
+
+            val size = event.message.length
+
+
+            //value なん文字以上か,百分率,何箇所壊すか,壊す文字の範囲
+
+            if (size < value[0].toInt() || value[1].toInt() >= Random().nextInt(99) + 1) {
+                continue
+            }
+
+            //破壊部分
+            for (i1 in 0 until value[2].toInt()) {
+
+                val r = Random().nextInt(size - 1)
+                msg.insert(r, "&k")
+
+                if (r + value[3].toInt() < size) {
+                    msg.insert(r + value[3].toInt(), "&r")
                 }
             }
-        }.run()
-        return event.message
+
+            Bukkit.getLogger().info("msg3")
+            Bukkit.getLogger().info(msg.toString())
+
+        }
+        return msg.toString()
     }
 
     fun clearCooldown(){
@@ -174,6 +187,22 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 val pd = db.get(key)
                 val drugData = config.get(drug)
 
+                ////////////////////////
+                //message
+                ///////////////////////
+                if (drugData.useMsg != null && plugin.size(drugData.useMsg!!,pd)){
+                    player.sendMessage(plugin.repStr(drugData.useMsg!![pd.level],player,pd))
+                }
+
+                //Delay message
+                if (drugData.useMsgDelay != null && plugin.size(drugData.useMsgDelay!!,pd)){
+                    val times = drugData.useMsgDelay!![pd.level].split(";")
+
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
+                        player.sendMessage(plugin.repStr(times[0],player,pd))
+                    },times[1].toLong())
+
+                }
 
                 ////////////////////////
                 //cooldown
@@ -428,10 +457,8 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 ///////////////////////
                 if (drugData.type == 0){
 
-                    pd.count ++
-
                     //レベルアップ
-                    if (pd.count >= drugData.nextLevelCount!![pd.level]&&pd.level<=drugData.dependenceLevel){
+                    if (pd.level<drugData.dependenceLevel&&pd.count >= drugData.nextLevelCount!![pd.level]){
 
                         ////////////////////////
                         //command
@@ -531,8 +558,6 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                         return
                     }
 
-                    pd.count ++
-
                     if (pd.count >= drugData.medicineCount){
                         pd.count = 0
                         pd2.count -= drugData.weakCount
@@ -586,26 +611,11 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                     db.playerMap[key2] = pd2
                 }
 
-                ////////////////////////
-                //message
-                ///////////////////////
-                if (drugData.useMsg != null && plugin.size(drugData.useMsg!!,pd)){
-                    player.sendMessage(plugin.repStr(drugData.useMsg!![pd.level],player,pd))
-                }
-
-                //Delay message
-                if (drugData.useMsgDelay != null && plugin.size(drugData.useMsgDelay!!,pd)){
-                    val times = drugData.useMsgDelay!![pd.level].split(";")
-
-                    Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
-                        player.sendMessage(plugin.repStr(times[0],player,pd))
-                    },times[1].toLong())
-
-                }
-
                 //remove 1 item
                 item.amount = item.amount - 1
                 player.inventory.itemInMainHand = item
+
+                pd.count ++
 
                 ////////////////
                 //アイテムを変える
