@@ -36,6 +36,8 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
         data.useMsgDelay = config.getStringList("UseMsgDelay")
         data.enchantEffect = config.getBoolean("EnchantEffect")
 
+        data.nearPlayer = config.getStringList("NearPlayer")
+
         //func lists
         data.func = config.getStringList("func")
         data.funcRandom = config.getStringList("funcrandom")
@@ -68,6 +70,7 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
 
         data.isCrashChat = config.getBoolean("IsCrashChat")
         data.crashChance = config.getStringList("CrashChance")
+
 
         //type 0 only
         if (data.type == 0){
@@ -232,6 +235,7 @@ class Data{
     val commandLvUp = HashMap<Int,MutableList<String>>()
     val commandRandomLvUp = HashMap<Int,MutableList<String>>()
 
+    var nearPlayer : MutableList<String>? = null
 
     //func
     var funcLvUp : MutableList<String>? = null

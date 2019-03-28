@@ -1,7 +1,9 @@
 package red.man10.man10drugplugin
 
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.World
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
@@ -187,6 +189,16 @@ class Man10DrugPlugin : JavaPlugin() {
                 .replace("<count>",pd.count.toString()).replace("<times>",pd.times.toString())
     }
 
+    fun getNearByPlayers(loc: Location,distance:Int):ArrayList<Player>{
+        val ds = distance*distance
+        val players = ArrayList<Player>()
+        for(player in Bukkit.getOnlinePlayers()){
+            if (player.location.distanceSquared(loc) < ds){
+                players.add(player)
+            }
+        }
+        return players
+    }
 
 
 }

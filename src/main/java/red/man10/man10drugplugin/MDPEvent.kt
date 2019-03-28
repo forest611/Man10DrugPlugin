@@ -96,7 +96,6 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
         val msg = StringBuilder()
         msg.append(event.message)
 
-        Bukkit.getLogger().info("msg1")
 
         val player = event.player
 
@@ -123,9 +122,6 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 continue
             }
 
-            Bukkit.getLogger().info("msg2")
-
-
             val value = drug.crashChance!![pd.level].split(",")
 
             val size = event.message.length
@@ -147,9 +143,6 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                     msg.insert(r + value[3].toInt(), "&r")
                 }
             }
-
-            Bukkit.getLogger().info("msg3")
-            Bukkit.getLogger().info(msg.toString())
 
         }
         return msg.toString()
@@ -451,6 +444,18 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                     val sound = time[0].split(",")
 
                     player.world.playSound(player.location, Sound.valueOf(sound[0]),sound[1].toFloat(),sound[2].toFloat())
+                }
+
+                /////////////////////////
+                //周囲に迷惑
+                ///////////////////////
+                if (drugData.nearPlayer != null && plugin.size(drugData.nearPlayer!!,pd)){
+                    val data = drugData.nearPlayer!![pd.level].split(";")
+                    val list = plugin.getNearByPlayers(player.location,data[0].toInt())
+
+                    for(p in list){
+                        plugin.mdpfunc.runFunc(p,data[1])
+                    }
                 }
 
                 ////////////////////////
