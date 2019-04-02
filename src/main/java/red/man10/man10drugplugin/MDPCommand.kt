@@ -71,6 +71,10 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
                         db.saveDataBase(p,true)
                     }
 
+                    db.saveStock()
+                    player.sendMessage("$chatMessage§eドラッグの情報を保存しました")
+                    db.loadStock()
+
                     player.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを保存しました")
 
                     plugin.load()

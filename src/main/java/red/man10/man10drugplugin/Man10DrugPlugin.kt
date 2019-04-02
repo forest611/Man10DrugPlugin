@@ -184,9 +184,10 @@ class Man10DrugPlugin : JavaPlugin() {
         return false
     }
 
-    fun repStr(str:String,player: Player,pd:playerData):String{
+    fun repStr(str:String,player: Player,pd:playerData,d:Data):String{
         return str.replace("<player>",player.name).replace("<level>",pd.level.toString())
                 .replace("<count>",pd.count.toString()).replace("<times>",pd.times.toString())
+                .replace("<stock>",d.stock.toString())
     }
 
     fun getNearByPlayers(loc: Location,distance:Int):ArrayList<Player>{

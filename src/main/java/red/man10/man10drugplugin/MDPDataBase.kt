@@ -23,10 +23,10 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
             return
         }
 
-        for (i in 0 until plugin.drugName.size){
+        for (name in plugin.drugName){
 
-            val drugData = config.get(plugin.drugName[i])
-            val key = player.name+plugin.drugName[i]
+            val drugData = config.get(name)
+            val key = player.name+name
 
             val data = get(key)
 
@@ -41,15 +41,15 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
                 continue
             }
 
-            var rs : ResultSet = selectRecord(mysql,player,plugin.drugName[i])
+            var rs : ResultSet = selectRecord(mysql,player,name)
 
             if (!rs.next()){
 
-                addRecord(mysql,player,plugin.drugName[i])
+                addRecord(mysql,player,name)
 
-                rs = selectRecord(mysql,player,plugin.drugName[i])
+                rs = selectRecord(mysql,player,name)
 
-                Bukkit.getLogger().info("${player.name}...insert ${plugin.drugName[i]}")
+                Bukkit.getLogger().info("${player.name}...insert $name")
 
                 rs.next()
             }
@@ -147,6 +147,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
 
     }
 
+    //hashmapを取得
     fun get(key:String):playerData{
         var data = playerMap[key]
         if (data == null){
@@ -169,7 +170,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
     }
 
     ////////////////////////
-    //レコード追加
+    //プレイヤーレコード追加
     private fun addRecord(mysql:MySQLManager,player:Player,drug:String){
         val sql = "INSERT INTO drug " +
                 "VALUES('${player.uniqueId}'," +
@@ -192,6 +193,43 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
                 "and drug_name='$drug';"
 
         return mysql.query(sql)
+    }
+
+    ////////////////
+    //stockを保存
+    fun saveStock(){
+        for (drug in plugin.drugName){
+            val data = config.get(drug)
+            val sql = "UPDATE data " +
+                    "SET value='${data.stock}' " +
+                    "WHERE drug='$drug';"
+            mysql.execute(sql)
+        }
+    }
+
+    ////////////////
+    //stock読み込み
+    fun loadStock(){
+        for (drug in plugin.drugName){
+            var sql = "SELECT " +
+                    "value " +
+                    "FROM data" +
+                    "WHERE drug='$drug';"
+            var rs = mysql.query(sql)
+            if (!rs.next()){
+                sql = "INSERT INTO data " +
+                        "VALUES('$drug',0,0,0);"
+                mysql.execute(sql)
+                sql = "SELECT " +
+                        "value " +
+                        "FROM data" +
+                        "WHERE drug='$drug';"
+                rs = mysql.query(sql)
+            }
+            val data = config.get(drug)
+            data.stock = rs.getInt("VALUE")
+            config.drugData[drug] = data
+        }
     }
 
 }

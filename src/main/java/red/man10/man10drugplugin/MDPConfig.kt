@@ -71,6 +71,9 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
         data.isCrashChat = config.getBoolean("IsCrashChat")
         data.crashChance = config.getStringList("CrashChance")
 
+        data.addStock = config.getInt("AddStock")
+        data.stock = config.getInt("FirstStock")
+        data.stockMode = config.getBoolean("IsStock")
 
         //type 0 only
         if (data.type == 0){
@@ -208,6 +211,9 @@ class Data{
 
     var crashChance : MutableList<String>? = null
 
+    var stockMode = false
+    var addStock = 0
+
     //type0
     var isDependence = false
     var dependenceLevel = 0  //依存レベル
@@ -252,5 +258,8 @@ class Data{
     var weakCount = 10  //指定値カウントを減らす
     var medicineCount = 0 //弱めるのに必要な量
     var stopTask = false //薬で依存を止めるか
+
+    //mutable
+    var stock = 0
 
 }

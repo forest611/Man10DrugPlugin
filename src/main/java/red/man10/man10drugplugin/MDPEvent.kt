@@ -163,6 +163,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
 
                 val drug = item.itemMeta.lore[item.itemMeta.lore.size -1].replace("§","")
 
+                //チェック
                 if(plugin.drugName.indexOf(drug) == -1){
                     return
                 }
@@ -175,7 +176,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                     event.player.sendMessage("§e今は使う気分ではないようだ")
                     return
                 }
-
+////////////////////////////////////////////////////////////
                 val key = player.name + drug
 
                 val pd = db.get(key)
@@ -185,7 +186,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 //message
                 ///////////////////////
                 if (drugData.useMsg != null && plugin.size(drugData.useMsg!!,pd)){
-                    player.sendMessage(plugin.repStr(drugData.useMsg!![pd.level],player,pd))
+                    player.sendMessage(plugin.repStr(drugData.useMsg!![pd.level],player,pd,drugData))
                 }
 
                 //Delay message
@@ -193,7 +194,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                     val times = drugData.useMsgDelay!![pd.level].split(";")
 
                     Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
-                        player.sendMessage(plugin.repStr(times[0],player,pd))
+                        player.sendMessage(plugin.repStr(times[0],player,pd,drugData))
                     },times[1].toLong())
 
                 }
@@ -215,16 +216,14 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 ///////////////////////
                 if (drugData.command[pd.level] != null){
 
-                    for (i in 0 until drugData.command[pd.level]!!.size){
-
-                        val cmd = plugin.repStr(drugData.command[pd.level]!![i],player,pd)
+                    for(c in drugData.command[pd.level]!!){
+                        val cmd = plugin.repStr(c,player,pd,drugData)
 
                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
 
                     }
 
                 }
-
                 ////////////////////////
                 //random command
                 ///////////////////////
@@ -232,7 +231,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
 
                     val cmd = plugin.repStr(drugData.commandRandom[pd.level]!![Random().nextInt(
                             drugData.commandRandom[pd.level]!!.size
-                    )],player,pd)
+                    )],player,pd,drugData)
 
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
 
@@ -243,17 +242,16 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 ///////////////////////
                 if (drugData.commandDelay[pd.level] != null){
 
-
-                    for (i in 0 until drugData.commandDelay[pd.level]!!.size){
-
-                        val command = drugData.commandDelay[pd.level]!![i].split(";")
+                    for(c in drugData.commandDelay[pd.level]!!){
+                        val command = c.split(";")
 
                         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
 
-                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.repStr(command[0],player,pd))
+                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.repStr(command[0],player,pd,drugData))
 
                         },command[1].toLong())
                     }
+
                 }
 
                 ////////////////////////
@@ -266,7 +264,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
 
                     Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
 
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.repStr(command[0],player,pd))
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.repStr(command[0],player,pd,drugData))
 
                     },command[1].toLong())
                 }
@@ -276,9 +274,8 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 ///////////////////////
                 if (drugData.buff[pd.level] != null){
 
-                    for (i in 0 until drugData.buff[pd.level]!!.size){
-                        val buff = drugData.buff[pd.level]!![i].split(",")
-
+                    for(b in drugData.buff[pd.level]!!){
+                        val buff = b.split(",")
                         player.addPotionEffect(PotionEffect(
                                 PotionEffectType.getByName(buff[0]),
                                 buff[1].toInt(),
@@ -286,6 +283,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                         ))
                     }
                 }
+
 
                 ////////////////////////
                 //buff random
@@ -307,9 +305,8 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 ///////////////////////
                 if (drugData.buffDelay[pd.level] != null){
 
-                    for (i in 0 until drugData.buffDelay[pd.level]!!.size){
-
-                        val time = drugData.buffDelay[pd.level]!![i].split(";")
+                    for(b in drugData.buffDelay[pd.level]!!){
+                        val time = b.split(";")
                         val buff = time[0].split(",")
 
                         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
@@ -345,13 +342,11 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 //particle
                 ///////////////////////
                 if(drugData.particle[pd.level] != null){
-                    for(i in 0 until drugData.particle[pd.level]!!.size){
-                        val particle = drugData.particle[pd.level]!![i].split(",")
-                        player.world.spawnParticle(Particle.valueOf(particle[0]),player.location,particle[1].toInt())
+                    for (p in drugData.particle[pd.level]!!){
+                        val par = p.split(",")
+                        player.world.spawnParticle(Particle.valueOf(par[0]),player.location,par[1].toInt())
 
                     }
-
-
                 }
 
                 ////////////////////////
@@ -370,13 +365,13 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 //particle delay
                 ///////////////////////
                 if (drugData.particleDelay[pd.level] != null){
-                    for(i in 0 until drugData.particleDelay[pd.level]!!.size){
-                        val times = drugData.particleDelay[pd.level]!![i].split(";")
+                    for (p in drugData.particleDelay[pd.level]!!){
+                        val times = p.split(";")
 
-                        val particle = times[0].split(",")
+                        val par = times[0].split(",")
 
                         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
-                            player.world.spawnParticle(Particle.valueOf(particle[0]),player.location,particle[1].toInt())
+                            player.world.spawnParticle(Particle.valueOf(par[0]),player.location,par[1].toInt())
                         },times[1].toLong())
 
                     }
@@ -400,10 +395,8 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 //sound
                 ///////////////////////
                 if (drugData.sound[pd.level] != null){
-
-                    for (i in 0 until drugData.sound[pd.level]!!.size){
-                        val sound = drugData.sound[pd.level]!![i].split(",")
-
+                    for(s in drugData.sound[pd.level]!!){
+                        val sound = s.split(",")
                         player.world.playSound(player.location, Sound.valueOf(sound[0]),sound[1].toFloat(),sound[2].toFloat())
                     }
                 }
@@ -424,13 +417,13 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 ///////////////////////
                 if (drugData.soundDelay[pd.level] != null){
 
-                    for (i in 0 until drugData.soundDelay[pd.level]!!.size){
-
-                        val time = drugData.soundDelay[pd.level]!![i].split(";")
+                    for(s in drugData.soundDelay[pd.level]!!){
+                        val time = s.split(";")
                         val sound = time[0].split(",")
 
                         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
-                            player.world.playSound(player.location, Sound.valueOf(sound[0]),sound[1].toFloat(),sound[2].toFloat())
+                            player.world.playSound(player.location, Sound.valueOf(sound[0]),sound[1].toFloat()
+                                    ,sound[2].toFloat())
                         },time[1].toLong())
                     }
                 }
@@ -458,6 +451,14 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                     }
                 }
 
+                /////////////////////////
+                //数値ストック
+                //////////////////////
+                if (drugData.stockMode){
+                    drugData.stock += drugData.addStock
+                }
+
+
                 ////////////////////////
                 // type 0 only
                 ///////////////////////
@@ -471,14 +472,11 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                         ///////////////////////
                         if (drugData.command[pd.level] != null){
 
-                            for (i in 0 until drugData.commandLvUp[pd.level]!!.size){
-
-                                val cmd = plugin.repStr(drugData.commandLvUp[pd.level]!![i],player,pd)
+                            for (c in drugData.commandLvUp[pd.level]!!){
+                                val cmd = plugin.repStr(c,player,pd,drugData)
 
                                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
-
                             }
-
                         }
 
                         ////////////////////////
@@ -488,7 +486,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
 
                             val cmd = plugin.repStr(drugData.commandRandomLvUp[pd.level]!![Random().nextInt(
                                     drugData.commandRandomLvUp[pd.level]!!.size
-                            )],player,pd)
+                            )],player,pd,drugData)
 
                             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
 
@@ -621,6 +619,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
                 item.amount = item.amount - 1
                 player.inventory.itemInMainHand = item
 
+                //count increment
                 pd.count ++
 
                 ////////////////
