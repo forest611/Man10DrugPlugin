@@ -17,6 +17,9 @@ import java.util.Random;
 
 import jp.hishidama.eval.*;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class MDPFunction {
 
@@ -182,6 +185,29 @@ public class MDPFunction {
                     playSound(p,timess[0]);
                 },Long.parseLong(timess[1]));
             }
+
+            //buff
+            for (String b : data.buff){
+                String[] buf = b.split(",");
+                p.addPotionEffect(new PotionEffect(
+                        PotionEffectType.getByName(buf[0]),
+                        Integer.parseInt(buf[1]),
+                        Integer.parseInt(buf[2])));
+
+            }
+            //buff random
+            if (data.buffRandom.size() != 0){
+                Random rnd = new SecureRandom();
+                int r = rnd.nextInt(data.cmdRandom.size());
+
+                String[] buf = data.buff.get(r).split(",");
+                p.addPotionEffect(new PotionEffect(
+                        PotionEffectType.getByName(buf[0]),
+                        Integer.parseInt(buf[1]),
+                        Integer.parseInt(buf[2])));
+
+            }
+
             //func
             for(String ss : data.func){
                 runFunc(p,ss);
@@ -265,6 +291,9 @@ public class MDPFunction {
         //sound
         List<String> sound = new ArrayList<>();
         List<String> soundDelay = new ArrayList<>();
+        //buff
+        List<String> buff = new ArrayList<>();
+        List<String> buffRandom = new ArrayList<>();
         //another func
         List<String> func = new ArrayList<>();
         List<String> funcRandom = new ArrayList<>();
@@ -313,6 +342,13 @@ public class MDPFunction {
             //soundDelay get
             if(data.contains("sounddelay")){
                 soundDelay = data.getStringList("sounddelay");
+            }
+            //buff
+            if(data.contains("buff")){
+                buff = data.getStringList("buff");
+            }
+            if(data.contains("buffrandom")){
+                buff = data.getStringList("buffrandom");
             }
             //func get
             if(data.contains("func")){
