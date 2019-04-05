@@ -164,13 +164,10 @@ class Man10DrugPlugin : JavaPlugin() {
         //鯖落ち時にオンラインプレイヤーがいた場合
         Bukkit.getScheduler().cancelTasks(this)
 
-        object : BukkitRunnable(){
-            override fun run() {
-                for (player in Bukkit.getServer().onlinePlayers){
-                    db.saveDataBase(player,true)
-                }
-            }
-        }.run()
+        for (player in Bukkit.getServer().onlinePlayers){
+            db.saveDataBase(player,true)
+        }
+        db.saveStock()
     }
 
 

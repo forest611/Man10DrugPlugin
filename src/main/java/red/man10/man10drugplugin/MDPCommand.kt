@@ -64,38 +64,37 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
         }
 
         if (cmd == "reload"){
-            object : BukkitRunnable() {
-                override fun run() {
-                    Bukkit.getScheduler().cancelTasks(plugin)
-                    for (p in Bukkit.getServer().onlinePlayers){
-                        db.saveDataBase(p,true)
-                    }
 
-                    db.saveStock()
-                    player.sendMessage("$chatMessage§eドラッグの情報を保存しました")
-                    db.loadStock()
+            Bukkit.getScheduler().cancelTasks(plugin)
 
-                    player.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを保存しました")
-
-                    plugin.load()
-                    player.sendMessage("$chatMessage§eドラッグのデータを読み込みました")
-
-                    for (p in Bukkit.getServer().onlinePlayers){
-                        db.loadDataBase(p)
-                    }
-                    player.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを読み込みました")
-
-                    plugin.mdpfunc.reloadAllFile()
-                    player.sendMessage("$chatMessage§e全関数を再読み込みしました")
-                    plugin.event!!.clearCooldown()
-                    player.sendMessage("$chatMessage§e全クールダウンをリセットしました")
-
-
+            Thread(Runnable {
+                for (p in Bukkit.getServer().onlinePlayers){
+                    db.saveDataBase(p,true)
                 }
 
-            }.run()
+                db.saveStock()
+                player.sendMessage("$chatMessage§eドラッグの情報を保存しました")
+                db.loadStock()
+
+                player.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを保存しました")
+
+                plugin.load()
+                player.sendMessage("$chatMessage§eドラッグのデータを読み込みました")
+
+                for (p in Bukkit.getServer().onlinePlayers){
+                    db.loadDataBase(p)
+                }
+                player.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを読み込みました")
+
+                plugin.mdpfunc.reloadAllFile()
+                player.sendMessage("$chatMessage§e全関数を再読み込みしました")
+                plugin.event!!.clearCooldown()
+                player.sendMessage("$chatMessage§e全クールダウンをリセットしました")
+
+            }).start()
 
         }
+
 
         if (cmd == "list"){
             player.sendMessage("${chatMessage}§e読み込まれているドラッグ一覧")

@@ -15,6 +15,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
+import org.bukkit.scheduler.BukkitTask
 import java.security.SecureRandom
 import java.util.*
 
@@ -24,17 +25,16 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
 
     @EventHandler
     fun joinEvent(event:PlayerJoinEvent){
-        object : BukkitRunnable() {
-            override fun run() {db.loadDataBase(event.player)}
-        }.run()
-
+        Thread(Runnable {
+            db.loadDataBase(event.player)
+        }).start()
     }
 
     @EventHandler
     fun leftEvent(event:PlayerQuitEvent){
-        object : BukkitRunnable() {
-            override fun run() {db.saveDataBase(event.player,true)}
-        }.run()
+        Thread(Runnable {
+            db.saveDataBase(event.player,true)
+        }).start()
     }
 
     //////////////
@@ -651,7 +651,10 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
                     },times[1].toLong())
                 }
             }
-        }.run()
+        }.runTask(plugin)
+
+
+
 
     }
 
