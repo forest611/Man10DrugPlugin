@@ -140,521 +140,524 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
     ///ドラッグ使用時
     ///pd = ドラッグを使用したプレイヤーのデータ
     ///drugData = プレイヤーが使用したドラッグのデータ
-    fun useDrug(player: Player,item: ItemStack,event:PlayerInteractEvent,drug:String){
-
-        object : BukkitRunnable() {
-            override fun run() {
+    fun useDrug(player: Player,item: ItemStack,event:PlayerInteractEvent,drug:String) {
 
 
-                if(cooldownMap.contains(player.uniqueId.toString()+" "+drug)){
-                    return
-                }
 
-                if(plugin.stop||!db.canConnect){
-                    event.player.sendMessage("§e今は使う気分ではないようだ")
-                    return
-                }
+        if (cooldownMap.contains(player.uniqueId.toString() + " " + drug)) {
+            return
+        }
+
+        if (plugin.stop || !db.canConnect) {
+            event.player.sendMessage("§e今は使う気分ではないようだ")
+            return
+        }
 ////////////////////////////////////////////////////////////
-                val key = player.name + drug
+        val key = player.name + drug
 
-                val pd = db.get(key)
-                val drugData = config.get(drug)
+        val pd = db.get(key)
+        val drugData = config.get(drug)
 
-                ////////////////////////
-                //message
-                ///////////////////////
-                if (drugData.useMsg != null && plugin.size(drugData.useMsg!!,pd)){
-                    player.sendMessage(plugin.repStr(drugData.useMsg!![pd.level],player,pd,drugData))
-                }
+        ////////////////////////////////
+        //時間のかかる処理をスレッド化
+        Bukkit.getScheduler().runTaskAsynchronously(plugin) {
+            ////////////////////////
+            //message
+            ///////////////////////
+            if (drugData.useMsg != null && plugin.size(drugData.useMsg!!, pd)) {
+                player.sendMessage(plugin.repStr(drugData.useMsg!![pd.level], player, pd, drugData))
+            }
 
-                //Delay message
-                if (drugData.useMsgDelay != null && plugin.size(drugData.useMsgDelay!!,pd)){
-                    val times = drugData.useMsgDelay!![pd.level].split(";")
+            //Delay message
+            if (drugData.useMsgDelay != null && plugin.size(drugData.useMsgDelay!!, pd)) {
+                val times = drugData.useMsgDelay!![pd.level].split(";")
 
-                    Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
-                        player.sendMessage(plugin.repStr(times[0],player,pd,drugData))
-                    },times[1].toLong())
+                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
+                    player.sendMessage(plugin.repStr(times[0], player, pd, drugData))
+                }, times[1].toLong())
 
-                }
+            }
 
-                ////////////////////////
-                //cooldown
-                ///////////////////////
+            ////////////////////////
+            //command
+            ///////////////////////
+            if (drugData.command[pd.level] != null) {
 
-                cooldownMap.add(player.uniqueId.toString()+" "+drug)
-
-                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
-
-                    cooldownMap.remove(player.uniqueId.toString()+" "+drug)
-
-                },drugData.cooldown)
-
-                ////////////////////////
-                //command
-                ///////////////////////
-                if (drugData.command[pd.level] != null){
-
-                    for(c in drugData.command[pd.level]!!){
-                        val cmd = plugin.repStr(c,player,pd,drugData)
-
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
-
-                    }
-
-                }
-                ////////////////////////
-                //random command
-                ///////////////////////
-                if (drugData.commandRandom[pd.level] != null){
-
-                    val cmd = plugin.repStr(drugData.commandRandom[pd.level]!![Random().nextInt(
-                            drugData.commandRandom[pd.level]!!.size
-                    )],player,pd,drugData)
+                for (c in drugData.command[pd.level]!!) {
+                    val cmd = plugin.repStr(c, player, pd, drugData)
 
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
 
                 }
 
-                ////////////////////////
-                //command delay
-                ///////////////////////
-                if (drugData.commandDelay[pd.level] != null){
+            }
+            ////////////////////////
+            //random command
+            ///////////////////////
+            if (drugData.commandRandom[pd.level] != null) {
 
-                    for(c in drugData.commandDelay[pd.level]!!){
-                        val command = c.split(";")
+                val cmd = plugin.repStr(drugData.commandRandom[pd.level]!![Random().nextInt(
+                        drugData.commandRandom[pd.level]!!.size
+                )], player, pd, drugData)
 
-                        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
 
-                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.repStr(command[0],player,pd,drugData))
+            }
 
-                        },command[1].toLong())
-                    }
+            ////////////////////////
+            //command delay
+            ///////////////////////
+            if (drugData.commandDelay[pd.level] != null) {
 
+                for (c in drugData.commandDelay[pd.level]!!) {
+                    val command = c.split(";")
+
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
+
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.repStr(command[0], player, pd, drugData))
+
+                    }, command[1].toLong())
                 }
 
-                ////////////////////////
-                //command random delay
-                ///////////////////////
-                if (drugData.commandRandomDelay[pd.level] != null){
+            }
 
-                    val command = drugData.commandRandomDelay[pd.level]!![
-                            drugData.commandRandomDelay[pd.level]!!.size - 1].split(";")
+            ////////////////////////
+            //command random delay
+            ///////////////////////
+            if (drugData.commandRandomDelay[pd.level] != null) {
 
-                    Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
+                val command = drugData.commandRandomDelay[pd.level]!![
+                        drugData.commandRandomDelay[pd.level]!!.size - 1].split(";")
 
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.repStr(command[0],player,pd,drugData))
+                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
 
-                    },command[1].toLong())
-                }
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.repStr(command[0], player, pd, drugData))
 
-                ////////////////////////
-                //buff
-                ///////////////////////
-                if (drugData.buff[pd.level] != null){
+                }, command[1].toLong())
+            }
 
-                    for(b in drugData.buff[pd.level]!!){
-                        val buff = b.split(",")
-                        player.addPotionEffect(PotionEffect(
-                                PotionEffectType.getByName(buff[0]),
-                                buff[1].toInt(),
-                                buff[2].toInt()
-                        ))
-                    }
-                }
+            /////////////////////////
+            //数値ストック
+            //////////////////////
+            if (drugData.stockMode) {
+                drugData.stock += drugData.addStock
+            }
 
 
-                ////////////////////////
-                //buff random
-                ///////////////////////
-                if (drugData.buffRandom[pd.level] != null){
+        }
 
-                    val buff = drugData.buffRandom[pd.level]!![Random()
-                            .nextInt(drugData.buffRandom[pd.level]!!.size -1)].split(",")
 
+        ////////////////////////
+        //cooldown
+        ///////////////////////
+
+        cooldownMap.add(player.uniqueId.toString() + " " + drug)
+
+        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
+
+            cooldownMap.remove(player.uniqueId.toString() + " " + drug)
+
+        }, drugData.cooldown)
+
+
+        ////////////////////////
+        //buff
+        ///////////////////////
+        if (drugData.buff[pd.level] != null) {
+
+            for (b in drugData.buff[pd.level]!!) {
+                val buff = b.split(",")
+                player.addPotionEffect(PotionEffect(
+                        PotionEffectType.getByName(buff[0]),
+                        buff[1].toInt(),
+                        buff[2].toInt()
+                ))
+            }
+        }
+
+
+        ////////////////////////
+        //buff random
+        ///////////////////////
+        if (drugData.buffRandom[pd.level] != null) {
+
+            val buff = drugData.buffRandom[pd.level]!![Random()
+                    .nextInt(drugData.buffRandom[pd.level]!!.size - 1)].split(",")
+
+            player.addPotionEffect(PotionEffect(
+                    PotionEffectType.getByName(buff[0]),
+                    buff[1].toInt(),
+                    buff[2].toInt()
+            ))
+        }
+
+        ////////////////////////
+        //buff delay
+        ///////////////////////
+        if (drugData.buffDelay[pd.level] != null) {
+
+            for (b in drugData.buffDelay[pd.level]!!) {
+                val time = b.split(";")
+                val buff = time[0].split(",")
+
+                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
                     player.addPotionEffect(PotionEffect(
                             PotionEffectType.getByName(buff[0]),
                             buff[1].toInt(),
                             buff[2].toInt()
                     ))
-                }
+                }, time[1].toLong())
+            }
+        }
+
+        ////////////////////////
+        //buff random delay
+        ///////////////////////
+        if (drugData.buffRandomDelay[pd.level] != null) {
+            val time = drugData.buffRandomDelay[pd.level]!![Random()
+                    .nextInt(drugData.buffRandomDelay[pd.level]!!.size - 1)].split(";")
+            val buff = time[0].split(",")
+
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
+                player.addPotionEffect(PotionEffect(
+                        PotionEffectType.getByName(buff[0]),
+                        buff[1].toInt(),
+                        buff[2].toInt()
+                ))
+
+            }, time[1].toLong())
+
+        }
+
+        ////////////////////////
+        //particle
+        ///////////////////////
+        if (drugData.particle[pd.level] != null) {
+            for (p in drugData.particle[pd.level]!!) {
+                val par = p.split(",")
+                player.world.spawnParticle(Particle.valueOf(par[0]), player.location, par[1].toInt())
+
+            }
+        }
+
+        ////////////////////////
+        //particle random
+        ///////////////////////
+        if (drugData.particleRandom[pd.level] != null) {
+
+            val particle = drugData.particleRandom[pd.level]!![Random()
+                    .nextInt(drugData.particleRandom[pd.level]!!.size - 1)].split(",")
+            player.world.spawnParticle(Particle.valueOf(particle[0]), player.location, particle[1].toInt())
+
+        }
+
+
+        ////////////////////////
+        //particle delay
+        ///////////////////////
+        if (drugData.particleDelay[pd.level] != null) {
+            for (p in drugData.particleDelay[pd.level]!!) {
+                val times = p.split(";")
+
+                val par = times[0].split(",")
+
+                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
+                    player.world.spawnParticle(Particle.valueOf(par[0]), player.location, par[1].toInt())
+                }, times[1].toLong())
+
+            }
+        }
+
+        ////////////////////////
+        //particle random delay
+        ///////////////////////
+        if (drugData.particleRandomDelay[pd.level] != null) {
+            val time = drugData.particleRandomDelay[pd.level]!![Random()
+                    .nextInt(drugData.particleRandomDelay[pd.level]!!.size - 1)].split(";")
+            val particle = time[0].split(",")
+
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
+                player.world.spawnParticle(Particle.valueOf(particle[0]), player.location, particle[1].toInt())
+            }, time[1].toLong())
+
+        }
+
+        ////////////////////////
+        //sound
+        ///////////////////////
+        if (drugData.sound[pd.level] != null) {
+            for (s in drugData.sound[pd.level]!!) {
+                val sound = s.split(",")
+                player.world.playSound(player.location, Sound.valueOf(sound[0]), sound[1].toFloat(), sound[2].toFloat())
+            }
+        }
+
+        ////////////////////////
+        //sound random
+        ///////////////////////
+        if (drugData.soundRandom[pd.level] != null) {
+
+            val sound = drugData.soundRandom[pd.level]!![Random()
+                    .nextInt(drugData.soundRandom[pd.level]!!.size - 1)].split(",")
+
+            player.world.playSound(player.location, Sound.valueOf(sound[0]), sound[1].toFloat(), sound[2].toFloat())
+        }
+
+        ////////////////////////
+        //sound delay
+        ///////////////////////
+        if (drugData.soundDelay[pd.level] != null) {
+
+            for (s in drugData.soundDelay[pd.level]!!) {
+                val time = s.split(";")
+                val sound = time[0].split(",")
+
+                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
+                    player.world.playSound(player.location, Sound.valueOf(sound[0]), sound[1].toFloat()
+                            , sound[2].toFloat())
+                }, time[1].toLong())
+            }
+        }
+
+        ////////////////////////
+        //sound random delay
+        ///////////////////////
+        if (drugData.soundRandomDelay[pd.level] != null) {
+            val time = drugData.soundRandomDelay[pd.level]!![Random()
+                    .nextInt(drugData.soundRandomDelay[pd.level]!!.size - 1)].split(";")
+            val sound = time[0].split(",")
+
+            player.world.playSound(player.location, Sound.valueOf(sound[0]), sound[1].toFloat(), sound[2].toFloat())
+        }
+
+        /////////////////////////
+        //周囲に迷惑
+        ///////////////////////
+        if (drugData.nearPlayer != null && plugin.size(drugData.nearPlayer!!, pd)) {
+            val data = drugData.nearPlayer!![pd.level].split(";")
+            val list = plugin.getNearByPlayers(player.location, data[0].toInt())
+
+            list.remove(player)
+
+            for (p in list) {
+                plugin.mdpfunc.runFunc(p, data[1])
+            }
+        }
+
+        ////////////////////////
+        // type 0 only
+        ///////////////////////
+        if (drugData.type == 0) {
+
+            //レベルアップ
+            if (pd.level < drugData.dependenceLevel && pd.count >= drugData.nextLevelCount!![pd.level]) {
 
                 ////////////////////////
-                //buff delay
+                //command
                 ///////////////////////
-                if (drugData.buffDelay[pd.level] != null){
+                if (drugData.command[pd.level] != null) {
 
-                    for(b in drugData.buffDelay[pd.level]!!){
-                        val time = b.split(";")
-                        val buff = time[0].split(",")
+                    for (c in drugData.commandLvUp[pd.level]!!) {
+                        val cmd = plugin.repStr(c, player, pd, drugData)
 
-                        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
-                            player.addPotionEffect(PotionEffect(
-                                    PotionEffectType.getByName(buff[0]),
-                                    buff[1].toInt(),
-                                    buff[2].toInt()
-                            ))
-                        },time[1].toLong())
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
                     }
                 }
 
                 ////////////////////////
-                //buff random delay
+                //command random
                 ///////////////////////
-                if (drugData.buffRandomDelay[pd.level] != null){
-                    val time = drugData.buffRandomDelay[pd.level]!![Random()
-                            .nextInt(drugData.buffRandomDelay[pd.level]!!.size -1)].split(";")
-                    val buff = time[0].split(",")
+                if (drugData.commandRandomLvUp[pd.level] != null) {
 
-                    Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
-                        player.addPotionEffect(PotionEffect(
-                                PotionEffectType.getByName(buff[0]),
-                                buff[1].toInt(),
-                                buff[2].toInt()
-                        ))
+                    val cmd = plugin.repStr(drugData.commandRandomLvUp[pd.level]!![Random().nextInt(
+                            drugData.commandRandomLvUp[pd.level]!!.size
+                    )], player, pd, drugData)
 
-                    },time[1].toLong())
-
-                }
-
-                ////////////////////////
-                //particle
-                ///////////////////////
-                if(drugData.particle[pd.level] != null){
-                    for (p in drugData.particle[pd.level]!!){
-                        val par = p.split(",")
-                        player.world.spawnParticle(Particle.valueOf(par[0]),player.location,par[1].toInt())
-
-                    }
-                }
-
-                ////////////////////////
-                //particle random
-                ///////////////////////
-                if (drugData.particleRandom[pd.level] != null){
-
-                    val particle = drugData.particleRandom[pd.level]!![Random()
-                            .nextInt(drugData.particleRandom[pd.level]!!.size -1)].split(",")
-                    player.world.spawnParticle(Particle.valueOf(particle[0]), player.location, particle[1].toInt())
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
 
                 }
 
 
-                ////////////////////////
-                //particle delay
-                ///////////////////////
-                if (drugData.particleDelay[pd.level] != null){
-                    for (p in drugData.particleDelay[pd.level]!!){
-                        val times = p.split(";")
-
-                        val par = times[0].split(",")
-
-                        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
-                            player.world.spawnParticle(Particle.valueOf(par[0]),player.location,par[1].toInt())
-                        },times[1].toLong())
-
-                    }
-                }
-
-                ////////////////////////
-                //particle random delay
-                ///////////////////////
-                if(drugData.particleRandomDelay[pd.level] != null){
-                    val time = drugData.particleRandomDelay[pd.level]!![Random()
-                            .nextInt(drugData.particleRandomDelay[pd.level]!!.size -1)].split(";")
-                    val particle = time[0].split(",")
-
-                    Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
-                        player.world.spawnParticle(Particle.valueOf(particle[0]),player.location,particle[1].toInt())
-                    },time[1].toLong())
-
-                }
-
-                ////////////////////////
-                //sound
-                ///////////////////////
-                if (drugData.sound[pd.level] != null){
-                    for(s in drugData.sound[pd.level]!!){
-                        val sound = s.split(",")
-                        player.world.playSound(player.location, Sound.valueOf(sound[0]),sound[1].toFloat(),sound[2].toFloat())
-                    }
-                }
-
-                ////////////////////////
-                //sound random
-                ///////////////////////
-                if (drugData.soundRandom[pd.level] != null){
-
-                    val sound = drugData.soundRandom[pd.level]!![Random()
-                            .nextInt(drugData.soundRandom[pd.level]!!.size -1)].split(",")
-
-                    player.world.playSound(player.location, Sound.valueOf(sound[0]),sound[1].toFloat(),sound[2].toFloat())
-                }
-
-                ////////////////////////
-                //sound delay
-                ///////////////////////
-                if (drugData.soundDelay[pd.level] != null){
-
-                    for(s in drugData.soundDelay[pd.level]!!){
-                        val time = s.split(";")
-                        val sound = time[0].split(",")
-
-                        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
-                            player.world.playSound(player.location, Sound.valueOf(sound[0]),sound[1].toFloat()
-                                    ,sound[2].toFloat())
-                        },time[1].toLong())
-                    }
-                }
-
-                ////////////////////////
-                //sound random delay
-                ///////////////////////
-                if (drugData.soundRandomDelay[pd.level] != null){
-                    val time = drugData.soundRandomDelay[pd.level]!![Random()
-                            .nextInt(drugData.soundRandomDelay[pd.level]!!.size -1)].split(";")
-                    val sound = time[0].split(",")
-
-                    player.world.playSound(player.location, Sound.valueOf(sound[0]),sound[1].toFloat(),sound[2].toFloat())
-                }
-
-                /////////////////////////
-                //周囲に迷惑
-                ///////////////////////
-                if (drugData.nearPlayer != null && plugin.size(drugData.nearPlayer!!,pd)){
-                    val data = drugData.nearPlayer!![pd.level].split(";")
-                    val list = plugin.getNearByPlayers(player.location,data[0].toInt())
-
-                    for(p in list){
-                        plugin.mdpfunc.runFunc(p,data[1])
-                    }
-                }
-
-                /////////////////////////
-                //数値ストック
-                //////////////////////
-                if (drugData.stockMode){
-                    drugData.stock += drugData.addStock
-                }
-
-
-                ////////////////////////
-                // type 0 only
-                ///////////////////////
-                if (drugData.type == 0){
-
-                    //レベルアップ
-                    if (pd.level<drugData.dependenceLevel&&pd.count >= drugData.nextLevelCount!![pd.level]){
-
-                        ////////////////////////
-                        //command
-                        ///////////////////////
-                        if (drugData.command[pd.level] != null){
-
-                            for (c in drugData.commandLvUp[pd.level]!!){
-                                val cmd = plugin.repStr(c,player,pd,drugData)
-
-                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
-                            }
-                        }
-
-                        ////////////////////////
-                        //command random
-                        ///////////////////////
-                        if (drugData.commandRandomLvUp[pd.level] != null){
-
-                            val cmd = plugin.repStr(drugData.commandRandomLvUp[pd.level]!![Random().nextInt(
-                                    drugData.commandRandomLvUp[pd.level]!!.size
-                            )],player,pd,drugData)
-
-                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
-
-                        }
-
-
-                        ////////////////////////
-                        // FuncDelay
-                        ///////////////////////
-                        if(drugData.funcDelayLvUp!=null){
-                            for(funcname in drugData.funcDelayLvUp!!){
-                                val times = funcname.split(";")
-                                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
-                                    plugin.mdpfunc.runFunc(player,times[0])
-                                },times[1].toLong())
-                            }
-                        }
-                        ////////////////////////
-                        // FuncRandom
-                        ///////////////////////
-                        if(drugData.funcRandomLvUp!=null&&drugData.funcRandomLvUp!!.size>0){
-                            val rnd = SecureRandom()
-                            val r = rnd.nextInt(drugData.funcRandomLvUp!!.size)
-                            val s = drugData.funcRandomLvUp!![r]
-                            plugin.mdpfunc.runFunc(player,s)
-                        }
-                        ////////////////////////
-                        // FuncRandomDelay
-                        ///////////////////////
-                        if(drugData.funcRandomDelayLvUp!=null&&drugData.funcRandomDelayLvUp!!.size>0){
-                            val rnd = SecureRandom()
-                            val r = rnd.nextInt(drugData.funcRandomDelayLvUp!!.size)
-                            val funcname = drugData.funcRandomDelayLvUp!![r]
-                            val times = funcname.split(";")
-                            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
-                                plugin.mdpfunc.runFunc(player,times[0])
-                            },times[1].toLong())
-                        }
-
-                        //count reset レベルアップ
-                        pd.count = 0
-                        pd.level ++
-                    }
-
-                    ////////
-                    //依存部分
-                    if (drugData.isDependence){
-
-                        //一時タスク終了
-                        if (pd.isDependence)
-                        {
-                            Bukkit.getScheduler().cancelTask(pd.taskId)
-                            pd.times = 0
-                        }
-                        pd.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin,SymptomsTask(player,drugData,pd,plugin)
-                        ,drugData.symptomsTime!![pd.level],drugData.symptomsNextTime!![1])
-
-                        pd.isDependence = true
-                    }
-                }
-
-                ////////////////////////
-                // type 1 only
-                ///////////////////////
-                if (drugData.type == 1){
-
-                    val key2 = player.name+drugData.weakDrug
-                    val pd2 = db.get(key2)
-                    val drug2 = config.get(drug)
-
-                    if(pd2.level == 0){
-                        player.sendMessage("§aあれ？.....解毒薬を飲む必要ってあるのかな...")
-                        return
-                    }
-
-                    if (pd.count >= drugData.medicineCount){
-                        pd.count = 0
-                        pd2.count -= drugData.weakCount
-
-                        //countがゼロになったら
-                        if (pd2.count <=0){
-                            pd2.level -= 1
-                            pd2.count +=  drug2.nextLevelCount!![pd.level]
-                        }
-                    }
-
-                    /////////
-                    //禁断症状
-                    if (pd2.isDependence&&drugData.stopTask){
-                        Bukkit.getScheduler().cancelTask(pd2.taskId)
-                        pd.times = 0
-                        pd2.isDependence = false
-
-                        //levelがぜろになったらタスクを走らせない
-                        if (pd2.level > 0){
-                            pd2.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin,SymptomsTask(player,drug2,pd2,plugin)
-                                    ,drug2.symptomsTime!![pd.level],drug2.symptomsNextTime!![1])
-                            pd2.isDependence = true
-
-                        }
-                    }
-
-                    db.playerMap[key2] = pd2
-
-                }
-
-                ////////////////////////
-                // type 2 only
-                ///////////////////////
-                if (drugData.type == 2){
-                    val key2 = player.name+drugData.weakDrug
-                    val pd2 = db.get(key2)
-
-                    if(pd2.level == 0){
-                        player.sendMessage("§aあれ？.....解毒薬を飲む必要ってあるのかな...")
-                        return
-                    }
-
-                    pd2.count = 0
-                    pd2.level = 0
-                    if(pd2.isDependence){
-                        pd2.isDependence =false
-                        Bukkit.getScheduler().cancelTask(pd2.taskId)
-                    }
-
-                    db.playerMap[key2] = pd2
-                }
-
-                //remove 1 item
-                item.amount = item.amount - 1
-                player.inventory.itemInMainHand = item
-
-                //count increment
-                pd.count ++
-
-                ////////////////
-                //アイテムを変える
-                ////////////////
-                if (drugData.isChange){ player.inventory.addItem(plugin.drugItemStack[drugData.changeItem]) }
-
-                db.addLog(player,drug)
-
-                //player data save memory
-                db.playerMap[key] = pd
-
-                ////////////////////////
-                // Func
-                ///////////////////////
-                if(drugData.func!=null){
-                    for(funcname in drugData.func!!){
-                        plugin.mdpfunc.runFunc(player,funcname)
-                    }
-                }
                 ////////////////////////
                 // FuncDelay
                 ///////////////////////
-                if(drugData.funcDelay!=null){
-                    for(funcname in drugData.funcDelay!!){
+                if (drugData.funcDelayLvUp != null) {
+                    for (funcname in drugData.funcDelayLvUp!!) {
                         val times = funcname.split(";")
-                        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
-                            plugin.mdpfunc.runFunc(player,times[0])
-                        },times[1].toLong())
+                        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
+                            plugin.mdpfunc.runFunc(player, times[0])
+                        }, times[1].toLong())
                     }
                 }
                 ////////////////////////
                 // FuncRandom
                 ///////////////////////
-                if(drugData.funcRandom!=null&&drugData.funcRandom!!.size>0){
+                if (drugData.funcRandomLvUp != null && drugData.funcRandomLvUp!!.size > 0) {
                     val rnd = SecureRandom()
-                    val r = rnd.nextInt(drugData.funcRandom!!.size)
-                    val s = drugData.funcRandom!![r]
-                    plugin.mdpfunc.runFunc(player,s)
+                    val r = rnd.nextInt(drugData.funcRandomLvUp!!.size)
+                    val s = drugData.funcRandomLvUp!![r]
+                    plugin.mdpfunc.runFunc(player, s)
                 }
                 ////////////////////////
                 // FuncRandomDelay
                 ///////////////////////
-                if(drugData.funcRandomDelay!=null&&drugData.funcRandomDelay!!.size>0){
+                if (drugData.funcRandomDelayLvUp != null && drugData.funcRandomDelayLvUp!!.size > 0) {
                     val rnd = SecureRandom()
-                    val r = rnd.nextInt(drugData.funcRandomDelay!!.size)
-                    val funcname = drugData.funcRandomDelay!![r]
+                    val r = rnd.nextInt(drugData.funcRandomDelayLvUp!!.size)
+                    val funcname = drugData.funcRandomDelayLvUp!![r]
                     val times = funcname.split(";")
-                    Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,{
-                        plugin.mdpfunc.runFunc(player,times[0])
-                    },times[1].toLong())
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
+                        plugin.mdpfunc.runFunc(player, times[0])
+                    }, times[1].toLong())
+                }
+
+                //count reset レベルアップ
+                pd.count = 0
+                pd.level++
+            }
+
+            ////////
+            //依存部分
+            if (drugData.isDependence) {
+
+                //一時タスク終了
+                if (pd.isDependence) {
+                    Bukkit.getScheduler().cancelTask(pd.taskId)
+                    pd.times = 0
+                }
+                pd.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, SymptomsTask(player, drugData, pd, plugin)
+                        , drugData.symptomsTime!![pd.level], drugData.symptomsNextTime!![1])
+
+                pd.isDependence = true
+            }
+        }
+
+        ////////////////////////
+        // type 1 only
+        ///////////////////////
+        if (drugData.type == 1) {
+
+            val key2 = player.name + drugData.weakDrug
+            val pd2 = db.get(key2)
+            val drug2 = config.get(drug)
+
+            if (pd2.level == 0) {
+                player.sendMessage("§aあれ？.....解毒薬を飲む必要ってあるのかな...")
+                return
+            }
+
+            if (pd.count >= drugData.medicineCount) {
+                pd.count = 0
+                pd2.count -= drugData.weakCount
+
+                //countがゼロになったら
+                if (pd2.count <= 0) {
+                    pd2.level -= 1
+                    pd2.count += drug2.nextLevelCount!![pd.level]
                 }
             }
-        }.runTask(plugin)
 
+            /////////
+            //禁断症状
+            if (pd2.isDependence && drugData.stopTask) {
+                Bukkit.getScheduler().cancelTask(pd2.taskId)
+                pd.times = 0
+                pd2.isDependence = false
 
+                //levelがぜろになったらタスクを走らせない
+                if (pd2.level > 0) {
+                    pd2.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, SymptomsTask(player, drug2, pd2, plugin)
+                            , drug2.symptomsTime!![pd.level], drug2.symptomsNextTime!![1])
+                    pd2.isDependence = true
 
+                }
+            }
+
+            db.playerMap[key2] = pd2
+
+        }
+
+        ////////////////////////
+        // type 2 only
+        ///////////////////////
+        if (drugData.type == 2) {
+            val key2 = player.name + drugData.weakDrug
+            val pd2 = db.get(key2)
+
+            if (pd2.level == 0) {
+                player.sendMessage("§aあれ？.....解毒薬を飲む必要ってあるのかな...")
+                return
+            }
+
+            pd2.count = 0
+            pd2.level = 0
+            if (pd2.isDependence) {
+                pd2.isDependence = false
+                Bukkit.getScheduler().cancelTask(pd2.taskId)
+            }
+
+            db.playerMap[key2] = pd2
+        }
+
+        //remove 1 item
+        item.amount = item.amount - 1
+        player.inventory.itemInMainHand = item
+
+        //count increment
+        pd.count++
+
+        ////////////////
+        //アイテムを変える
+        ////////////////
+        if (drugData.isChange) {
+            player.inventory.addItem(plugin.drugItemStack[drugData.changeItem])
+        }
+
+        db.addLog(player, drug)
+
+        //player data save memory
+        db.playerMap[key] = pd
+
+        ////////////////////////
+        // Func
+        ///////////////////////
+        if (drugData.func != null) {
+            for (funcname in drugData.func!!) {
+                plugin.mdpfunc.runFunc(player, funcname)
+            }
+        }
+        ////////////////////////
+        // FuncDelay
+        ///////////////////////
+        if (drugData.funcDelay != null) {
+            for (funcname in drugData.funcDelay!!) {
+                val times = funcname.split(";")
+                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
+                    plugin.mdpfunc.runFunc(player, times[0])
+                }, times[1].toLong())
+            }
+        }
+        ////////////////////////
+        // FuncRandom
+        ///////////////////////
+        if (drugData.funcRandom != null && drugData.funcRandom!!.size > 0) {
+            val rnd = SecureRandom()
+            val r = rnd.nextInt(drugData.funcRandom!!.size)
+            val s = drugData.funcRandom!![r]
+            plugin.mdpfunc.runFunc(player, s)
+        }
+        ////////////////////////
+        // FuncRandomDelay
+        ///////////////////////
+        if (drugData.funcRandomDelay != null && drugData.funcRandomDelay!!.size > 0) {
+            val rnd = SecureRandom()
+            val r = rnd.nextInt(drugData.funcRandomDelay!!.size)
+            val funcname = drugData.funcRandomDelay!![r]
+            val times = funcname.split(";")
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
+                plugin.mdpfunc.runFunc(player, times[0])
+            }, times[1].toLong())
+        }
 
     }
 

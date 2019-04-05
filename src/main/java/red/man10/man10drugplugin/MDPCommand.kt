@@ -39,8 +39,8 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
                 for (i in 0 until plugin.drugName.size){
                     player.sendMessage(
                             "$chatMessage§e${plugin.drugName[i]}" +
-                            ",${db.playerMap[player.name+plugin.drugName[i]]!!.count}" +
-                            ",${db.playerMap[player.name+plugin.drugName[i]]!!.level}"
+                            ",${db.playerMap[args[1]+plugin.drugName[i]]!!.count}" +
+                            ",${db.playerMap[args[1]+player.name+plugin.drugName[i]]!!.level}"
                     )
                 }
             }catch (e:Exception){
