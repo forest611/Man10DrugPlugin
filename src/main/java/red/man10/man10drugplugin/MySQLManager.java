@@ -65,6 +65,19 @@ public class MySQLManager {
                 "text text," +
                 "bool text," +
                 "value int);");
+
+        //drug box
+        execute("CREATE TABLE if not exists box " +
+                "(id int,"  +
+                "one text,"     +
+                "two text,"     +
+                "three text,"   +
+                "four text,"    +
+                "five text,"    +
+                "six text,"     +
+                "seven text,"   +
+                "eight text,"   +
+                "nine text);");
     }
 
     /////////////////////////////////

@@ -138,9 +138,9 @@ class Man10DrugPlugin : JavaPlugin() {
         //drug load
         load()
 
-        db = MDPDataBase(this,mysql,mdpConfig)
+        db = MDPDataBase(this,mdpConfig)
 
-        event = MDPEvent(this,mysql,db,mdpConfig)
+        event = MDPEvent(this,db,mdpConfig)
         Bukkit.getServer().pluginManager.registerEvents(event,this)
         getCommand("mdp").executor = MDPCommand(this,db)
 

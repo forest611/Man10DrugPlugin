@@ -99,14 +99,9 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
 
         if (cmd == "list"){
             player.sendMessage("${chatMessage}§e読み込まれているドラッグ一覧")
-
-            object : BukkitRunnable() {
-                override fun run() {
-                    for (i in 0 until plugin.drugName.size){
-                        player.sendMessage("${chatMessage}§e${plugin.drugName[i]}")
-                    }
+            for (d in plugin.drugName){
+                player.sendMessage("${chatMessage}§e$d")
                 }
-            }.run()
         }
 
         if (cmd == "log"){

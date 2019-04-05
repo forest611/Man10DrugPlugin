@@ -8,7 +8,9 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
+import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.*
+import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
@@ -16,7 +18,7 @@ import org.bukkit.scheduler.BukkitRunnable
 import java.security.SecureRandom
 import java.util.*
 
-class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDataBase,val config:MDPConfig) : Listener {
+class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPConfig) : Listener {
 
     public var cooldownMap : MutableList<String> = ArrayList()
 
@@ -59,27 +61,9 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
 
             event.isCancelled = true
 
-            useDrug(event.player,item,event)
+            useDrug(event.player,item,event,drug)
         }
     }
-
-//    @EventHandler
-//    fun foodEvent(event: PlayerItemConsumeEvent){
-//
-//        //can milk
-//        if (event.item.type == Material.MILK_BUCKET&&!plugin.canMilk){
-//            event.isCancelled = true
-//            return
-//        }
-//        val i = event.player.inventory.itemInMainHand ?: return
-//
-//        if (i.itemMeta == null)return
-//        if (i.itemMeta.lore == null)
-//        if (i.itemMeta.lore.isEmpty())return
-//
-//        useDrug(event.player,event.item)
-//
-//    }
 
     //チャット破壊イベント
     @EventHandler
@@ -156,17 +140,11 @@ class MDPEvent(val plugin: Man10DrugPlugin, val mysql :MySQLManager,val db:MDPDa
     ///ドラッグ使用時
     ///pd = ドラッグを使用したプレイヤーのデータ
     ///drugData = プレイヤーが使用したドラッグのデータ
-    fun useDrug(player: Player,item: ItemStack,event:PlayerInteractEvent){
+    fun useDrug(player: Player,item: ItemStack,event:PlayerInteractEvent,drug:String){
 
         object : BukkitRunnable() {
             override fun run() {
 
-                val drug = item.itemMeta.lore[item.itemMeta.lore.size -1].replace("§","")
-
-                //チェック
-                if(plugin.drugName.indexOf(drug) == -1){
-                    return
-                }
 
                 if(cooldownMap.contains(player.uniqueId.toString()+" "+drug)){
                     return

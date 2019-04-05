@@ -1,16 +1,18 @@
 package red.man10.man10drugplugin
 
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.scheduler.BukkitRunnable
+import org.bukkit.inventory.ItemStack
 import java.sql.ResultSet
 import java.text.SimpleDateFormat
 import java.util.*
 
-class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:MDPConfig){
+class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
 
     var playerMap = HashMap<String,playerData>()
     var canConnect = true
+    val mysql = MySQLManager(plugin,"man10drugPlugin")
 
     ////////////////////////
     //DBのデータを読み込む
@@ -199,6 +201,13 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
     //stockを保存
     fun saveStock(){
         for (drug in plugin.drugName){
+
+            val d= config.get(drug)
+
+            if (!d.stockMode){
+                continue
+            }
+
             val data = config.get(drug)
             val sql = "UPDATE data " +
                     "SET value='${data.stock}' " +
@@ -211,9 +220,16 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val mysql:MySQLManager,val config:
     //stock読み込み
     fun loadStock(){
         for (drug in plugin.drugName){
+
+            val d= config.get(drug)
+
+            if (!d.stockMode){
+                continue
+            }
+
             var sql = "SELECT " +
                     "value " +
-                    "FROM data" +
+                    "FROM data " +
                     "WHERE drug='$drug';"
             var rs = mysql.query(sql)
             if (!rs.next()){
