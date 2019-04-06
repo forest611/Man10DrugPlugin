@@ -664,7 +664,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
         val loc = centerPlayer.location
         val world = centerPlayer.world
         for(player in Bukkit.getOnlinePlayers()){
-            if (player.location.distanceSquared(loc) < ds&&player.world == world){
+            if (player.world == world && player.location.distanceSquared(loc) < ds){
                 players.add(player)
             }
         }
