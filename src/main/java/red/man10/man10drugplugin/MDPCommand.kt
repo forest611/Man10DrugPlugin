@@ -54,7 +54,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
 
             if (plugin.drugItemStack[args[1]] == null){
                 player.sendMessage("$chatMessage§4${args[1]}§aという名前の薬は見つかりませんでした。")
-                player.sendMessage("$chatMessage§a設定ファイルの名前を入力してください(拡張子を含まない)")
+                player.sendMessage("$chatMessage§adrugNameはDataNameに書いた値を入力してください")
                 return true
             }
 
@@ -178,7 +178,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
     fun helpChat(player: Player) {
 
         player.sendMessage("$chatMessage§e§lMan10DrugPlugin HELP")
-        player.sendMessage("$chatMessage§e/mdp get [drugName] 薬を手に入れる drugNameは設定ファイルの名前を入力してください(拡張子を含まない)")
+        player.sendMessage("$chatMessage§e/mdp get [drugName] 薬を手に入れる drugNameはDataNameに書いた値を入力してください")
         player.sendMessage("$chatMessage§e/mdp reload 薬の設定ファイルを再読込みします")
         player.sendMessage("$chatMessage§e/mdp show [player名] 薬の使用情報を見ることができます")
         player.sendMessage("$chatMessage§e/mdp list 読み込まれている薬の名前を表示します")

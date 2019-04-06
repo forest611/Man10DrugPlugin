@@ -1,9 +1,6 @@
 package red.man10.man10drugplugin
 
-import org.bukkit.Bukkit
-import org.bukkit.Material
-import org.bukkit.Particle
-import org.bukkit.Sound
+import org.bukkit.*
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -435,10 +432,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
         ///////////////////////
         if (drugData.nearPlayer != null && plugin.size(drugData.nearPlayer!!, pd)) {
             val data = drugData.nearPlayer!![pd.level].split(";")
-            val list = plugin.getNearByPlayers(player.location, data[0].toInt())
-
-            list.remove(player)
-
+            val list = getNearByPlayers(player, data[0].toInt())
             for (p in list) {
                 plugin.mdpfunc.runFunc(p, data[1])
             }
@@ -660,5 +654,23 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
         }
 
     }
+
+
+    ///////////////////////////
+    //周囲のプレイヤーを検知
+    private fun getNearByPlayers(centerPlayer:Player, distance:Int):ArrayList<Player>{
+        val ds = distance*distance
+        val players = ArrayList<Player>()
+        val loc = centerPlayer.location
+        val world = centerPlayer.world
+        for(player in Bukkit.getOnlinePlayers()){
+            if (player.location.distanceSquared(loc) < ds&&player.world == world){
+                players.add(player)
+            }
+        }
+        players.remove(centerPlayer)
+        return players
+    }
+
 
 }

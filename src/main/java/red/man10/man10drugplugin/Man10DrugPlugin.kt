@@ -170,8 +170,6 @@ class Man10DrugPlugin : JavaPlugin() {
         db.saveStock()
     }
 
-
-
     ///////////////////////////////
     //複数のクラスで使うメソッド
     fun size(list:MutableList<String>,pd:playerData):Boolean{
@@ -186,17 +184,4 @@ class Man10DrugPlugin : JavaPlugin() {
                 .replace("<count>",pd.count.toString()).replace("<times>",pd.times.toString())
                 .replace("<stock>",d.stock.toString())
     }
-
-    fun getNearByPlayers(loc: Location,distance:Int):ArrayList<Player>{
-        val ds = distance*distance
-        val players = ArrayList<Player>()
-        for(player in Bukkit.getOnlinePlayers()){
-            if (player.location.distanceSquared(loc) < ds){
-                players.add(player)
-            }
-        }
-        return players
-    }
-
-
 }
