@@ -36,11 +36,11 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
 
             try {
                 player.sendMessage("$chatMessage§e${args[1]}の使用情報(カウント、レベル)")
-                for (i in 0 until plugin.drugName.size){
+                for (drug in plugin.drugName){
                     player.sendMessage(
-                            "$chatMessage§e${plugin.drugName[i]}" +
-                            ",${db.playerMap[args[1]+plugin.drugName[i]]!!.count}" +
-                            ",${db.playerMap[args[1]+player.name+plugin.drugName[i]]!!.level}"
+                            "$chatMessage§e$drug" +
+                            ",${db.playerMap[args[1]+drug]!!.count}" +
+                            ",${db.playerMap[args[1]+drug]!!.level}"
                     )
                 }
             }catch (e:Exception){
