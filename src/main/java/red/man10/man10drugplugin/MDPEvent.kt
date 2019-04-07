@@ -444,12 +444,14 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
         if (drugData.type == 0) {
 
             //レベルアップ
+            //dependenceLevelを5にした場合、level5まで上がる
+            //0も含めるので、6段階となる
             if (pd.level < drugData.dependenceLevel && pd.count >= drugData.nextLevelCount!![pd.level]) {
 
                 ////////////////////////
                 //command
                 ///////////////////////
-                if (drugData.command[pd.level] != null) {
+                if (drugData.commandLvUp[pd.level] != null) {
 
                     for (c in drugData.commandLvUp[pd.level]!!) {
                         val cmd = plugin.repStr(c, player, pd, drugData)
