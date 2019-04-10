@@ -12,12 +12,13 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
 
     var playerMap = HashMap<String,playerData>()
     var canConnect = true
-    val mysql = MySQLManager(plugin,"man10drugPlugin")
 
     ////////////////////////
     //DBのデータを読み込む
     ////////////////////////
     fun loadDataBase(player: Player){
+
+        val mysql = MySQLManager(plugin,"man10drugPlugin")
 
         if (!canConnect){
             Bukkit.getLogger().info("MySQLに接続できません")
@@ -74,29 +75,35 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
 
                 playerMap[key] = data
 
+
             }catch (e:Exception){
                 Bukkit.getLogger().info(e.message)
                 Bukkit.getLogger().info("/mdp reload もしくは再起動してください")
                 canConnect = false
                 Bukkit.getScheduler().cancelTasks(plugin)
-                return
             }
-        }
 
+        }
         Bukkit.getLogger().info(player.name+"...Loaded DB")
+
+        mysql.close()
+
     }
 
     /////////////////////////////
     //データをDBに保存
     //////////////////////////
     fun saveDataBase(player: Player,remove:Boolean){
+
+        val mysql = MySQLManager(plugin,"man10drugPlugin")
+
         if (!canConnect){
             Bukkit.getLogger().info("MySQLに接続できません")
             Bukkit.getLogger().info("/mdp reloadしてください")
             return
         }
 
-
+        canConnect = true
 
         for (i in 0 until plugin.drugName.size){
 
@@ -124,32 +131,34 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
             }
         }
         Bukkit.getLogger().info("${player.name}...save DB")
-        saveLog(player)
+        saveLog(player,mysql)
         Bukkit.getLogger().info("${player.name}...save Logs")
 
+        mysql.close()
 
     }
 
     /////////////////////////
     //DBにログを保存
-    fun saveLog(player: Player){
+    fun saveLog(player: Player,mysql: MySQLManager){
 
         val log = plugin.playerLog[player] ?: return
 
         for (i in 0 until log.size){
             val logs = log[i].split(",")
 
-            mysql.execute("INSERT INTO log " +
+            mysql.execute(
+                    "INSERT INTO log " +
                     "VALUES('${player.uniqueId}', " +
                     "'${player.name}', " +
                     "'${logs[0]}'," +
-                    "'${logs[1]}');")
+                    "'${logs[1]}');"
+            )
         }
         plugin.playerLog.remove(player)
 
     }
 
-    //hashmapを取得
     fun get(key:String):playerData{
         var data = playerMap[key]
         if (data == null){
@@ -200,6 +209,9 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
     ////////////////
     //stockを保存
     fun saveStock(){
+
+        val mysql = MySQLManager(plugin,"man10drugPlugin")
+
         for (drug in plugin.drugName){
 
             val d= config.get(drug)
@@ -214,11 +226,16 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
                     "WHERE drug='$drug';"
             mysql.execute(sql)
         }
+
+        mysql.close()
     }
 
     ////////////////
     //stock読み込み
     fun loadStock(){
+
+        val mysql = MySQLManager(plugin,"man10drugPlugin")
+
         for (drug in plugin.drugName){
 
             val d= config.get(drug)
@@ -246,6 +263,8 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
             data.stock = rs.getInt("VALUE")
             config.drugData[drug] = data
         }
+
+        mysql.close()
     }
 
 }

@@ -5,7 +5,6 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import org.bukkit.scheduler.BukkitRunnable
 
 
 class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecutor {
@@ -14,37 +13,63 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
     val permissionError = "§4§lYou don't have permission."
     val permission = "man10drug.cmd"
     val chatMessage = "§5[Man10DrugPlugin]"
+    val config = MDPConfig(plugin)
 
 
     override fun onCommand(sender: CommandSender?, command: Command?, label: String?, args: Array<out String>?): Boolean {
 
-        if (!sender!!.hasPermission(permission)){
+        if (sender !is Player) {
+
+            if (args == null || args.isEmpty()){
+                return true
+            }
+
+            val cmd = args[0]
+
+            //使用状態をコマンドで
+            if (cmd == "using" && args.size  == 3){
+
+                val e = MDPEvent(plugin,db,config)
+                try{
+                    e.useDrug(Bukkit.getPlayer(args[1]), plugin.drugItemStack[args[2]]!!,args[2])
+
+                }catch (e:Exception){
+                    Bukkit.getLogger().info("error:${e.message}")
+                }
+            }
+
+
+            return true
+        }
+
+        if (!sender.hasPermission(permission)){
             sender.sendMessage(permissionError)
             return true
         }
 
-        val player = sender as Player
-
-        //help
-        if (args == null|| args.isEmpty()){
-            helpChat(player)
+        if (args != null&& args.isEmpty()){
+            helpChat(sender)
             return true
         }
-        val cmd = args[0]
+
+        val cmd = args!![0]
+
+        //help
 
         if (cmd == "show" && args.size == 2){
 
             try {
-                player.sendMessage("$chatMessage§e${args[1]}の使用情報(カウント、レベル)")
+                sender.sendMessage("$chatMessage§e${args[1]}の使用情報(カウント、レベル)")
                 for (drug in plugin.drugName){
-                    player.sendMessage(
+                    sender.sendMessage(
                             "$chatMessage§e$drug" +
                             ",${db.playerMap[args[1]+drug]!!.count}" +
                             ",${db.playerMap[args[1]+drug]!!.level}"
                     )
                 }
             }catch (e:Exception){
-                player.sendMessage(chatMessage+"§e${args[1]}の使用情報を取得できませんでした")
+                sender.sendMessage(chatMessage+"§e${args[1]}の使用情報を取得できませんでした")
+                sender.sendMessage(chatMessage+"§e${e.message}")
             }
             return true
 
@@ -53,17 +78,19 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
         if (cmd == "get" && args.size == 2){
 
             if (plugin.drugItemStack[args[1]] == null){
-                player.sendMessage("$chatMessage§4${args[1]}§aという名前の薬は見つかりませんでした。")
-                player.sendMessage("$chatMessage§adrugNameはDataNameに書いた値を入力してください")
+                sender.sendMessage("$chatMessage§4${args[1]}§aという名前の薬は見つかりませんでした。")
+                sender.sendMessage("$chatMessage§adrugNameはDataNameに書いた値を入力してください")
                 return true
             }
 
-            player.inventory.addItem(plugin.drugItemStack[args[1]])
+            sender.inventory.addItem(plugin.drugItemStack[args[1]])
             return true
 
         }
 
         if (cmd == "reload"){
+
+            Bukkit.broadcastMessage("${chatMessage}§eドラッグプラグインのリロードを始めます")
 
             Bukkit.getScheduler().cancelTasks(plugin)
 
@@ -73,68 +100,62 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
                 }
 
                 db.saveStock()
-                player.sendMessage("$chatMessage§eドラッグの情報を保存しました")
+                sender.sendMessage("$chatMessage§eドラッグの情報を保存しました")
                 db.loadStock()
 
-                player.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを保存しました")
+                sender.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを保存しました")
 
                 plugin.load()
-                player.sendMessage("$chatMessage§eドラッグのデータを読み込みました")
+                sender.sendMessage("$chatMessage§eドラッグのデータを読み込みました")
 
                 for (p in Bukkit.getServer().onlinePlayers){
                     db.loadDataBase(p)
                 }
-                player.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを読み込みました")
+                sender.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを読み込みました")
 
                 plugin.mdpfunc.reloadAllFile()
-                player.sendMessage("$chatMessage§e全関数を再読み込みしました")
+                sender.sendMessage("$chatMessage§e全関数を再読み込みしました")
                 plugin.event!!.clearCooldown()
-                player.sendMessage("$chatMessage§e全クールダウンをリセットしました")
+                sender.sendMessage("$chatMessage§e全クールダウンをリセットしました")
+
+                Bukkit.broadcastMessage("${chatMessage}§eドラッグプラグインのリロード完了 みんな使いまくってね！")
 
             }).start()
 
+
         }
 
-
         if (cmd == "list"){
-            player.sendMessage("${chatMessage}§e読み込まれているドラッグ一覧")
+            sender.sendMessage("${chatMessage}§e読み込まれているドラッグ一覧")
             for (d in plugin.drugName){
-                player.sendMessage("${chatMessage}§e$d")
-                }
+                sender.sendMessage("${chatMessage}§e$d")
+            }
         }
 
         if (cmd == "log"){
             if (args.size == 1)return false
 
-            if (args[1] == "save"){
-                for (p in Bukkit.getServer().onlinePlayers){
-                    db.saveLog(p)
-                }
-                player.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグ使用ログを保存しました")
-                return true
-            }
-
             if (args.size != 3){
-                player.sendMessage("$chatMessage§e/mdp log player名 回数 で入力してください")
+                sender.sendMessage("$chatMessage§e/mdp log player名 回数 で入力してください")
                 return true
             }
 
             val data = plugin.playerLog[Bukkit.getPlayer(args[1])]
 
             if (data == null){
-                player.sendMessage("$chatMessage§e指定したプレイヤーはオフラインの可能性があります")
+                sender.sendMessage("$chatMessage§e指定したプレイヤーはオフラインの可能性があります")
                 return false
             }
 
             if (args[2].toInt() > data.size){
-                player.sendMessage("$chatMessage§e指定回数以上ドラッグを使用していません")
+                sender.sendMessage("$chatMessage§e指定回数以上ドラッグを使用していません")
                 return  true
             }
 
 
-            player.sendMessage("$chatMessage§e${args[1]}の直近${args[2]}回のドラッグ使用ログ")
+            sender.sendMessage("$chatMessage§e${args[1]}の直近${args[2]}回のドラッグ使用ログ")
             for(i in data.size - args[2].toInt() until data.size ){
-                player.sendMessage("$chatMessage§e${data[i]}")
+                sender.sendMessage("$chatMessage§e${data[i]}")
             }
 
 
@@ -142,19 +163,20 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
 
         if(cmd == "cancel"){
             Bukkit.getScheduler().cancelTasks(plugin)
-            player.sendMessage("$chatMessage§eオンラインプレイヤーのタスクを止めました")
+            sender.sendMessage("$chatMessage§eオンラインプレイヤーのタスクを止めました")
             return true
         }
 
         if (cmd =="on"){
             plugin.stop = false
-            player.sendMessage("$chatMessage§eプラグインをスタートしました")
+            sender.sendMessage("$chatMessage§eプラグインをスタートしました")
             return true
         }
 
         if (cmd == "off"){
             plugin.stop = true
-            player.sendMessage("$chatMessage§eプラグインをストップしました")
+            sender.sendMessage("$chatMessage§eプラグインをストップしました")
+            Bukkit.getScheduler().cancelTasks(plugin)
             return true
         }
 
@@ -167,9 +189,22 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
             pd.times = 0
             pd.taskId = 0
             pd.isDependence = false
+            Bukkit.getScheduler().cancelTask(pd.taskId)
 
-            player.sendMessage("削除しました")
+            db.playerMap[args[0]+args[1]] = pd
 
+            sender.sendMessage("$chatMessage§e§l${args[1]}§rの§l${args[2]}のドラッグデータを削除しました")
+
+            return true
+        }
+
+        if (cmd == "usedTimes" &&args.size == 2){
+            try{
+                sender.sendMessage("$chatMessage§eサーバー起動後の${args[1]}の使用回数:${config.get(args[1]).used}")
+
+            }catch (e:Exception){
+                sender.sendMessage("$chatMessage§eerror:${e.message}")
+            }
         }
 
         return true
@@ -182,14 +217,20 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
         player.sendMessage("$chatMessage§e/mdp reload 薬の設定ファイルを再読込みします")
         player.sendMessage("$chatMessage§e/mdp show [player名] 薬の使用情報を見ることができます")
         player.sendMessage("$chatMessage§e/mdp list 読み込まれている薬の名前を表示します")
-        player.sendMessage("$chatMessage§e/mdp log [player名] [回数]プレイヤーの使用ログを見ることができます \n" +
-                "プレイヤー名を[save]にすると、オンラインプレイヤーのログをDBに保存することができます")
-        player.sendMessage("$chatMessage§e/mdp cancel オンラインプレイヤーのタスクを止めます（デバッグ用)")
+        player.sendMessage("$chatMessage§e/mdp log [player名] [回数]プレイヤーの使用ログを見ることができます")
+        player.sendMessage("$chatMessage§e/mdp cancel オンラインプレイヤーのタスクを止めます（デバッグ、修正用)")
         player.sendMessage("$chatMessage§e/mdp on/off プラグインの on off を切り替えます")
         player.sendMessage("$chatMessage§e/mdp clear [player] [drug] 指定プレイヤー、ドラッグの依存データをリセットします")
+        player.sendMessage("$chatMessage§e/mdp using [player] [drug] ドラッグを消費せずにドラッグの使用状態を再現します(console用)")
+        player.sendMessage("$chatMessage§e/mdp usedTimes [drug] サーバー起動後に何回ドラッグを使用されたか確認できます")
         when(plugin.stop){
             false -> player.sendMessage("$chatMessage§e§l現在プラグインは可動しています")
             true -> player.sendMessage("$chatMessage§e§l現在プラグインはストップしています")
+
+        }
+        when(db.canConnect){
+            false -> player.sendMessage("$chatMessage§e§lMySQLの接続ができてません")
+            true -> player.sendMessage("$chatMessage§e§lMySQLに接続できています")
 
         }
 

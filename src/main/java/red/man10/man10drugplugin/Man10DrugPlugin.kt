@@ -20,9 +20,7 @@ class Man10DrugPlugin : JavaPlugin() {
     var drugItemStack = HashMap<String,ItemStack>()//key drugName
     var playerLog = HashMap<Player,MutableList<String>>()//log
 
-    lateinit var mysql : MySQLManager
     lateinit var db : MDPDataBase
-
 
     private val mdpConfig = MDPConfig(this)
     var event: MDPEvent? = null
@@ -130,8 +128,6 @@ class Man10DrugPlugin : JavaPlugin() {
 
         config.set("CanUseMilk",canMilk)
         config.set("Stop",stop)
-
-        mysql = MySQLManager(this,"man10DrugPlugin")
 
         saveConfig()
 

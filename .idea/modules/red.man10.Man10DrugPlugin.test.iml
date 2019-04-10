@@ -13,6 +13,7 @@
           <option name="pluginClasspaths">
             <array />
           </option>
+          <option name="coroutinesState" value="warn" />
         </compilerArguments>
       </configuration>
     </facet>
@@ -25,7 +26,7 @@
     </facet>
   </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
-    <output-test url="file://$MODULE_DIR$/../../out/test/classes" />
+    <output-test url="file://$MODULE_DIR$/../../build/classes/java/test" />
     <exclude-output />
     <content url="file://$MODULE_DIR$/../../src/test">
       <sourceFolder url="file://$MODULE_DIR$/../../src/test/java" isTestSource="true" />
@@ -33,6 +34,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="red.man10.Man10DrugPlugin.main" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>
@@ -56,5 +58,5 @@
     <orderEntry type="library" name="Gradle: javax.persistence:persistence-api:1.0" level="project" />
     <orderEntry type="library" name="Gradle: org.hamcrest:hamcrest-core:1.1" level="project" />
   </component>
-  <component name="TestModuleProperties" production-module="red.man10.Man10DrugPlugin.main" />
+  <component name="TestModuleProperties" production-module="Man10DrugPlugin.main" />
 </module>

@@ -75,6 +75,8 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
         data.stock = config.getInt("FirstStock")
         data.stockMode = config.getBoolean("IsStock")
 
+        data.removeBuffs = config.getBoolean("RemoveBuffs")
+
         //type 0 only
         if (data.type == 0){
             data.isDependence = config.getBoolean("IsDependence") //禁断症状が出るか
@@ -214,6 +216,8 @@ class Data{
     var stockMode = false
     var addStock = 0
 
+    var removeBuffs = false
+
     //type0
     var isDependence = false
     var dependenceLevel = 0  //依存レベル
@@ -261,5 +265,6 @@ class Data{
 
     //mutable
     var stock = 0
+    var used = 0
 
 }

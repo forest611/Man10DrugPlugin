@@ -15,6 +15,9 @@ import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scheduler.BukkitTask
 import java.security.SecureRandom
 import java.util.*
+import sun.audio.AudioPlayer.player
+
+
 
 class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPConfig) : Listener {
 
@@ -58,7 +61,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
 
             event.isCancelled = true
 
-            useDrug(event.player,item,event,drug)
+            useDrug(event.player,item,drug)
         }
     }
 
@@ -137,7 +140,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
     ///ドラッグ使用時
     ///pd = ドラッグを使用したプレイヤーのデータ
     ///drugData = プレイヤーが使用したドラッグのデータ
-    fun useDrug(player: Player,item: ItemStack,event:PlayerInteractEvent,drug:String) {
+    fun useDrug(player: Player,item: ItemStack,drug:String) {
 
 
 
@@ -146,7 +149,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
         }
 
         if (plugin.stop || !db.canConnect) {
-            event.player.sendMessage("§e今は使う気分ではないようだ")
+            player.sendMessage("§e今は使う気分ではないようだ")
             return
         }
 ////////////////////////////////////////////////////////////
@@ -157,7 +160,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
 
         ////////////////////////////////
         //時間のかかる処理をスレッド化
-        Bukkit.getScheduler().runTaskAsynchronously(plugin) {
+        Bukkit.getScheduler().runTask(plugin) {
             ////////////////////////
             //message
             ///////////////////////
@@ -240,9 +243,9 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
                 drugData.stock += drugData.addStock
             }
 
-
         }
 
+        //////////
 
         ////////////////////////
         //cooldown
@@ -255,6 +258,15 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
             cooldownMap.remove(player.uniqueId.toString() + " " + drug)
 
         }, drugData.cooldown)
+
+
+        /////////////////////////
+        //remove buff
+        if (drugData.removeBuffs){
+            for (effect in player.activePotionEffects){
+                player.removePotionEffect(effect.type)
+            }
+        }
 
 
         ////////////////////////
@@ -435,6 +447,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
             val list = getNearByPlayers(player, data[0].toInt())
             for (p in list) {
                 plugin.mdpfunc.runFunc(p, data[1])
+                Bukkit.getLogger().info(p.name + "func")
             }
         }
 
@@ -472,8 +485,14 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
 
                 }
-
-
+                ////////////////////////
+                // Func
+                ///////////////////////
+                if (drugData.func != null) {
+                    for (funcname in drugData.func!!) {
+                        plugin.mdpfunc.runFunc(player, funcname)
+                    }
+                }
                 ////////////////////////
                 // FuncDelay
                 ///////////////////////
@@ -601,6 +620,8 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
 
         //count increment
         pd.count++
+
+        drugData.used ++
 
         ////////////////
         //アイテムを変える
