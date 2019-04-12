@@ -12,6 +12,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
 
     val permissionError = "§4§lYou don't have permission."
     val permission = "man10drug.cmd"
+    val permissionNormal = "man10drug.normal"
     val chatMessage = "§5[Man10DrugPlugin]"
     val config = MDPConfig(plugin)
 
@@ -42,10 +43,6 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
             return true
         }
 
-        if (!sender.hasPermission(permission)){
-            sender.sendMessage(permissionError)
-            return true
-        }
 
         if (args != null&& args.isEmpty()){
             helpChat(sender)
@@ -56,24 +53,49 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
 
         //help
 
-        if (cmd == "show" && args.size == 2){
+        if (cmd == "show"){
 
-            try {
-                sender.sendMessage("$chatMessage§e${args[1]}の使用情報(カウント、レベル)")
+            if (args.size == 1 && sender.hasPermission(permissionNormal)){
+
+                sender.sendMessage("$chatMessage §e現在の依存状況")
+
                 for (drug in plugin.drugName){
                     sender.sendMessage(
                             "$chatMessage§e$drug" +
-                            ",${db.playerMap[args[1]+drug]!!.count}" +
-                            ",${db.playerMap[args[1]+drug]!!.level}"
+                                    ",${db.playerMap[sender.name+drug]!!.count}" +
+                                    ",${db.playerMap[sender.name+drug]!!.level}"
                     )
                 }
-            }catch (e:Exception){
-                sender.sendMessage(chatMessage+"§e${args[1]}の使用情報を取得できませんでした")
-                sender.sendMessage(chatMessage+"§e${e.message}")
+
             }
+
+            if (args.size == 2 && sender.hasPermission(permission)){
+                try {
+                    sender.sendMessage("$chatMessage§e${args[1]}の依存状況(カウント、レベル)")
+                    for (drug in plugin.drugName){
+                        sender.sendMessage(
+                                "$chatMessage§e$drug" +
+                                        ",${db.playerMap[args[1]+drug]!!.count}" +
+                                        ",${db.playerMap[args[1]+drug]!!.level}"
+                        )
+                    }
+                }catch (e:Exception){
+                    sender.sendMessage(chatMessage+"§e${args[1]}の使用情報を取得できませんでした")
+                    sender.sendMessage(chatMessage+"§e${e.message}")
+                }
+
+            }
+
             return true
 
         }
+
+        //op staff以上
+        if (!sender.hasPermission(permission)){
+            sender.sendMessage(permissionError)
+            return true
+        }
+
 
         if (cmd == "get" && args.size == 2){
 
@@ -99,9 +121,9 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
                     db.saveDataBase(p,true)
                 }
 
-                db.saveStock()
+                db.saveStat()
                 sender.sendMessage("$chatMessage§eドラッグの情報を保存しました")
-                db.loadStock()
+                db.loadStat()
 
                 sender.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを保存しました")
 
@@ -207,10 +229,26 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
             }
         }
 
+        if (cmd == "stat" && args.size == 2){
+            sender.sendMessage("$chatMessage§e${args[1]}の利用統計")
+
+            val stat = db.getStat(args[1])
+
+            sender.sendMessage("$chatMessage§e累計使用回数:§l${stat.count}")
+            sender.sendMessage("$chatMessage§e各依存レベルの依存人数")
+            for (i in 0 until stat.level.size){
+                sender.sendMessage("$chatMessage§e§lLv.$i:${stat.level[i]}")
+            }
+        }
+
         return true
     }
 
     fun helpChat(player: Player) {
+
+        player.sendMessage("$chatMessage§e/mdp show 薬の使用情報を見ることができます")
+
+        if (!player.hasPermission(permission))return
 
         player.sendMessage("$chatMessage§e§lMan10DrugPlugin HELP")
         player.sendMessage("$chatMessage§e/mdp get [drugName] 薬を手に入れる drugNameはDataNameに書いた値を入力してください")
@@ -223,6 +261,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
         player.sendMessage("$chatMessage§e/mdp clear [player] [drug] 指定プレイヤー、ドラッグの依存データをリセットします")
         player.sendMessage("$chatMessage§e/mdp using [player] [drug] ドラッグを消費せずにドラッグの使用状態を再現します(console用)")
         player.sendMessage("$chatMessage§e/mdp usedTimes [drug] サーバー起動後に何回ドラッグを使用されたか確認できます")
+        player.sendMessage("$chatMessage§e/mdp stat [drug] 指定ドラッグの利用統計を表示します")
         when(plugin.stop){
             false -> player.sendMessage("$chatMessage§e§l現在プラグインは可動しています")
             true -> player.sendMessage("$chatMessage§e§l現在プラグインはストップしています")

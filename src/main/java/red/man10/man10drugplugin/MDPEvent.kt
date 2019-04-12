@@ -156,6 +156,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
         val key = player.name + drug
 
         val pd = db.get(key)
+        val stat = db.getStat(drug)
         val drugData = config.get(drug)
 
         ////////////////////////////////
@@ -240,7 +241,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
             //数値ストック
             //////////////////////
             if (drugData.stockMode) {
-                drugData.stock += drugData.addStock
+                stat.stock += drugData.addStock
             }
 
         }
@@ -456,6 +457,12 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
         ///////////////////////
         if (drugData.type == 0) {
 
+            if (pd.level == 0 && pd.count == 0){
+                stat.level[0] ++
+            }
+
+            //初回利用(統計用)
+
             //レベルアップ
             //dependenceLevelを5にした場合、level5まで上がる
             //0も含めるので、6段階となる
@@ -526,9 +533,17 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
                     }, times[1].toLong())
                 }
 
+                //decrement before level
+                stat.level[pd.level] --
                 //count reset レベルアップ
                 pd.count = 0
                 pd.level++
+                //stat increment
+                try {
+                    stat.level[pd.level] ++
+                }catch (e:IndexOutOfBoundsException){
+                    stat.level.add(1)
+                }
             }
 
             ////////
@@ -621,7 +636,10 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
         //count increment
         pd.count++
 
-        drugData.used ++
+        //stat increment
+        stat.count ++
+
+        db.drugStat[drug] = stat
 
         ////////////////
         //アイテムを変える

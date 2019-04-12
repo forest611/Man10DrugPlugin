@@ -135,6 +135,7 @@ class Man10DrugPlugin : JavaPlugin() {
         load()
 
         db = MDPDataBase(this,mdpConfig)
+        db.loadStat()
 
         event = MDPEvent(this,db,mdpConfig)
         Bukkit.getServer().pluginManager.registerEvents(event,this)
@@ -163,7 +164,7 @@ class Man10DrugPlugin : JavaPlugin() {
         for (player in Bukkit.getServer().onlinePlayers){
             db.saveDataBase(player,true)
         }
-        db.saveStock()
+        db.saveStat()
     }
 
     ///////////////////////////////
@@ -178,6 +179,6 @@ class Man10DrugPlugin : JavaPlugin() {
     fun repStr(str:String,player: Player,pd:playerData,d:Data):String{
         return str.replace("<player>",player.name).replace("<level>",pd.level.toString())
                 .replace("<count>",pd.count.toString()).replace("<times>",pd.times.toString())
-                .replace("<stock>",d.stock.toString())
+                //.replace("<stock>",d.stock.toString())
     }
 }

@@ -1,5 +1,6 @@
 package red.man10.man10drugplugin
 
+import com.google.common.base.Joiner
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -11,6 +12,7 @@ import java.util.*
 class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
 
     var playerMap = HashMap<String,playerData>()
+    var drugStat = HashMap<String,DrugStat>()
     var canConnect = true
 
     ////////////////////////
@@ -167,6 +169,14 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
         return data
     }
 
+    fun getStat(key:String):DrugStat{
+        var data = drugStat[key]
+        if (data == null){
+            data = DrugStat()
+        }
+        return data
+    }
+
     ////////////////////
     //ログをメモリに保存
     fun addLog(player: Player,drug:String){
@@ -208,60 +218,81 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
 
     ////////////////
     //stockを保存
-    fun saveStock(){
+    fun saveStat(){
 
         val mysql = MySQLManager(plugin,"man10drugPlugin")
 
         for (drug in plugin.drugName){
 
-            val d= config.get(drug)
+            val data = getStat(drug)
+            val level = StringBuilder()
 
-            if (!d.stockMode){
-                continue
+            for(i in data.level){
+                level.append("$i,")
             }
 
-            val data = config.get(drug)
             val sql = "UPDATE data " +
-                    "SET value='${data.stock}' " +
+                    "SET count='${data.count}'," +
+                    "level='${level.substring(0,level.length - 1)}'," +
+                    "stock='${data.stock}' " +
                     "WHERE drug='$drug';"
             mysql.execute(sql)
         }
+
+        drugStat.clear()
 
         mysql.close()
     }
 
     ////////////////
     //stock読み込み
-    fun loadStock(){
+    fun loadStat(){
 
         val mysql = MySQLManager(plugin,"man10drugPlugin")
 
         for (drug in plugin.drugName){
 
-            val d= config.get(drug)
-
-            if (!d.stockMode){
-                continue
-            }
+            val stat = getStat(drug)
 
             var sql = "SELECT " +
-                    "value " +
+                    "count," +
+                    "level," +
+                    "stock " +
                     "FROM data " +
                     "WHERE drug='$drug';"
+
             var rs = mysql.query(sql)
+
             if (!rs.next()){
                 sql = "INSERT INTO data " +
-                        "VALUES('$drug',0,0,0);"
+                        "VALUES('$drug',0,'0,0',0);"
                 mysql.execute(sql)
+
                 sql = "SELECT " +
-                        "value " +
-                        "FROM data" +
+                        "count," +
+                        "level," +
+                        "stock " +
+                        "FROM data " +
                         "WHERE drug='$drug';"
+
                 rs = mysql.query(sql)
+
+                rs.next()
+
             }
+
             val data = config.get(drug)
-            data.stock = rs.getInt("VALUE")
+            stat.stock = rs.getInt("stock")
+            stat.count = rs.getInt("count")
+            // load level
+            for(l in rs.getString("level").split(",")){
+                stat.level.add(l.toInt())
+            }
+
+            rs.close()
+
             config.drugData[drug] = data
+            drugStat[drug] = stat
         }
 
         mysql.close()
@@ -275,4 +306,10 @@ class playerData{
     var times = 0
     var taskId = 0
     var isDependence = false
+}
+
+class DrugStat{
+    var count = 0
+    var level = ArrayList<Int>()
+    var stock = 0
 }

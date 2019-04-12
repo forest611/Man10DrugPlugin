@@ -62,9 +62,9 @@ public class MySQLManager {
         //drugData table
         execute("CREATE TABLE if not exists data " +
                 "(drug text," +
-                "text text," +
-                "bool text," +
-                "value int);");
+                "count int," +
+                "level text," +
+                "stock int);");
 
         //drug box
         execute("CREATE TABLE if not exists box " +

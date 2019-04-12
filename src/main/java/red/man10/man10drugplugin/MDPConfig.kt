@@ -72,7 +72,6 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
         data.crashChance = config.getStringList("CrashChance")
 
         data.addStock = config.getInt("AddStock")
-        data.stock = config.getInt("FirstStock")
         data.stockMode = config.getBoolean("IsStock")
 
         data.removeBuffs = config.getBoolean("RemoveBuffs")
@@ -264,7 +263,6 @@ class Data{
     var stopTask = false //薬で依存を止めるか
 
     //mutable
-    var stock = 0
     var used = 0
 
 }
