@@ -124,10 +124,10 @@ class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData,val 
             player.sendMessage(plugin.repStr(drugData.msgSymptoms!![pd.level],player,pd,drugData))
         }
 
-        pd.times ++
+        pd.symptomsTotal ++
 
         //一定回数禁断症状が出た時
-        if(drugData.symptomsCount!![pd.level] <= pd.times&&drugData.symptomsCount!![pd.level] !=0){
+        if(drugData.symptomsCount!![pd.level] <= pd.symptomsTotal&&drugData.symptomsCount!![pd.level] !=0){
 
             Bukkit.getScheduler().cancelTask(pd.taskId)
             pd.isDependence = false

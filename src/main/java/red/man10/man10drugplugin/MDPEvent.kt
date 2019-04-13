@@ -5,18 +5,12 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
-import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.*
-import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
-import org.bukkit.scheduler.BukkitRunnable
-import org.bukkit.scheduler.BukkitTask
 import java.security.SecureRandom
 import java.util.*
-import sun.audio.AudioPlayer.player
-
 
 
 class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPConfig) : Listener {
@@ -33,7 +27,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
     @EventHandler
     fun leftEvent(event:PlayerQuitEvent){
         Thread(Runnable {
-            db.saveDataBase(event.player,true)
+            db.saveDataBase(event.player)
         }).start()
     }
 
@@ -97,7 +91,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
                 continue
             }
 
-            if (pd.count == 0 && pd.level == 0) {
+            if (pd.usedLevel == 0 && pd.level == 0) {
                 continue
             }
 
@@ -244,6 +238,10 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
                 stat.stock += drugData.addStock
             }
 
+
+            ////////////////////
+            //ログをメモリに保存、最後に使った時間を保存
+            db.addLog(player, drug)
         }
 
         //////////
@@ -457,16 +455,10 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
         ///////////////////////
         if (drugData.type == 0) {
 
-            if (pd.level == 0 && pd.count == 0){
-                stat.level[0] ++
-            }
-
-            //初回利用(統計用)
-
             //レベルアップ
             //dependenceLevelを5にした場合、level5まで上がる
             //0も含めるので、6段階となる
-            if (pd.level < drugData.dependenceLevel && pd.count >= drugData.nextLevelCount!![pd.level]) {
+            if (pd.level < drugData.dependenceLevel && pd.usedLevel >= drugData.nextLevelCount!![pd.level]) {
 
                 ////////////////////////
                 //command
@@ -533,17 +525,9 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
                     }, times[1].toLong())
                 }
 
-                //decrement before level
-                stat.level[pd.level] --
-                //count reset レベルアップ
-                pd.count = 0
+                //usedLevel reset レベルアップ
+                pd.usedLevel = 0
                 pd.level++
-                //stat increment
-                try {
-                    stat.level[pd.level] ++
-                }catch (e:IndexOutOfBoundsException){
-                    stat.level.add(1)
-                }
             }
 
             ////////
@@ -553,7 +537,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
                 //一時タスク終了
                 if (pd.isDependence) {
                     Bukkit.getScheduler().cancelTask(pd.taskId)
-                    pd.times = 0
+                    pd.symptomsTotal = 0
                 }
                 pd.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, SymptomsTask(player, drugData, pd, plugin)
                         , drugData.symptomsTime!![pd.level], drugData.symptomsNextTime!![1])
@@ -571,19 +555,19 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
             val pd2 = db.get(key2)
             val drug2 = config.get(drug)
 
-            if (pd2.level == 0) {
+            if (pd2.level == 0 && pd2.usedLevel == 0) {
                 player.sendMessage("§aあれ？.....解毒薬を飲む必要ってあるのかな...")
                 return
             }
 
-            if (pd.count >= drugData.medicineCount) {
-                pd.count = 0
-                pd2.count -= drugData.weakCount
+            if (pd.usedLevel >= drugData.medicineCount) {
+                pd.usedLevel = 0
+                pd2.usedLevel -= drugData.weakCount
 
                 //countがゼロになったら
-                if (pd2.count <= 0) {
+                if (pd2.usedLevel <= 0) {
                     pd2.level -= 1
-                    pd2.count += drug2.nextLevelCount!![pd.level]
+                    pd2.usedLevel += drug2.nextLevelCount!![pd.level]
                 }
             }
 
@@ -591,7 +575,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
             //禁断症状
             if (pd2.isDependence && drugData.stopTask) {
                 Bukkit.getScheduler().cancelTask(pd2.taskId)
-                pd.times = 0
+                pd.symptomsTotal = 0
                 pd2.isDependence = false
 
                 //levelがぜろになったらタスクを走らせない
@@ -619,7 +603,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
                 return
             }
 
-            pd2.count = 0
+            pd2.usedLevel = 0
             pd2.level = 0
             if (pd2.isDependence) {
                 pd2.isDependence = false
@@ -633,10 +617,9 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
         item.amount = item.amount - 1
         player.inventory.itemInMainHand = item
 
-        //count increment
-        pd.count++
-
-        //stat increment
+        //usedLevel increment
+        pd.usedLevel++  //levelごと
+        pd.usedCount++  //total
         stat.count ++
 
         db.drugStat[drug] = stat
@@ -647,8 +630,6 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
         if (drugData.isChange) {
             player.inventory.addItem(plugin.drugItemStack[drugData.changeItem])
         }
-
-        db.addLog(player, drug)
 
         //player data save memory
         db.playerMap[key] = pd

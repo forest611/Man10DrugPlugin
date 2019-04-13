@@ -48,9 +48,11 @@ public class MySQLManager {
                 "(uuid text," +
                 "player text," +
                 "drug_name text," +
-                "count int," +
+                "used_count int," +
+                "usedLevel int," +
+                "used_time text," +
                 "level int," +
-                "times int);");
+                "symptoms_total int);");
 
         //logger table
         execute("CREATE TABLE if not exists log " +
@@ -58,13 +60,6 @@ public class MySQLManager {
                 "player text, " +
                 "drug_name text, " +
                 "date text);");
-
-        //drugData table
-        execute("CREATE TABLE if not exists data " +
-                "(drug text," +
-                "count int," +
-                "level text," +
-                "stock int);");
 
         //drug box
         execute("CREATE TABLE if not exists box " +
@@ -154,10 +149,10 @@ public class MySQLManager {
     ////////////////////////////////
     public int count(String table) {
         int count = 0;
-        ResultSet set = this.query(String.format("SELECT count(*) from %s", table));
+        ResultSet set = this.query(String.format("SELECT usedLevel(*) from %s", table));
 
         try {
-            count = set.getInt("count(*)");
+            count = set.getInt("usedLevel(*)");
 
         } catch (SQLException var5) {
             Bukkit.getLogger().log(Level.SEVERE, "Could not select all rows from table: " + table + ", error: " + var5.getErrorCode());
