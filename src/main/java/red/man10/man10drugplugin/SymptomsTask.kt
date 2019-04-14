@@ -6,12 +6,11 @@ import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
-import org.bukkit.scheduler.BukkitRunnable
 import java.util.*
 
-class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData,val plugin: Man10DrugPlugin): BukkitRunnable() {
+class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData,val plugin: Man10DrugPlugin) {
 
-    override fun run() {
+    fun run() {
 
         ////////////////
         //buff
@@ -129,7 +128,6 @@ class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData,val 
         //一定回数禁断症状が出た時
         if(drugData.symptomsCount!![pd.level] <= pd.symptomsTotal&&drugData.symptomsCount!![pd.level] !=0){
 
-            Bukkit.getScheduler().cancelTask(pd.taskId)
             pd.isDependence = false
 
         }

@@ -44,12 +44,12 @@ public class MySQLManager {
             plugin.getLogger().info("Unable to establish a MySQL connection.");
         }
         //drug table
-        execute("CREATE TABLE if not exists drug " +
+        execute("CREATE TABLE if not exists drug_dependence " +
                 "(uuid text," +
                 "player text," +
                 "drug_name text," +
                 "used_count int," +
-                "usedLevel int," +
+                "used_level int," +
                 "used_time text," +
                 "level int," +
                 "symptoms_total int);");

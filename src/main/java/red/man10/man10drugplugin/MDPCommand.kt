@@ -113,7 +113,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
 
             Bukkit.broadcastMessage("${chatMessage}§eドラッグプラグインのリロードを始めます")
 
-            Bukkit.getScheduler().cancelTasks(plugin)
+            plugin.cancelTask()
 
             Thread(Runnable {
                 for (p in Bukkit.getServer().onlinePlayers){
@@ -134,6 +134,8 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
                 sender.sendMessage("$chatMessage§e全関数を再読み込みしました")
                 plugin.event!!.clearCooldown()
                 sender.sendMessage("$chatMessage§e全クールダウンをリセットしました")
+
+                plugin.startDependenceTask()
 
                 Bukkit.broadcastMessage("${chatMessage}§eドラッグプラグインのリロード完了 みんな使いまくってね！")
 
@@ -177,22 +179,39 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
 
         }
 
-        if(cmd == "cancel"){
-            Bukkit.getScheduler().cancelTasks(plugin)
-            sender.sendMessage("$chatMessage§eオンラインプレイヤーのタスクを止めました")
+        if(cmd == "stopDependence"){
+            if (!plugin.isTask){
+                sender.sendMessage("$chatMessage§e依存スレッドは止まっています")
+                return true
+
+            }
+            plugin.cancelTask()
+            sender.sendMessage("$chatMessage§e依存スレッドを止めました")
+            return true
+        }
+        if(cmd == "startDependence"){
+            if (plugin.isTask){
+                sender.sendMessage("$chatMessage§e依存スレッドは動いています")
+                return true
+
+            }
+            plugin.isTask = true
+            plugin.startDependenceTask()
+            sender.sendMessage("$chatMessage§e依存スレッドをスタートしました")
             return true
         }
 
         if (cmd =="on"){
             plugin.stop = false
+            plugin.startDependenceTask()
             sender.sendMessage("$chatMessage§eプラグインをスタートしました")
             return true
         }
 
         if (cmd == "off"){
             plugin.stop = true
+            plugin.cancelTask()
             sender.sendMessage("$chatMessage§eプラグインをストップしました")
-            Bukkit.getScheduler().cancelTasks(plugin)
             return true
         }
 
@@ -203,9 +222,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
             pd.usedLevel = 0
             pd.level = 0
             pd.symptomsTotal = 0
-            pd.taskId = 0
             pd.isDependence = false
-            Bukkit.getScheduler().cancelTask(pd.taskId)
 
             db.playerMap[args[0]+args[1]] = pd
 
@@ -258,22 +275,35 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
         player.sendMessage("$chatMessage§e/mdp show [player名] 薬の使用情報を見ることができます")
         player.sendMessage("$chatMessage§e/mdp list 読み込まれている薬の名前を表示します")
         player.sendMessage("$chatMessage§e/mdp log [player名] [回数]プレイヤーの使用ログを見ることができます")
-        player.sendMessage("$chatMessage§e/mdp cancel オンラインプレイヤーのタスクを止めます（デバッグ、修正用)")
+        player.sendMessage("$chatMessage§e/mdp startDependence オンラインプレイヤーのタスクをスタートします")
+        player.sendMessage("$chatMessage§e/mdp stopDependence オンラインプレイヤーのタスクを止めます")
         player.sendMessage("$chatMessage§e/mdp on/off プラグインの on off を切り替えます")
         player.sendMessage("$chatMessage§e/mdp clear [player] [drug] 指定プレイヤー、ドラッグの依存データをリセットします")
         player.sendMessage("$chatMessage§e/mdp using [player] [drug] ドラッグを消費せずにドラッグの使用状態を再現します(console用)")
         player.sendMessage("$chatMessage§e/mdp usedTimes [drug] サーバー起動後に何回ドラッグを使用されたか確認できます")
         player.sendMessage("$chatMessage§e/mdp stat [drug] 指定ドラッグの利用統計を表示します")
+        player.sendMessage("---------------------------------------------------------")
+
         when(plugin.stop){
             false -> player.sendMessage("$chatMessage§e§l現在プラグインは可動しています")
             true -> player.sendMessage("$chatMessage§e§l現在プラグインはストップしています")
 
         }
+        player.sendMessage("")
         when(db.canConnect){
             false -> player.sendMessage("$chatMessage§e§lMySQLの接続ができてません")
             true -> player.sendMessage("$chatMessage§e§lMySQLに接続できています")
 
         }
+        player.sendMessage("")
+
+        when(plugin.isTask){
+            false -> player.sendMessage("$chatMessage§e§l依存タスクは停止しています")
+            true -> player.sendMessage("$chatMessage§e§l依存タスクは動いています")
+
+        }
+        player.sendMessage("---------------------------------------------------------")
+
 
     }
 

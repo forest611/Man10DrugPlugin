@@ -10,7 +10,11 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import java.security.SecureRandom
+import java.text.DateFormat
 import java.util.*
+import java.text.SimpleDateFormat
+
+
 
 
 class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPConfig) : Listener {
@@ -530,20 +534,14 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
                 pd.level++
             }
 
-            ////////
-            //依存部分
-            if (drugData.isDependence) {
-
-                //一時タスク終了
-                if (pd.isDependence) {
-                    Bukkit.getScheduler().cancelTask(pd.taskId)
-                    pd.symptomsTotal = 0
-                }
-                pd.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, SymptomsTask(player, drugData, pd, plugin)
-                        , drugData.symptomsTime!![pd.level], drugData.symptomsNextTime!![1])
-
+            //最終利用時刻更新
+            if (drugData.isDependence){
+                val date = Date()
+                val sdf = SimpleDateFormat("MMddHHmmss")
+                pd.time = sdf.format(date)
                 pd.isDependence = true
             }
+
         }
 
         ////////////////////////
@@ -574,14 +572,11 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
             /////////
             //禁断症状
             if (pd2.isDependence && drugData.stopTask) {
-                Bukkit.getScheduler().cancelTask(pd2.taskId)
                 pd.symptomsTotal = 0
                 pd2.isDependence = false
 
                 //levelがぜろになったらタスクを走らせない
                 if (pd2.level > 0) {
-                    pd2.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, SymptomsTask(player, drug2, pd2, plugin)
-                            , drug2.symptomsTime!![pd.level], drug2.symptomsNextTime!![1])
                     pd2.isDependence = true
 
                 }
@@ -607,7 +602,6 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
             pd2.level = 0
             if (pd2.isDependence) {
                 pd2.isDependence = false
-                Bukkit.getScheduler().cancelTask(pd2.taskId)
             }
 
             db.playerMap[key2] = pd2
@@ -693,6 +687,4 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
         players.remove(centerPlayer)
         return players
     }
-
-
 }

@@ -58,7 +58,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
 
             try{
 
-                data.usedLevel = rs.getInt("usedLevel")
+                data.usedLevel = rs.getInt("used_level")
                 data.level = rs.getInt("level")
                 data.symptomsTotal = rs.getInt("symptoms_total")
                 data.time = rs.getString("used_time")
@@ -66,17 +66,10 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
 
                 rs.close()
 
-                //禁断症状
-                if (drugData.isDependence&&data.symptomsTotal!=0){
-
-
-
-
-                    data.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin,SymptomsTask(player
-                            ,drugData,data,plugin)
-                            ,drugData.symptomsTime!![data.level],drugData.symptomsNextTime!![1])
+                if (data.usedLevel > 0 || data.level > 0){
                     data.isDependence = true
                 }
+
 
                 playerMap[key] = data
 
@@ -123,9 +116,9 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
 
             val data = get(key)
 
-            val sql = "UPDATE drug " +
+            val sql = "UPDATE drug_dependence " +
                     "SET used_count='${data.usedCount}'"+
-                    ",usedLevel='${data.usedLevel}'"+
+                    ",used_level='${data.usedLevel}'"+
                     ",used_time='${data.time}'"+
                     ",level='${data.level}'"+
                     ",symptoms_total='${data.symptomsTotal}' " +
@@ -133,7 +126,6 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
 
             mysql.execute(sql)
 
-            Bukkit.getScheduler().cancelTask(data.taskId)
 
             playerMap.remove(key)
 
@@ -199,7 +191,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
     ////////////////////////
     //プレイヤーレコード追加
     private fun addRecord(mysql:MySQLManager,player:Player,drug:String){
-        val sql = "INSERT INTO drug " +
+        val sql = "INSERT INTO drug_dependence " +
                 "VALUES('${player.uniqueId}'," +
                 "'${player.name}'," +
                 "'$drug',0,0,0,0,0);"
@@ -213,11 +205,11 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
     private fun selectRecord(mysql:MySQLManager,player: Player,drug:String):ResultSet{
         val sql = "SELECT " +
                 "used_count," +
-                "usedLevel," +
+                "used_level," +
                 "used_time," +
                 "level," +
                 "symptoms_total " +
-                "FROM drug " +
+                "FROM drug_dependence " +
                 "WHERE uuid='${player.uniqueId}' "+
                 "and drug_name='$drug';"
 
@@ -232,7 +224,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
 
         val mysql = MySQLManager(plugin,"man10drugplugin")
 
-        val rs = mysql.query("SELECT SUM(used_count) FROM drug WHERE drug_name='$drug';")
+        val rs = mysql.query("SELECT SUM(used_count) FROM drug_dependence WHERE drug_name='$drug';")
 
         rs.next()
 
@@ -253,7 +245,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
 
         val mysql = MySQLManager(plugin,"man10drugplugin")
 
-        val rs = mysql.query("SELECT level , COUNT(level) FROM drug WHERE drug_name='$drug' AND used_count!='0' group BY LEVEL;")
+        val rs = mysql.query("SELECT level , COUNT(level) FROM drug_dependence WHERE drug_name='$drug' AND used_count!='0' group BY LEVEL;")
 
         while (rs.next()){
             list.add(rs.getInt(1))
@@ -272,8 +264,7 @@ class playerData{
     var level = 0
     var symptomsTotal = 0
     var usedCount = 0
-    var time = ""
-    var taskId = 0
+    var time = "0"
     var isDependence = false
 }
 

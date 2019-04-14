@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitRunnable
 import java.io.File
+import java.text.SimpleDateFormat
 import java.util.*
 
 class Man10DrugPlugin : JavaPlugin() {
@@ -28,6 +29,12 @@ class Man10DrugPlugin : JavaPlugin() {
 
     var canMilk = true // milkを使えるか
     var stop = false //止まっているか
+
+    var isTask = true //task が動いてるか
+
+    //task作成
+    lateinit var timer : Timer
+
 
     ////////////////////////
     //config load
@@ -134,20 +141,19 @@ class Man10DrugPlugin : JavaPlugin() {
 
         db = MDPDataBase(this,mdpConfig)
 
+        for (p in Bukkit.getServer().onlinePlayers){
+            db.loadDataBase(p)
+        }
+
+
         event = MDPEvent(this,db,mdpConfig)
         Bukkit.getServer().pluginManager.registerEvents(event,this)
         getCommand("mdp").executor = MDPCommand(this,db)
 
         vault = VaultManager(this)
 
-        //再起動時にオンラインプレイヤーがいた場合
-        object : BukkitRunnable() {
-            override fun run() {
-                for (player in Bukkit.getServer().onlinePlayers){
-                    db.loadDataBase(player)
-                }
-            }
-        }.run()
+
+        startDependenceTask()
 
     }
 
@@ -159,10 +165,67 @@ class Man10DrugPlugin : JavaPlugin() {
         //鯖落ち時にオンラインプレイヤーがいた場合
         Bukkit.getScheduler().cancelTasks(this)
 
+        cancelTask()
+
         for (player in Bukkit.getServer().onlinePlayers){
             db.saveDataBase(player)
         }
     }
+
+
+    //////////////////////////
+    //日付差分で禁断症状
+    fun startDependenceTask(){
+
+        timer  = Timer()
+
+        timer.scheduleAtFixedRate(object: TimerTask() {
+            override fun run() {
+
+                if (stop || !isTask){
+                    cancel()
+                    return
+                }
+
+                isTask = true
+
+                for (p in Bukkit.getOnlinePlayers()){
+
+                    for (drug in drugName){
+                        val c = mdpConfig.get(drug)
+
+                        if (!c.isDependence)continue
+
+                        val pd = db.get(p.name + c)
+
+                        if (pd.time == "0")continue
+
+                        val now  = Date().time
+                        val time = SimpleDateFormat("MMddHHmmss").parse(pd.time).time
+
+                        val differenceTick = (now - time) * 20
+
+                        //debug
+                        Bukkit.getLogger().info(differenceTick.toString())
+
+                        if (c.symptomsNextTime!![pd.level] <= differenceTick.toInt() || c.symptomsTime!![pd.level] <= differenceTick.toInt()){
+
+                            SymptomsTask(p,c,pd,this@Man10DrugPlugin).run()
+
+                        }
+                    }
+
+                }
+            }
+        },10000,10000)
+
+    }
+
+    fun cancelTask(){
+        timer.cancel()
+        isTask = false
+    }
+
 
     ///////////////////////////////
     //複数のクラスで使うメソッド
