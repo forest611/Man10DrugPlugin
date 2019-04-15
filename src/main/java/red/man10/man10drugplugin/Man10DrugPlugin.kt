@@ -33,7 +33,6 @@ class Man10DrugPlugin : JavaPlugin() {
     var isTask = true //task が動いてるか
 
     //task作成
-    lateinit var timer : Timer
 
 
     ////////////////////////
@@ -162,9 +161,6 @@ class Man10DrugPlugin : JavaPlugin() {
     ///////////////////////
     override fun onDisable() {
 
-        //鯖落ち時にオンラインプレイヤーがいた場合
-        Bukkit.getScheduler().cancelTasks(this)
-
         cancelTask()
 
         for (player in Bukkit.getServer().onlinePlayers){
@@ -177,9 +173,8 @@ class Man10DrugPlugin : JavaPlugin() {
     //日付差分で禁断症状
     fun startDependenceTask(){
 
-        timer  = Timer()
 
-        timer.scheduleAtFixedRate(object: TimerTask() {
+        Bukkit.getScheduler().runTaskTimer(this,object: TimerTask() {
             override fun run() {
 
                 if (stop || !isTask){
@@ -196,33 +191,32 @@ class Man10DrugPlugin : JavaPlugin() {
 
                         if (!c.isDependence)continue
 
-                        val pd = db.get(p.name + c)
+                        val pd = db.get(p.name + drug)
 
-                        if (pd.time == "0")continue
+                        if (!pd.isDependence){
+                            continue
+                        }
 
                         val now  = Date().time
-                        val time = SimpleDateFormat("MMddHHmmss").parse(pd.time).time
+                        val time = pd.time.time
 
-                        val differenceTick = (now - time) * 20
-
-                        //debug
-                        Bukkit.getLogger().info(differenceTick.toString())
+                        val differenceTick = (now - time) / 1000
 
                         if (c.symptomsNextTime!![pd.level] <= differenceTick.toInt() || c.symptomsTime!![pd.level] <= differenceTick.toInt()){
 
-                            SymptomsTask(p,c,pd,this@Man10DrugPlugin).run()
+                            SymptomsTask(p,c,pd,this@Man10DrugPlugin,db,drug).run()
 
                         }
                     }
 
                 }
             }
-        },10000,10000)
+        },200,200)
 
     }
 
     fun cancelTask(){
-        timer.cancel()
+        Bukkit.getScheduler().cancelTasks(this)
         isTask = false
     }
 

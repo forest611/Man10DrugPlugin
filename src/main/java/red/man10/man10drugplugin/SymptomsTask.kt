@@ -6,9 +6,10 @@ import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
+import java.text.SimpleDateFormat
 import java.util.*
 
-class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData,val plugin: Man10DrugPlugin) {
+class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData,val plugin: Man10DrugPlugin,val db:MDPDataBase,val drug:String) {
 
     fun run() {
 
@@ -125,6 +126,9 @@ class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData,val 
 
         pd.symptomsTotal ++
 
+        pd.time = Date()
+
+        db.playerMap[player.name+drug] = pd
         //一定回数禁断症状が出た時
         if(drugData.symptomsCount!![pd.level] <= pd.symptomsTotal&&drugData.symptomsCount!![pd.level] !=0){
 

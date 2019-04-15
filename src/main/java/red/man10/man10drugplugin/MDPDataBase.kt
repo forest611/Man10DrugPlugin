@@ -61,7 +61,8 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
                 data.usedLevel = rs.getInt("used_level")
                 data.level = rs.getInt("level")
                 data.symptomsTotal = rs.getInt("symptoms_total")
-                data.time = rs.getString("used_time")
+                data.time = Date()
+                data.time.time = rs.getLong("used_time")
                 data.usedCount = rs.getInt("used_count")
 
                 rs.close()
@@ -119,7 +120,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
             val sql = "UPDATE drug_dependence " +
                     "SET used_count='${data.usedCount}'"+
                     ",used_level='${data.usedLevel}'"+
-                    ",used_time='${data.time}'"+
+                    ",used_time='${data.time.time}'"+
                     ",level='${data.level}'"+
                     ",symptoms_total='${data.symptomsTotal}' " +
                     " WHERE uuid='${player.uniqueId}' and drug_name='${plugin.drugName[i]}';"
@@ -194,7 +195,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
         val sql = "INSERT INTO drug_dependence " +
                 "VALUES('${player.uniqueId}'," +
                 "'${player.name}'," +
-                "'$drug',0,0,0,0,0);"
+                "'$drug',0,0,${Date().time},0,0);"
 
         mysql.execute(sql)
 
@@ -264,7 +265,7 @@ class playerData{
     var level = 0
     var symptomsTotal = 0
     var usedCount = 0
-    var time = "0"
+    var time = Date()
     var isDependence = false
 }
 

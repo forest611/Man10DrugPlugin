@@ -535,12 +535,8 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
             }
 
             //最終利用時刻更新
-            if (drugData.isDependence){
-                val date = Date()
-                val sdf = SimpleDateFormat("MMddHHmmss")
-                pd.time = sdf.format(date)
-                pd.isDependence = true
-            }
+            pd.time = Date()
+            pd.isDependence = true
 
         }
 

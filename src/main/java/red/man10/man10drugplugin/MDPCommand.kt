@@ -135,6 +135,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
                 plugin.event!!.clearCooldown()
                 sender.sendMessage("$chatMessage§e全クールダウンをリセットしました")
 
+                plugin.isTask = true
                 plugin.startDependenceTask()
 
                 Bukkit.broadcastMessage("${chatMessage}§eドラッグプラグインのリロード完了 みんな使いまくってね！")
