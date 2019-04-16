@@ -32,6 +32,8 @@ class Man10DrugPlugin : JavaPlugin() {
 
     var isTask = true //task が動いてるか
 
+    var debug = false
+
     //task作成
 
 
@@ -202,7 +204,8 @@ class Man10DrugPlugin : JavaPlugin() {
 
                         val differenceTick = (now - time) / 1000
 
-                        if (c.symptomsNextTime!![pd.level] <= differenceTick.toInt() || c.symptomsTime!![pd.level] <= differenceTick.toInt()){
+                        if (c.symptomsNextTime!![pd.level] <= differenceTick.toInt() || c.symptomsTime!![pd.level] <= differenceTick.toInt() ||
+                                (debug && differenceTick > 180)){
 
                             SymptomsTask(p,c,pd,this@Man10DrugPlugin,db,drug).run()
 

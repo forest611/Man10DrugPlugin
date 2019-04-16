@@ -259,6 +259,43 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
 
             }).start()
 
+            return true
+
+        }
+
+        if (cmd == "highspeed"){
+
+            when(plugin.debug){
+                true -> {
+                    sender.sendMessage("$chatMessage§ehighspeedモードを切りました")
+                    plugin.debug = false
+                }
+                false -> {
+                    sender.sendMessage("$chatMessage§eデバッグ機能：禁断症状が3分ごとに発生するようになりました")
+                    plugin.debug = true
+                }
+            }
+
+
+
+
+            return true
+        }
+
+        if (cmd == "set" &&args.size == 5){
+            val pd = db.get(args[1] + args[2])
+
+            pd.usedLevel = args[3].toInt()
+            pd.level = args[4].toInt()
+
+            if (config.get(args[2]).dependenceLevel <= args[4].toInt()){
+                pd.level = config.get(args[2]).dependenceLevel
+            }
+
+            sender.sendMessage("$chatMessage§e依存データを設定しました")
+
+            return true
+
         }
 
         return true
@@ -283,6 +320,8 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
         player.sendMessage("$chatMessage§e/mdp using [player] [drug] ドラッグを消費せずにドラッグの使用状態を再現します(console用)")
         player.sendMessage("$chatMessage§e/mdp usedTimes [drug] サーバー起動後に何回ドラッグを使用されたか確認できます")
         player.sendMessage("$chatMessage§e/mdp stat [drug] 指定ドラッグの利用統計を表示します")
+        player.sendMessage("$chatMessage§e/mdp highspeed 禁断症状が3分毎に発生するようになります(デバッグ用)")
+        player.sendMessage("$chatMessage§e/mdp set [player] [drug] [count] [level] 依存データを設定します(デバッグ用)")
         player.sendMessage("---------------------------------------------------------")
 
         when(plugin.stop){
