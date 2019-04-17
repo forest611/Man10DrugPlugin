@@ -63,6 +63,16 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
         }
     }
 
+    /////////////////////////
+    //milk対策
+    @EventHandler
+    fun foodEvent(event:PlayerItemConsumeEvent){
+        if(event.item.type == Material.MILK_BUCKET){
+            event.isCancelled = true
+            return
+        }
+    }
+
     //チャット破壊イベント
     @EventHandler
     fun onChat(event: AsyncPlayerChatEvent){

@@ -63,13 +63,18 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
 
             if (args.size == 1){
 
-                sender.sendMessage("$chatMessage §e現在の依存状況")
+                sender.sendMessage("$chatMessage §e現在の依存状況(カウント、レベル)")
 
                 for (drug in plugin.drugName){
+                    val pd = db.playerMap[sender.name+drug]
+
+                    if (pd!!.usedLevel == 0 && pd.level == 0){
+                        continue
+                    }
                     sender.sendMessage(
                             "$chatMessage§e§l$drug" +
-                                    ":${db.playerMap[sender.name+drug]!!.usedLevel}" +
-                                    ",${db.playerMap[sender.name+drug]!!.level}"
+                                    ":${pd.usedCount}" +
+                                    ",${pd.level}"
                     )
                 }
             }
@@ -79,11 +84,20 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
             if (sender.hasPermission("man10drug.showop") && args.size == 2){
                 try {
                     sender.sendMessage("$chatMessage§e${args[1]}の依存状況(カウント、レベル)")
+
+
                     for (drug in plugin.drugName){
+
+                        val pd = db.playerMap[sender.name+drug]
+
+                        if (pd!!.usedCount == 0 && pd.level == 0){
+                            continue
+                        }
+
                         sender.sendMessage(
                                 "$chatMessage§e§l$drug" +
-                                        ":${db.playerMap[args[1]+drug]!!.usedLevel}" +
-                                        ",${db.playerMap[args[1]+drug]!!.level}"
+                                        ":${pd.usedCount}" +
+                                        ",${pd.level}"
                         )
                     }
                 }catch (e:Exception){
@@ -121,6 +135,8 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
                 }
 
                 sender.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを保存しました")
+
+                db.drugStat.clear()
 
                 plugin.load()
                 sender.sendMessage("$chatMessage§eドラッグのデータを読み込みました")
@@ -232,15 +248,6 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
             return true
         }
 
-        if (cmd == "usedTimes" &&args.size == 2){
-            try{
-                sender.sendMessage("$chatMessage§eサーバー起動後の${args[1]}の使用回数:${config.get(args[1]).used}")
-
-            }catch (e:Exception){
-                sender.sendMessage("$chatMessage§eerror:${e.message}")
-            }
-        }
-
         if (cmd == "stat" && args.size == 2){
             sender.sendMessage("$chatMessage§e${args[1]}の利用統計")
 
@@ -318,7 +325,6 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
         player.sendMessage("$chatMessage§e/mdp on/off プラグインの on off を切り替えます")
         player.sendMessage("$chatMessage§e/mdp clear [player] [drug] 指定プレイヤー、ドラッグの依存データをリセットします")
         player.sendMessage("$chatMessage§e/mdp using [player] [drug] ドラッグを消費せずにドラッグの使用状態を再現します(console用)")
-        player.sendMessage("$chatMessage§e/mdp usedTimes [drug] サーバー起動後に何回ドラッグを使用されたか確認できます")
         player.sendMessage("$chatMessage§e/mdp stat [drug] 指定ドラッグの利用統計を表示します")
         player.sendMessage("$chatMessage§e/mdp highspeed 禁断症状が3分毎に発生するようになります(デバッグ用)")
         player.sendMessage("$chatMessage§e/mdp set [player] [drug] [count] [level] 依存データを設定します(デバッグ用)")
