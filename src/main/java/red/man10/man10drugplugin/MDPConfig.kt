@@ -82,6 +82,8 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
             data.dependenceLevel = config.getInt("DependenceLevel")
             data.nextLevelCount = config.getIntegerList("NextLevelCount")
 
+            data.weakDrug = config.getString("WeakDrug","none")
+
             data.symptomsTime = config.getLongList("SymptomsTime")
             data.symptomsNextTime = config.getLongList("SymptomsNextTime")
             data.symptomsCount = config.getIntegerList("SymptomsCount")
@@ -113,8 +115,7 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
         //type1
         if (data.type == 1 || data.type == 2){
             data.weakDrug = config.getString("WeakDrug") //DataName
-            data.weakCount = config.getInt("WeakCount")
-            data.medicineCount = config.getInt("MedicineCount")
+            data.weakUsing = config.getIntegerList("WeakUsing")
             data.stopTask = config.getBoolean("StopTask")
         }
 
@@ -258,11 +259,8 @@ class Data{
 
     //type1
     var weakDrug = "drug" //type2
-    var weakCount = 10  //指定値カウントを減らす
-    var medicineCount = 0 //弱めるのに必要な量
+    var weakUsing : MutableList<Int>? = null//弱めるのに必要な量
     var stopTask = false //薬で依存を止めるか
 
-    //mutable
-    var used = 0
 
 }

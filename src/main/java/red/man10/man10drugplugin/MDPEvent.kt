@@ -544,6 +544,15 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
                 pd.level++
             }
 
+            if (drugData.weakDrug != "none"){
+                val weak = db.get(player.name+drugData.weakDrug)
+
+                weak.usedLevel = 0
+
+                db.playerMap[player.name+drugData.weakDrug] = weak
+
+            }
+
             //最終利用時刻更新
             pd.time = Date()
             pd.isDependence = true
@@ -557,60 +566,27 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
 
             val key2 = player.name + drugData.weakDrug
             val pd2 = db.get(key2)
-            val drug2 = config.get(drug)
 
             if (pd2.level == 0 && pd2.usedLevel == 0) {
                 player.sendMessage("§aあれ？.....解毒薬を飲む必要ってあるのかな...")
                 return
             }
 
-            if (pd.usedLevel >= drugData.medicineCount) {
+            if (pd.usedLevel >= drugData.weakUsing!![pd2.level]) {
                 pd.usedLevel = 0
-                pd2.usedLevel -= drugData.weakCount
+                pd2.level --
+                pd2.usedLevel = 0
 
-                //countがゼロになったら
-                if (pd2.usedLevel <= 0) {
-                    pd2.level -= 1
-                    pd2.usedLevel += drug2.nextLevelCount!![pd.level]
-                }
-            }
+                if (pd2.level <= 0 && pd2.usedLevel > 0){
+                    pd2.level = 0
+                    pd2.usedLevel = 0
 
-            /////////
-            //禁断症状
-            if (pd2.isDependence && drugData.stopTask) {
-                pd.symptomsTotal = 0
-                pd2.isDependence = false
-
-                //levelがぜろになったらタスクを走らせない
-                if (pd2.level > 0) {
-                    pd2.isDependence = true
-
+                    pd2.isDependence = false
                 }
             }
 
             db.playerMap[key2] = pd2
 
-        }
-
-        ////////////////////////
-        // type 2 only
-        ///////////////////////
-        if (drugData.type == 2) {
-            val key2 = player.name + drugData.weakDrug
-            val pd2 = db.get(key2)
-
-            if (pd2.level == 0) {
-                player.sendMessage("§aあれ？.....解毒薬を飲む必要ってあるのかな...")
-                return
-            }
-
-            pd2.usedLevel = 0
-            pd2.level = 0
-            if (pd2.isDependence) {
-                pd2.isDependence = false
-            }
-
-            db.playerMap[key2] = pd2
         }
 
         //remove 1 item
