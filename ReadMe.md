@@ -2,12 +2,15 @@
 ## 必須項目
 
 <br/>
+
 - DisplayName ... ドラッグの表示名
 - DataName ... コマンド、db、などのデータ名
 - Type ... ドラッグのタイプ
 - Material ... どのアイテムをドラッグにするか[マテリアルまとめ](https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html)
 - Damage ... アイテムのダメージ値
+
 <br/>
+
 <br/>
 
 ## どのタイプでも使える機能
@@ -56,6 +59,7 @@
 
 ## Type0(依存薬物)のみ使える機能
 <br/>
+
 - IsDependence ... 依存するかどうか(bool)
 - DependenceLevel ... 依存レベル(int)(4を指定した場合、Lv.0から含めるため、5段階となります)
 - NextLevelCount ... 次の依存レベルに上がるまでに必要な摂取回数(int list)
