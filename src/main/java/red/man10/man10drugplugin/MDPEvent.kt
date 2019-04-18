@@ -170,22 +170,6 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
         ////////////////////////////////
         //時間のかかる処理をスレッド化
         Bukkit.getScheduler().runTask(plugin) {
-            ////////////////////////
-            //message
-            ///////////////////////
-            if (drugData.useMsg != null && plugin.size(drugData.useMsg!!, pd)) {
-                player.sendMessage(plugin.repStr(drugData.useMsg!![pd.level], player, pd, drugData))
-            }
-
-            //Delay message
-            if (drugData.useMsgDelay != null && plugin.size(drugData.useMsgDelay!!, pd)) {
-                val times = drugData.useMsgDelay!![pd.level].split(";")
-
-                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
-                    player.sendMessage(plugin.repStr(times[0], player, pd, drugData))
-                }, times[1].toLong())
-
-            }
 
             ////////////////////////
             //command
@@ -592,6 +576,24 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
         //remove 1 item
         item.amount = item.amount - 1
         player.inventory.itemInMainHand = item
+
+        ////////////////////////
+        //message
+        ///////////////////////
+        if (drugData.useMsg != null && plugin.size(drugData.useMsg!!, pd)) {
+            player.sendMessage(plugin.repStr(drugData.useMsg!![pd.level], player, pd, drugData))
+        }
+
+        //Delay message
+        if (drugData.useMsgDelay != null && plugin.size(drugData.useMsgDelay!!, pd)) {
+            val times = drugData.useMsgDelay!![pd.level].split(";")
+
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
+                player.sendMessage(plugin.repStr(times[0], player, pd, drugData))
+            }, times[1].toLong())
+
+        }
+
 
         //usedLevel increment
         pd.usedLevel++  //levelごと

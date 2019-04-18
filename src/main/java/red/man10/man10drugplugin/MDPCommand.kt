@@ -240,6 +240,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
             pd.level = 0
             pd.symptomsTotal = 0
             pd.isDependence = false
+            pd.usedCount = 0
 
             db.playerMap[args[0]+args[1]] = pd
 

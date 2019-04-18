@@ -107,12 +107,12 @@ class Man10DrugPlugin : JavaPlugin() {
 
         meta.lore = data.lore
 
-        if (data.damage.toInt() != 0){
-            drug.durability = data.damage
-            meta.isUnbreakable = true
-            meta.itemFlags.add(ItemFlag.HIDE_UNBREAKABLE)
-        }
         if(data.enchantEffect){ meta.addEnchant(Enchantment.LOOT_BONUS_BLOCKS,1,true)}
+
+        drug.durability = data.damage
+        meta.isUnbreakable = true
+        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE)
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS)
 
         drug.itemMeta = meta
 
