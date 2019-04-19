@@ -24,6 +24,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
     @EventHandler
     fun joinEvent(event:PlayerJoinEvent){
         Thread(Runnable {
+            Thread.sleep(10000)
             db.loadDataBase(event.player)
         }).start()
     }
@@ -164,7 +165,6 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
         val key = player.name + drug
 
         val pd = db.get(key)
-        val stat = db.getStat(drug)
         val drugData = config.get(drug)
 
         ////////////////////////////////
@@ -229,12 +229,12 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
                 }, command[1].toLong())
             }
 
-            /////////////////////////
-            //数値ストック
-            //////////////////////
-            if (drugData.stockMode) {
-                stat.stock += drugData.addStock
-            }
+//            /////////////////////////
+//            //数値ストック
+//            //////////////////////
+//            if (drugData.stockMode) {
+//                stat.stock += drugData.addStock
+//            }
 
 
             ////////////////////
@@ -448,6 +448,11 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
             }
         }
 
+        //usedLevel increment
+        pd.usedLevel++  //levelごと
+        pd.usedCount++  //total
+        pd.countOnline++
+
         ////////////////////////
         // type 0 only
         ///////////////////////
@@ -551,7 +556,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
             val key2 = player.name + drugData.weakDrug
             val pd2 = db.get(key2)
 
-            if (pd2.level == 0 && pd2.usedLevel == 0) {
+            if (pd2.level <= 0 && pd2.usedLevel <= 0) {
                 player.sendMessage("§aあれ？.....解毒薬を飲む必要ってあるのかな...")
                 return
             }
@@ -561,10 +566,8 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
                 pd2.level --
                 pd2.usedLevel = 0
 
-                if (pd2.level <= 0 && pd2.usedLevel > 0){
+                if (pd2.level <= 0 && pd2.usedLevel <= 0){
                     pd2.level = 0
-                    pd2.usedLevel = 0
-
                     pd2.isDependence = false
                 }
             }
@@ -593,14 +596,6 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
             }, times[1].toLong())
 
         }
-
-
-        //usedLevel increment
-        pd.usedLevel++  //levelごと
-        pd.usedCount++  //total
-        stat.count ++
-
-        db.drugStat[drug] = stat
 
         ////////////////
         //アイテムを変える

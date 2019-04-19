@@ -88,7 +88,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
 
                     for (drug in plugin.drugName){
 
-                        val pd = db.playerMap[sender.name+drug]
+                        val pd = db.playerMap[args[1]+drug]
 
                         if (pd!!.usedCount == 0 && pd.level == 0){
                             continue
@@ -135,8 +135,6 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
                 }
 
                 sender.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを保存しました")
-
-                db.drugStat.clear()
 
                 plugin.load()
                 sender.sendMessage("$chatMessage§eドラッグのデータを読み込みました")
@@ -256,10 +254,8 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
 
                 val list = db.getDrugServerLevel(args[1])
 
-                val stat = db.getStat(args[1])
 
                 sender.sendMessage("$chatMessage§e累計使用回数:§l${db.getDrugServerTotal(args[1])}")
-                sender.sendMessage("$chatMessage§eプラグインを起動してからの使用回数:§l${stat.count}")
                 sender.sendMessage("$chatMessage§e各依存レベルの依存人数")
                 for (i in 0 until list.size){
                     sender.sendMessage("$chatMessage§e§lLv.$i:${list[i]}")

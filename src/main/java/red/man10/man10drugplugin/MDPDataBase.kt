@@ -9,13 +9,17 @@ import java.util.*
 class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
 
     var playerMap = HashMap<String,playerData>()
-    var drugStat = HashMap<String,DrugStat>()
     var canConnect = true
+    var online = ArrayList<Player>()
 
     ////////////////////////
     //DBのデータを読み込む
     ////////////////////////
     fun loadDataBase(player: Player){
+
+        if (!player.isOnline){
+            return
+        }
 
         val mysql = MySQLManager(plugin,"man10drugPlugin")
 
@@ -83,6 +87,8 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
             }
 
         }
+        online.add(player)
+
         Bukkit.getLogger().info(player.name+"...Loaded DB")
 
         mysql.close()
@@ -93,6 +99,10 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
     //データをDBに保存
     //////////////////////////
     fun saveDataBase(player: Player){
+
+        if (online.indexOf(player) == -1){
+            return
+        }
 
         val mysql = MySQLManager(plugin,"man10drugPlugin")
 
@@ -168,14 +178,6 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
         return data
     }
 
-    fun getStat(key:String):DrugStat{
-        var data = drugStat[key]
-        if (data == null){
-            data = DrugStat()
-        }
-        return data
-    }
-
     ////////////////////
     //ログをメモリに保存 最後に使用した時間を保存
     fun addLog(player: Player,drug:String){
@@ -221,15 +223,19 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
     //DBとメモリから累計使用回数取得
     fun getDrugServerTotal(drug:String):Int{
 
-        val data = getStat(drug)
-
         val mysql = MySQLManager(plugin,"man10drugplugin")
 
         val rs = mysql.query("SELECT SUM(used_count) FROM drug_dependence WHERE drug_name='$drug';")
 
         rs.next()
 
-        val total = data.count + rs.getInt(1)
+        var total = rs.getInt(1)
+
+        for(p in Bukkit.getOnlinePlayers()){
+            val pd = get(p.name+drug)
+
+            total += pd.countOnline
+        }
 
         rs.close()
         mysql.close()
@@ -261,6 +267,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
 }
 
 class playerData{
+    var countOnline = 0
     var usedLevel = 0
     var level = 0
     var symptomsTotal = 0
@@ -269,7 +276,3 @@ class playerData{
     var isDependence = false
 }
 
-class DrugStat{
-    var count = 0
-    var stock = 0
-}
