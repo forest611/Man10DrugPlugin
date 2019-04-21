@@ -15,6 +15,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
     ////////////////////////
     //DBのデータを読み込む
     ////////////////////////
+    @Synchronized
     fun loadDataBase(player: Player){
 
         if (!player.isOnline){
@@ -35,8 +36,6 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
             val key = player.name+name
 
             val data = get(key)
-
-            Bukkit.getLogger().info(key)
 
             if (drugData.type != 0 && drugData.type != 1){
                 data.level = 0
@@ -98,6 +97,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
     /////////////////////////////
     //データをDBに保存
     //////////////////////////
+    @Synchronized
     fun saveDataBase(player: Player){
 
         if (online.indexOf(player) == -1){
@@ -151,6 +151,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
 
     /////////////////////////
     //DBにログを保存
+    @Synchronized
     fun saveLog(player: Player,mysql: MySQLManager){
 
         val log = plugin.playerLog[player] ?: return

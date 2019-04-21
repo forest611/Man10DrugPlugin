@@ -140,19 +140,24 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
                 }
 
                 sender.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを保存しました")
+                Bukkit.getLogger().info("オンラインプレイヤーのドラッグデータを保存しました")
 
                 plugin.load()
                 sender.sendMessage("$chatMessage§eドラッグのデータを読み込みました")
+                Bukkit.getLogger().info("ドラッグのデータを読み込みました")
 
                 for (p in Bukkit.getServer().onlinePlayers){
                     db.loadDataBase(p)
                 }
                 sender.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを読み込みました")
+                Bukkit.getLogger().info("オンラインプレイヤーのドラッグデータを読み込みました")
 
                 plugin.mdpfunc.reloadAllFile()
                 sender.sendMessage("$chatMessage§e全関数を再読み込みしました")
                 plugin.event!!.clearCooldown()
                 sender.sendMessage("$chatMessage§e全クールダウンをリセットしました")
+
+                Bukkit.getLogger().info("関数、クールダウン終了")
 
                 plugin.isTask = true
                 plugin.startDependenceTask()

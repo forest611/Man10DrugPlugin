@@ -199,7 +199,7 @@ class Man10DrugPlugin : JavaPlugin() {
 
                         val pd = db.get(p.name + drug)
 
-                        if (!pd.isDependence){
+                        if (!pd.isDependence || pd.symptomsTotal > c.symptomsCount!![pd.level]){
                             continue
                         }
 
@@ -212,7 +212,7 @@ class Man10DrugPlugin : JavaPlugin() {
                             依存レベルチェック、debugモードの場合は3分ごとに発生
 
                          */
-                        if ((pd.symptomsTotal >0 && c.symptomsNextTime!![pd.level] <= differenceTick.toInt() )
+                        if ((pd.symptomsTotal >0&&c.symptomsNextTime!![pd.level] <= differenceTick.toInt() )
                                 || c.symptomsTime!![pd.level] <= differenceTick.toInt()
                                 || (debug && differenceTick > 180)){
 
@@ -231,8 +231,10 @@ class Man10DrugPlugin : JavaPlugin() {
 
                             pd.level --
                             pd.usedLevel = 0
-                            if (pd.level < 0){
+                            if (pd.level <= 0){
                                 pd.level = 0
+
+                                pd.isDependence = false
                             }
                         }
                     }
