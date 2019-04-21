@@ -63,6 +63,11 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
 
             if (args.size == 1){
 
+                if (db.online.indexOf(sender) == -1){
+                    sender.sendMessage("§e現在データの読み込み中です.....")
+                    return true
+                }
+
                 sender.sendMessage("$chatMessage §e現在の依存状況(カウント、レベル)")
 
                 for (drug in plugin.drugName){

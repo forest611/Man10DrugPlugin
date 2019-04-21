@@ -20,6 +20,8 @@ class Man10DrugPlugin : JavaPlugin() {
     var playerLog = HashMap<Player,MutableList<String>>()//log
 
     lateinit var db : MDPDataBase
+    lateinit var disableWorld : MutableList<String>
+
 
     private val mdpConfig = MDPConfig(this)
     var event: MDPEvent? = null
@@ -131,9 +133,11 @@ class Man10DrugPlugin : JavaPlugin() {
 
         canMilk = config.getBoolean("CanUseMilk",false)
         stop = config.getBoolean("Stop",false)
+        disableWorld = config.getStringList("DisableWorld")
 
         config.set("CanUseMilk",canMilk)
         config.set("Stop",stop)
+        config.set("DisableWorld",disableWorld)
 
         saveConfig()
 
@@ -204,11 +208,32 @@ class Man10DrugPlugin : JavaPlugin() {
 
                         val differenceTick = (now - time) / 1000
 
-                        if (c.symptomsNextTime!![pd.level] <= differenceTick.toInt() || c.symptomsTime!![pd.level] <= differenceTick.toInt() ||
-                                (debug && differenceTick > 180)){
+                        /*
+                            依存レベルチェック、debugモードの場合は3分ごとに発生
+
+                         */
+                        if ((pd.symptomsTotal >0 && c.symptomsNextTime!![pd.level] <= differenceTick.toInt() )
+                                || c.symptomsTime!![pd.level] <= differenceTick.toInt()
+                                || (debug && differenceTick > 180)){
 
                             SymptomsTask(p,c,pd,this@Man10DrugPlugin,db,drug).run()
 
+                        }
+
+                        if(c.weakenProbability!!.size <= pd.level){
+                            continue
+                        }
+
+                        //確率で依存レベルを下げる
+                        val r = Random().nextInt(c.weakenProbability!![pd.level])+1
+
+                        if (r==1){
+
+                            pd.level --
+                            pd.usedLevel = 0
+                            if (pd.level < 0){
+                                pd.level = 0
+                            }
                         }
                     }
 

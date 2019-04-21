@@ -152,6 +152,11 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
     fun useDrug(player: Player,item: ItemStack,drug:String) {
 
 
+        if (plugin.disableWorld.indexOf(player.world.name) >= 1){
+            player.sendMessage("§eここではドラッグは使えません")
+            return
+        }
+
 
         if (cooldownMap.contains(player.uniqueId.toString() + " " + drug)) {
             return

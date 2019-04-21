@@ -88,6 +88,8 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
             data.symptomsNextTime = config.getLongList("SymptomsNextTime")
             data.symptomsCount = config.getIntegerList("SymptomsCount")
 
+            data.weakenProbability = config.getIntegerList("WeakenProb")
+
             getHashMap("BuffSymptoms",config,data.buffSymptoms)
             getHashMap("BuffSymptomsRandom",config,data.buffSymptomsRandom)
 
@@ -246,6 +248,7 @@ class Data{
     val commandRandomLvUp = HashMap<Int,MutableList<String>>()
 
     var nearPlayer : MutableList<String>? = null
+    var weakenProbability : MutableList<Int>? = null
 
     //func
     var funcLvUp : MutableList<String>? = null
