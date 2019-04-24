@@ -12,12 +12,13 @@ import org.bukkit.scheduler.BukkitRunnable
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 class Man10DrugPlugin : JavaPlugin() {
 
     var drugName = ArrayList<String>()  //command name
     var drugItemStack = HashMap<String,ItemStack>()//key drugName
-    var playerLog = HashMap<Player,MutableList<String>>()//log
+    var playerLog = ConcurrentHashMap<Player,MutableList<String>>()//log
 
     lateinit var db : MDPDataBase
     lateinit var disableWorld : MutableList<String>
@@ -218,25 +219,27 @@ class Man10DrugPlugin : JavaPlugin() {
 
                             SymptomsTask(p,c,pd,this@Man10DrugPlugin,db,drug).run()
 
+                            //確率で依存レベルを下げる
+                            val r = Random().nextInt(c.weakenProbability!![pd.level])+1
+
+                            if (r==1){
+
+                                pd.level --
+                                pd.usedLevel = 0
+                                if (pd.level <= 0){
+                                    pd.level = 0
+
+                                    pd.isDependence = false
+                                }
+                            }
+
+
                         }
 
-                        if(c.weakenProbability!!.size <= pd.level){
+                        if(c.weakenProbability == null||c.weakenProbability!!.size <= pd.level){
                             continue
                         }
 
-                        //確率で依存レベルを下げる
-                        val r = Random().nextInt(c.weakenProbability!![pd.level])+1
-
-                        if (r==1){
-
-                            pd.level --
-                            pd.usedLevel = 0
-                            if (pd.level <= 0){
-                                pd.level = 0
-
-                                pd.isDependence = false
-                            }
-                        }
                     }
 
                 }

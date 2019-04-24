@@ -5,17 +5,17 @@ import org.bukkit.entity.Player
 import java.sql.ResultSet
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
 
-    var playerMap = HashMap<String,playerData>()
+    var playerMap = ConcurrentHashMap<String,playerData>()
     var canConnect = true
     var online = ArrayList<Player>()
 
     ////////////////////////
     //DBのデータを読み込む
     ////////////////////////
-    @Synchronized
     fun loadDataBase(player: Player){
 
         if (!player.isOnline){
@@ -97,7 +97,6 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
     /////////////////////////////
     //データをDBに保存
     //////////////////////////
-    @Synchronized
     fun saveDataBase(player: Player){
 
         if (online.indexOf(player) == -1){
@@ -151,7 +150,6 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
 
     /////////////////////////
     //DBにログを保存
-    @Synchronized
     fun saveLog(player: Player,mysql: MySQLManager){
 
         val log = plugin.playerLog[player] ?: return

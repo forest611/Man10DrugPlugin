@@ -4,10 +4,11 @@ import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 class MDPConfig(val plugin: Man10DrugPlugin) {
 
-    val drugData = HashMap<String,Data>()
+    val drugData = ConcurrentHashMap<String,Data>()
 
     /////////////////
     //config 読み込み

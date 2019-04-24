@@ -193,6 +193,12 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
             }
         }
 
+        ////////////////////
+        //remove 1 item
+        item.amount = item.amount - 1
+        player.inventory.itemInMainHand = item
+
+
         Bukkit.getScheduler().runTask(plugin, Runnable {
             ////////////////////
             //command
@@ -544,11 +550,6 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
                 db.playerMap[key2] = pd2
 
             }
-
-            ////////////////////
-            //remove 1 item
-            item.amount = item.amount - 1
-            player.inventory.itemInMainHand = item
 
             ////////////////////
             //ログをメモリに保存、最後に使った時間を保存
