@@ -7,12 +7,11 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 
-class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecutor {
+class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase,val config : MDPConfig) : CommandExecutor {
 
 
     val permissionError = "§4§lYou don't have permission."
     val chatMessage = "§5[Man10DrugPlugin]"
-    val config = MDPConfig(plugin)
 
 
     override fun onCommand(sender: CommandSender?, command: Command?, label: String?, args: Array<out String>?): Boolean {
@@ -68,20 +67,25 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase) : CommandExecu
                     return true
                 }
 
-                sender.sendMessage("$chatMessage §e現在の依存状況(カウント、レベル)")
+                sender.sendMessage("$chatMessage §e現在の依存状況")
 
                 for (drug in plugin.drugName){
-                    val pd = db.playerMap[sender.name+drug]
+                    val c = config.drugData[drug]?:continue
 
-                    if (pd!!.usedLevel == 0 && pd.level == 0){
+                    if (!c.isDependence){
                         continue
                     }
-                    sender.sendMessage(
-                            "$chatMessage§e§l$drug" +
-                                    ":${pd.usedCount}" +
-                                    ",${pd.level}"
-                    )
+
+                    val pd = db.get(sender.name+drug)
+
+                    if (pd.usedLevel == 0 && pd.level == 0){
+                        continue
+                    }
+                    sender.sendMessage(chatMessage+c.dependenceMsg!![pd.level])
+
                 }
+
+                return true
             }
 
             ///////////////////////////////

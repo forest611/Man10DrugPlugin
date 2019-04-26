@@ -154,7 +154,7 @@ class Man10DrugPlugin : JavaPlugin() {
 
         event = MDPEvent(this,db,mdpConfig)
         Bukkit.getServer().pluginManager.registerEvents(event,this)
-        getCommand("mdp").executor = MDPCommand(this,db)
+        getCommand("mdp").executor = MDPCommand(this,db,mdpConfig)
 
         vault = VaultManager(this)
 
