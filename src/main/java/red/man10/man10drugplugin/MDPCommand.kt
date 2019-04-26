@@ -7,7 +7,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 
-class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase,val config : MDPConfig) : CommandExecutor {
+class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
 
 
     val permissionError = "§4§lYou don't have permission."
@@ -27,12 +27,10 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase,val config : MD
             val cmd = args[0]
 
             //使用状態をコマンドで
+            //vale using [player] [drug]
             if (cmd == "using" && args.size  == 3){
 
-                val e = MDPEvent(plugin,db,config)
-                try{
-                    e.useDrug(Bukkit.getPlayer(args[1]), plugin.drugItemStack[args[2]]!!,args[2])
-
+                try{ plugin.event!!.using(plugin.db.get(args[1]+args[2]),plugin.mdpConfig.get(args[2]),Bukkit.getPlayer(args[1]),args[2])
                 }catch (e:Exception){
                     Bukkit.getLogger().info("error:${e.message}")
                 }
@@ -62,7 +60,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase,val config : MD
 
             if (args.size == 1){
 
-                if (db.online.indexOf(sender) == -1){
+                if (plugin.db.online.indexOf(sender) == -1){
                     sender.sendMessage("§e現在データの読み込み中です.....")
                     return true
                 }
@@ -70,18 +68,18 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase,val config : MD
                 sender.sendMessage("$chatMessage §e現在の依存状況")
 
                 for (drug in plugin.drugName){
-                    val c = config.drugData[drug]?:continue
+                    val c = plugin.mdpConfig.drugData[drug]?:continue
 
                     if (!c.isDependence){
                         continue
                     }
 
-                    val pd = db.get(sender.name+drug)
+                    val pd = plugin.db.get(sender.name+drug)
 
                     if (pd.usedLevel == 0 && pd.level == 0){
                         continue
                     }
-                    sender.sendMessage(chatMessage+c.dependenceMsg!![pd.level])
+                    if(c.dependenceMsg != null){ sender.sendMessage("$chatMessage§e§l${c.displayName}:${c.dependenceMsg!![pd.level]}") }
 
                 }
 
@@ -97,7 +95,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase,val config : MD
 
                     for (drug in plugin.drugName){
 
-                        val pd = db.playerMap[args[1]+drug]
+                        val pd = plugin.db.playerMap[args[1]+drug]
 
                         if (pd!!.usedCount == 0 && pd.level == 0){
                             continue
@@ -140,7 +138,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase,val config : MD
 
             Thread(Runnable {
                 for (p in Bukkit.getServer().onlinePlayers){
-                    db.saveDataBase(p)
+                    plugin.db.saveDataBase(p)
                 }
 
                 sender.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを保存しました")
@@ -151,7 +149,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase,val config : MD
                 Bukkit.getLogger().info("ドラッグのデータを読み込みました")
 
                 for (p in Bukkit.getServer().onlinePlayers){
-                    db.loadDataBase(p)
+                    plugin.db.loadDataBase(p)
                 }
                 sender.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを読み込みました")
                 Bukkit.getLogger().info("オンラインプレイヤーのドラッグデータを読み込みました")
@@ -246,7 +244,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase,val config : MD
 
         if (cmd == "clear"){
             if (args.size !=3)return true
-            val pd = db.get(args[1]+args[2])
+            val pd = plugin.db.get(args[1]+args[2])
 
             pd.usedLevel = 0
             pd.level = 0
@@ -254,7 +252,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase,val config : MD
             pd.isDependence = false
             pd.usedCount = 0
 
-            db.playerMap[args[0]+args[1]] = pd
+            plugin.db.playerMap[args[0]+args[1]] = pd
 
             sender.sendMessage("$chatMessage§e§l${args[1]}§rの§l${args[2]}のドラッグデータを削除しました")
 
@@ -266,10 +264,10 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase,val config : MD
 
             Thread(Runnable {
 
-                val list = db.getDrugServerLevel(args[1])
+                val list = plugin.db.getDrugServerLevel(args[1])
 
 
-                sender.sendMessage("$chatMessage§e累計使用回数:§l${db.getDrugServerTotal(args[1])}")
+                sender.sendMessage("$chatMessage§e累計使用回数:§l${plugin.db.getDrugServerTotal(args[1])}")
                 sender.sendMessage("$chatMessage§e各依存レベルの依存人数")
                 for (i in 0 until list.size){
                     sender.sendMessage("$chatMessage§e§lLv.$i:${list[i]}")
@@ -300,21 +298,6 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase,val config : MD
             return true
         }
 
-        if (cmd == "set" &&args.size == 5){
-            val pd = db.get(args[1] + args[2])
-
-            pd.usedLevel = args[3].toInt()
-            pd.level = args[4].toInt()
-
-            if (config.get(args[2]).dependenceLevel <= args[4].toInt()){
-                pd.level = config.get(args[2]).dependenceLevel
-            }
-
-            sender.sendMessage("$chatMessage§e依存データを設定しました")
-
-            return true
-
-        }
 
         return true
     }
@@ -338,7 +321,6 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase,val config : MD
         player.sendMessage("$chatMessage§e/mdp using [player] [drug] ドラッグを消費せずにドラッグの使用状態を再現します(console用)")
         player.sendMessage("$chatMessage§e/mdp stat [drug] 指定ドラッグの利用統計を表示します")
         player.sendMessage("$chatMessage§e/mdp highspeed 禁断症状が3分毎に発生するようになります(デバッグ用)")
-        player.sendMessage("$chatMessage§e/mdp set [player] [drug] [count] [level] 依存データを設定します(デバッグ用)")
         player.sendMessage("---------------------------------------------------------")
 
         when(plugin.stop){
@@ -347,7 +329,7 @@ class MDPCommand (val plugin: Man10DrugPlugin,val db:MDPDataBase,val config : MD
 
         }
         player.sendMessage("")
-        when(db.canConnect){
+        when(plugin.db.canConnect){
             false -> player.sendMessage("$chatMessage§e§lMySQLの接続ができてません")
             true -> player.sendMessage("$chatMessage§e§lMySQLに接続できています")
 

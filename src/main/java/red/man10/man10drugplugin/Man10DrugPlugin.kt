@@ -24,11 +24,11 @@ class Man10DrugPlugin : JavaPlugin() {
     lateinit var disableWorld : MutableList<String>
 
 
-    private val mdpConfig = MDPConfig(this)
-    var event: MDPEvent? = null
+    val mdpConfig = MDPConfig(this)
 
     val mdpfunc = MDPFunction(this)
     var vault : VaultManager? = null
+    var event : MDPEvent? =null
 
     var canMilk = true // milkを使えるか
     var stop = false //止まっているか
@@ -145,16 +145,15 @@ class Man10DrugPlugin : JavaPlugin() {
         //drug load
         load()
 
-        db = MDPDataBase(this,mdpConfig)
+        db = MDPDataBase(this)
 
         for (p in Bukkit.getServer().onlinePlayers){
             db.loadDataBase(p)
         }
 
-
-        event = MDPEvent(this,db,mdpConfig)
+        event = MDPEvent(this)
         Bukkit.getServer().pluginManager.registerEvents(event,this)
-        getCommand("mdp").executor = MDPCommand(this,db,mdpConfig)
+        getCommand("mdp").executor = MDPCommand(this)
 
         vault = VaultManager(this)
 

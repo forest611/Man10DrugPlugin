@@ -77,6 +77,8 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
 
         data.removeBuffs = config.getBoolean("RemoveBuffs")
 
+        data.removeItem = config.getBoolean("RemoveItem",true)
+
         //type 0 only
         if (data.type == 0){
             data.isDependence = config.getBoolean("IsDependence") //禁断症状が出るか
@@ -222,6 +224,8 @@ class Data{
     var addStock = 0
 
     var removeBuffs = false
+
+    var removeItem = true
 
     //type0
     var isDependence = false

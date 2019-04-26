@@ -17,7 +17,7 @@ import java.text.SimpleDateFormat
 
 
 
-class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPConfig) : Listener {
+class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
 
     public var cooldownMap : MutableList<String> = ArrayList()
 
@@ -25,14 +25,14 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
     fun joinEvent(event:PlayerJoinEvent){
         Thread(Runnable {
             Thread.sleep(10000)
-            db.loadDataBase(event.player)
+            plugin.db.loadDataBase(event.player)
         }).start()
     }
 
     @EventHandler
     fun leftEvent(event:PlayerQuitEvent){
         Thread(Runnable {
-            db.saveDataBase(event.player)
+            plugin.db.saveDataBase(event.player)
         }).start()
     }
 
@@ -94,11 +94,11 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
 
         //ドラッグの数だけ実行
         for (i in 0 until plugin.drugName.size) {
-            val drug = config.get(plugin.drugName[i])
+            val drug = plugin.mdpConfig.get(plugin.drugName[i])
 
             val key = player.name + plugin.drugName[i]
 
-            val pd = db.get(key)
+            val pd = plugin.db.get(key)
 
 
             //壊すか
@@ -162,15 +162,15 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
             return
         }
 
-        if (plugin.stop || !db.canConnect) {
+        if (plugin.stop || !plugin.db.canConnect) {
             player.sendMessage("§e今は使う気分ではないようだ")
             return
         }
 ////////////////////////////////////////////////////////////
         val key = player.name + drug
 
-        val pd = db.get(key)
-        val drugData = config.get(drug)
+        val pd = plugin.db.get(key)
+        val drugData = plugin.mdpConfig.get(drug)
 
         ////////////////////////
         //cooldown
@@ -185,6 +185,65 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
         }, drugData.cooldown)
 
 
+
+        ////////////////////
+        //remove 1 item
+        if (drugData.removeItem){
+            item.amount = item.amount - 1
+            player.inventory.itemInMainHand = item
+        }
+
+        using(pd,drugData,player,drug)
+
+        ////////////////////////
+        // Func
+        ///////////////////////
+        if (drugData.func != null) {
+            for (funcname in drugData.func!!) {
+                plugin.mdpfunc.runFunc(player, funcname)
+            }
+        }
+        ////////////////////////
+        // FuncDelay
+        ///////////////////////
+        if (drugData.funcDelay != null) {
+            for (funcname in drugData.funcDelay!!) {
+                val times = funcname.split(";")
+                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
+                    plugin.mdpfunc.runFunc(player, times[0])
+                }, times[1].toLong())
+            }
+        }
+        ////////////////////////
+        // FuncRandom
+        ///////////////////////
+        if (drugData.funcRandom != null && drugData.funcRandom!!.size > 0) {
+            val rnd = SecureRandom()
+            val r = rnd.nextInt(drugData.funcRandom!!.size)
+            val s = drugData.funcRandom!![r]
+            plugin.mdpfunc.runFunc(player, s)
+        }
+        ////////////////////////
+        // FuncRandomDelay
+        ///////////////////////
+        if (drugData.funcRandomDelay != null && drugData.funcRandomDelay!!.size > 0) {
+            val rnd = SecureRandom()
+            val r = rnd.nextInt(drugData.funcRandomDelay!!.size)
+            val funcname = drugData.funcRandomDelay!![r]
+            val times = funcname.split(";")
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
+                plugin.mdpfunc.runFunc(player, times[0])
+            }, times[1].toLong())
+        }
+
+    }
+
+
+    ///////////////////////////////////
+    //      サブスレッドで動かす処理
+    ///////////////////////////////
+    fun using(pd:playerData,drugData:Data,player: Player,drug:String){
+
         /////////////////////////
         //remove buff
         if (drugData.removeBuffs){
@@ -192,12 +251,6 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
                 player.removePotionEffect(effect.type)
             }
         }
-
-        ////////////////////
-        //remove 1 item
-        item.amount = item.amount - 1
-        player.inventory.itemInMainHand = item
-
 
         Bukkit.getScheduler().runTask(plugin, Runnable {
             ////////////////////
@@ -508,11 +561,11 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
                 ///////////////////////
                 //治療薬の効果削除
                 if (drugData.weakDrug != "none"){
-                    val weak = db.get(player.name+drugData.weakDrug)
+                    val weak = plugin.db.get(player.name+drugData.weakDrug)
 
                     weak.usedLevel = 0
 
-                    db.playerMap[player.name+drugData.weakDrug] = weak
+                    plugin.db.playerMap[player.name+drugData.weakDrug] = weak
 
                 }
 
@@ -529,7 +582,7 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
             if (drugData.type == 1) {
 
                 val key2 = player.name + drugData.weakDrug
-                val pd2 = db.get(key2)
+                val pd2 = plugin.db.get(key2)
 
                 if (pd2.level <= 0 && pd2.usedLevel <= 0) {
                     player.sendMessage("§aあれ？.....解毒薬を飲む必要ってあるのかな...")
@@ -547,13 +600,13 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
                     }
                 }
 
-                db.playerMap[key2] = pd2
+                plugin.db.playerMap[key2] = pd2
 
             }
 
             ////////////////////
             //ログをメモリに保存、最後に使った時間を保存
-            db.addLog(player, drug)
+            plugin.db.addLog(player, drug)
 
 
             ////////////////////////
@@ -581,52 +634,9 @@ class MDPEvent(val plugin: Man10DrugPlugin, val db:MDPDataBase,val config:MDPCon
             }
 
             //player data save memory
-            db.playerMap[key] = pd
+            plugin.db.playerMap[player.name+drug] = pd
 
         })
-
-
-
-        ////////////////////////
-        // Func
-        ///////////////////////
-        if (drugData.func != null) {
-            for (funcname in drugData.func!!) {
-                plugin.mdpfunc.runFunc(player, funcname)
-            }
-        }
-        ////////////////////////
-        // FuncDelay
-        ///////////////////////
-        if (drugData.funcDelay != null) {
-            for (funcname in drugData.funcDelay!!) {
-                val times = funcname.split(";")
-                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
-                    plugin.mdpfunc.runFunc(player, times[0])
-                }, times[1].toLong())
-            }
-        }
-        ////////////////////////
-        // FuncRandom
-        ///////////////////////
-        if (drugData.funcRandom != null && drugData.funcRandom!!.size > 0) {
-            val rnd = SecureRandom()
-            val r = rnd.nextInt(drugData.funcRandom!!.size)
-            val s = drugData.funcRandom!![r]
-            plugin.mdpfunc.runFunc(player, s)
-        }
-        ////////////////////////
-        // FuncRandomDelay
-        ///////////////////////
-        if (drugData.funcRandomDelay != null && drugData.funcRandomDelay!!.size > 0) {
-            val rnd = SecureRandom()
-            val r = rnd.nextInt(drugData.funcRandomDelay!!.size)
-            val funcname = drugData.funcRandomDelay!![r]
-            val times = funcname.split(";")
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
-                plugin.mdpfunc.runFunc(player, times[0])
-            }, times[1].toLong())
-        }
 
     }
 

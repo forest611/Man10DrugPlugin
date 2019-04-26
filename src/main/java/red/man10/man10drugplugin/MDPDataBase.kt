@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
+class MDPDataBase(val plugin: Man10DrugPlugin){
 
     var playerMap = ConcurrentHashMap<String,playerData>()
     var canConnect = true
@@ -32,7 +32,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
 
         for (name in plugin.drugName){
 
-            val drugData = config.get(name)
+            val drugData = plugin.mdpConfig.get(name)
             val key = player.name+name
 
             val data = get(key)
@@ -115,7 +115,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin,val config:MDPConfig){
 
         for (i in 0 until plugin.drugName.size){
 
-            val drugData = config.get(plugin.drugName[i])
+            val drugData = plugin.mdpConfig.get(plugin.drugName[i])
 
 
             if (drugData.type != 0 && drugData.type != 1){
