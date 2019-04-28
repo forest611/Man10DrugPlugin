@@ -25,14 +25,20 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
     fun joinEvent(event:PlayerJoinEvent){
         Thread(Runnable {
             Thread.sleep(10000)
-            plugin.db.loadDataBase(event.player)
+            if(plugin.reload){return@Runnable }
+            val mysql = MySQLManager(plugin,"man10drugplugin")
+            plugin.db.loadDataBase(event.player,mysql)
+            mysql.close()
         }).start()
     }
 
     @EventHandler
     fun leftEvent(event:PlayerQuitEvent){
+        if(plugin.reload){ return}
         Thread(Runnable {
-            plugin.db.saveDataBase(event.player)
+            val mysql = MySQLManager(plugin,"man10drugplugin")
+            plugin.db.saveDataBase(event.player,mysql)
+            mysql.close()
         }).start()
     }
 
@@ -51,6 +57,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
             if (item.itemMeta.lore == null)return
             if (item.itemMeta.lore.isEmpty())return
             if (item.type == Material.AIR)return
+            if (plugin.reload)return
 
             val drug = item.itemMeta.lore[item.itemMeta.lore.size -1].replace("§","")
 
@@ -68,7 +75,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
     //milk対策
     @EventHandler
     fun foodEvent(event:PlayerItemConsumeEvent){
-        if(event.item.type == Material.MILK_BUCKET){
+        if(event.item.type == Material.MILK_BUCKET && !plugin.canMilk && !event.player.hasPermission("man10drug.milk")){
             event.isCancelled = true
             return
         }
@@ -467,7 +474,6 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
                 val list = getNearByPlayers(player, data[0].toInt())
                 for (p in list) {
                     plugin.mdpfunc.runFunc(p, data[1])
-                    Bukkit.getLogger().info(p.name + "func")
                 }
             }
 

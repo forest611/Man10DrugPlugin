@@ -37,6 +37,8 @@ class Man10DrugPlugin : JavaPlugin() {
 
     var debug = false
 
+    var reload = false
+
     //task作成
 
 
@@ -147,9 +149,11 @@ class Man10DrugPlugin : JavaPlugin() {
 
         db = MDPDataBase(this)
 
+        val mysql = MySQLManager(this,"man10drugplugin")
         for (p in Bukkit.getServer().onlinePlayers){
-            db.loadDataBase(p)
+            db.loadDataBase(p,mysql)
         }
+        mysql.close()
 
         event = MDPEvent(this)
         Bukkit.getServer().pluginManager.registerEvents(event,this)
@@ -169,9 +173,11 @@ class Man10DrugPlugin : JavaPlugin() {
 
         cancelTask()
 
+        val mysql = MySQLManager(this,"man10drugplugin")
         for (player in Bukkit.getServer().onlinePlayers){
-            db.saveDataBase(player)
+            db.saveDataBase(player,mysql)
         }
+        mysql.close()
     }
 
 
@@ -219,20 +225,20 @@ class Man10DrugPlugin : JavaPlugin() {
                             SymptomsTask(p,c,pd,this@Man10DrugPlugin,db,drug).run()
 
                             //確率で依存レベルを下げる
-                            val r = Random().nextInt(c.weakenProbability!![pd.level])+1
+                            if (c.weakenProbability != null){
+                                val r = Random().nextInt(c.weakenProbability!![pd.level])+1
 
-                            if (r==1){
+                                if (r==1){
 
-                                pd.level --
-                                pd.usedLevel = 0
-                                if (pd.level <= 0){
-                                    pd.level = 0
+                                    pd.level --
+                                    pd.usedLevel = 0
+                                    if (pd.level <= 0){
+                                        pd.level = 0
 
-                                    pd.isDependence = false
+                                        pd.isDependence = false
+                                    }
                                 }
                             }
-
-
                         }
 
                         if(c.weakenProbability == null||c.weakenProbability!!.size <= pd.level){

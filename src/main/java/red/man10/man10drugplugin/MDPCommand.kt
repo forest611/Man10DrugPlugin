@@ -136,9 +136,14 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
 
             plugin.cancelTask()
 
+            plugin.reload = true
+
             Thread(Runnable {
+
+                val mysql = MySQLManager(plugin,"man10drugPlugin")
+
                 for (p in Bukkit.getServer().onlinePlayers){
-                    plugin.db.saveDataBase(p)
+                    plugin.db.saveDataBase(p,mysql)
                 }
 
                 sender.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを保存しました")
@@ -149,8 +154,10 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
                 Bukkit.getLogger().info("ドラッグのデータを読み込みました")
 
                 for (p in Bukkit.getServer().onlinePlayers){
-                    plugin.db.loadDataBase(p)
+                    plugin.db.loadDataBase(p,mysql)
                 }
+
+                mysql.close()
                 sender.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを読み込みました")
                 Bukkit.getLogger().info("オンラインプレイヤーのドラッグデータを読み込みました")
 
@@ -166,8 +173,8 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
 
                 Bukkit.broadcastMessage("${chatMessage}§eドラッグプラグインのリロード完了 みんな使いまくってね！")
 
+                plugin.reload = false
             }).start()
-
         }
 
         if (cmd == "list"){
@@ -295,6 +302,11 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
 
 
 
+            return true
+        }
+
+        if(cmd == "restore"){
+            plugin.reload = false
             return true
         }
 

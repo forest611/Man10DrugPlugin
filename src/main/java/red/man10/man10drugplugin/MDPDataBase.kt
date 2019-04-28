@@ -16,13 +16,13 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
     ////////////////////////
     //DBのデータを読み込む
     ////////////////////////
-    fun loadDataBase(player: Player){
+    fun loadDataBase(player: Player,mysql: MySQLManager){
 
         if (!player.isOnline){
             return
         }
 
-        val mysql = MySQLManager(plugin,"man10drugPlugin")
+//        val mysql = MySQLManager(plugin,"man10drugPlugin")
 
         if (!canConnect){
             Bukkit.getLogger().info("MySQLに接続できません")
@@ -90,20 +90,20 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
 
         Bukkit.getLogger().info(player.name+"...Loaded DB")
 
-        mysql.close()
+//        mysql.close()
 
     }
 
     /////////////////////////////
     //データをDBに保存
     //////////////////////////
-    fun saveDataBase(player: Player){
+    fun saveDataBase(player: Player,mysql: MySQLManager){
 
         if (online.indexOf(player) == -1){
             return
         }
 
-        val mysql = MySQLManager(plugin,"man10drugPlugin")
+//        val mysql = MySQLManager(plugin,"man10drugPlugin")
 
         if (!canConnect){
             Bukkit.getLogger().info("MySQLに接続できません")
@@ -144,7 +144,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
         saveLog(player,mysql)
         Bukkit.getLogger().info("${player.name}...save Logs")
 
-        mysql.close()
+//        mysql.close()
 
     }
 

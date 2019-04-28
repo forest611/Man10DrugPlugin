@@ -99,7 +99,7 @@ public class MDPFunction {
             return false;
         }
         FuncData data = list.get(name);
-        Bukkit.getScheduler().runTaskAsynchronously(plugin,()->{
+        Bukkit.getScheduler().runTask(plugin,()->{
 
             //conditions
             for(String s: data.conditions){
@@ -213,29 +213,30 @@ public class MDPFunction {
                     runFunc(p,timess[0]);
                 },Long.parseLong(timess[1]));
             }
+            //buff
+            for (String b : data.buff){
+                String[] buf = b.split(",");
+                p.addPotionEffect(new PotionEffect(
+                        PotionEffectType.getByName(buf[0]),
+                        Integer.parseInt(buf[1]),
+                        Integer.parseInt(buf[2])));
+
+            }
+            //buff random
+            if (data.buffRandom.size() != 0){
+                Random rnd = new SecureRandom();
+                int r = rnd.nextInt(data.cmdRandom.size());
+
+                String[] buf = data.buff.get(r).split(",");
+                p.addPotionEffect(new PotionEffect(
+                        PotionEffectType.getByName(buf[0]),
+                        Integer.parseInt(buf[1]),
+                        Integer.parseInt(buf[2])));
+
+            }
+
         });
 
-        //buff
-        for (String b : data.buff){
-            String[] buf = b.split(",");
-            p.addPotionEffect(new PotionEffect(
-                    PotionEffectType.getByName(buf[0]),
-                    Integer.parseInt(buf[1]),
-                    Integer.parseInt(buf[2])));
-
-        }
-        //buff random
-        if (data.buffRandom.size() != 0){
-            Random rnd = new SecureRandom();
-            int r = rnd.nextInt(data.cmdRandom.size());
-
-            String[] buf = data.buff.get(r).split(",");
-            p.addPotionEffect(new PotionEffect(
-                    PotionEffectType.getByName(buf[0]),
-                    Integer.parseInt(buf[1]),
-                    Integer.parseInt(buf[2])));
-
-        }
 
         return true;
     }
