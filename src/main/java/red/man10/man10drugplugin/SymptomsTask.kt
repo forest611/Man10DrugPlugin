@@ -80,7 +80,7 @@ class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData,val 
             for (i in 0 until drugData.soundSymptoms[pd.level]!!.size){
                 val sound = drugData.soundSymptoms[pd.level]!![i].split(",")
 
-                player.world.playSound(player.location, Sound.valueOf(sound[0]),sound[1].toFloat(),sound[2].toFloat())
+                player.world.playSound(player.location, sound[0],sound[1].toFloat(),sound[2].toFloat())
             }
         }
 
@@ -92,7 +92,7 @@ class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData,val 
             val sound = drugData.soundSymptomsRandom[pd.level]!![Random()
                     .nextInt(drugData.soundSymptomsRandom[pd.level]!!.size -1)].split(",")
 
-            player.world.playSound(player.location, Sound.valueOf(sound[0]),sound[1].toFloat(),sound[2].toFloat())
+            player.world.playSound(player.location, sound[0],sound[1].toFloat(),sound[2].toFloat())
         }
 
         ////////////////////////
@@ -118,6 +118,18 @@ class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData,val 
             player.world.spawnParticle(Particle.valueOf(particle[0]), player.location, particle[1].toInt())
 
         }
+
+        /////////////////////////
+        //周囲に迷惑
+        ///////////////////////
+        if (drugData.symptomsNearPlayer != null && plugin.size(drugData.symptomsNearPlayer!!, pd)) {
+            val data = drugData.symptomsNearPlayer!![pd.level].split(";")
+            val list = plugin.event!!.getNearByPlayers(player, data[0].toInt())
+            for (p in list) {
+                plugin.mdpfunc.runFunc(p, data[1])
+            }
+        }
+
 
         //send msg
         if (drugData.msgSymptoms != null && plugin.size(drugData.msgSymptoms!!,pd)){

@@ -424,7 +424,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
             if (drugData.sound[pd.level] != null) {
                 for (s in drugData.sound[pd.level]!!) {
                     val sound = s.split(",")
-                    player.world.playSound(player.location, Sound.valueOf(sound[0]), sound[1].toFloat(), sound[2].toFloat())
+                    player.world.playSound(player.location, sound[0], sound[1].toFloat(), sound[2].toFloat())
                 }
             }
 
@@ -436,7 +436,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
                 val sound = drugData.soundRandom[pd.level]!![Random()
                         .nextInt(drugData.soundRandom[pd.level]!!.size - 1)].split(",")
 
-                player.world.playSound(player.location, Sound.valueOf(sound[0]), sound[1].toFloat(), sound[2].toFloat())
+                player.world.playSound(player.location, sound[0], sound[1].toFloat(), sound[2].toFloat())
             }
 
             ////////////////////////
@@ -449,7 +449,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
                     val sound = time[0].split(",")
 
                     Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
-                        player.world.playSound(player.location, Sound.valueOf(sound[0]), sound[1].toFloat()
+                        player.world.playSound(player.location, sound[0], sound[1].toFloat()
                                 , sound[2].toFloat())
                     }, time[1].toLong())
                 }
@@ -463,7 +463,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
                         .nextInt(drugData.soundRandomDelay[pd.level]!!.size - 1)].split(";")
                 val sound = time[0].split(",")
 
-                player.world.playSound(player.location, Sound.valueOf(sound[0]), sound[1].toFloat(), sound[2].toFloat())
+                player.world.playSound(player.location, sound[0], sound[1].toFloat(), sound[2].toFloat())
             }
 
             /////////////////////////
@@ -649,7 +649,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
 
     ///////////////////////////
     //周囲のプレイヤーを検知
-    private fun getNearByPlayers(centerPlayer:Player, distance:Int):ArrayList<Player>{
+    fun getNearByPlayers(centerPlayer:Player, distance:Int):ArrayList<Player>{
         val ds = distance*distance
         val players = ArrayList<Player>()
         val loc = centerPlayer.location

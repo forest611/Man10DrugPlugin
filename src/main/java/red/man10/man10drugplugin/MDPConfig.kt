@@ -117,6 +117,9 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
 
             data.dependenceMsg = config.getStringList("DependenceMsg")
 
+            data.nearPlayer = config.getStringList("SymptomsNearPlayer")
+
+
         }
 
         //type1
@@ -255,6 +258,7 @@ class Data{
     val commandRandomLvUp = HashMap<Int,MutableList<String>>()
 
     var nearPlayer : MutableList<String>? = null
+    var symptomsNearPlayer : MutableList<String>? = null
     var dependenceMsg : MutableList<String>? = null
     var weakenProbability : MutableList<Int>? = null
 

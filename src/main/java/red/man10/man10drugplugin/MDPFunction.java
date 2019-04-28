@@ -268,7 +268,7 @@ public class MDPFunction {
 
     public void playSound(Player p ,String s){
         String[] sounds = s.split(",");
-        p.getWorld().playSound(p.getLocation(), Sound.valueOf(sounds[0]),Float.parseFloat(sounds[1]),Float.parseFloat(sounds[2]));
+        p.getWorld().playSound(p.getLocation(), sounds[0],Float.parseFloat(sounds[1]),Float.parseFloat(sounds[2]));
     }
 
     public String rep(Player p,String s){

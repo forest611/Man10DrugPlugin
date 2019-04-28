@@ -46,13 +46,33 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
                 continue
             }
 
-            var rs : ResultSet = selectRecord(mysql,player,name)
+            var sql = "SELECT " +
+                    "used_count," +
+                    "used_level," +
+                    "used_time," +
+                    "level," +
+                    "symptoms_total " +
+                    "FROM drug_dependence " +
+                    "WHERE uuid='${player.uniqueId}' "+
+                    "and drug_name='$name';"
+
+            var rs : ResultSet = mysql.query(sql)
 
             if (!rs.next()){
 
                 addRecord(mysql,player,name)
 
-                rs = selectRecord(mysql,player,name)
+                sql = "SELECT " +
+                        "used_count," +
+                        "used_level," +
+                        "used_time," +
+                        "level," +
+                        "symptoms_total " +
+                        "FROM drug_dependence " +
+                        "WHERE uuid='${player.uniqueId}' "+
+                        "and drug_name='$name';"
+
+                rs = mysql.query(sql)
 
                 Bukkit.getLogger().info("${player.name}...insert $name")
 
@@ -200,22 +220,6 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
 
         mysql.execute(sql)
 
-    }
-
-    //////////////////
-    //select
-    private fun selectRecord(mysql:MySQLManager,player: Player,drug:String):ResultSet{
-        val sql = "SELECT " +
-                "used_count," +
-                "used_level," +
-                "used_time," +
-                "level," +
-                "symptoms_total " +
-                "FROM drug_dependence " +
-                "WHERE uuid='${player.uniqueId}' "+
-                "and drug_name='$drug';"
-
-        return mysql.query(sql)
     }
 
     ///////////////////////
