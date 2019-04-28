@@ -117,7 +117,7 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
 
             data.dependenceMsg = config.getStringList("DependenceMsg")
 
-            data.nearPlayer = config.getStringList("SymptomsNearPlayer")
+            data.symptomsNearPlayer = config.getStringList("SymptomsNearPlayer")
 
 
         }

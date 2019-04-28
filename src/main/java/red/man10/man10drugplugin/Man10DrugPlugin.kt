@@ -205,7 +205,7 @@ class Man10DrugPlugin : JavaPlugin() {
 
                         val pd = db.get(p.name + drug)
 
-                        if (!pd.isDependence || pd.symptomsTotal > c.symptomsCount!![pd.level]){
+                        if (!pd.isDependence || (pd.symptomsTotal > c.symptomsCount!![pd.level] &&c.symptomsCount!![pd.level] !=0)){
                             continue
                         }
 
@@ -225,7 +225,7 @@ class Man10DrugPlugin : JavaPlugin() {
                             SymptomsTask(p,c,pd,this@Man10DrugPlugin,db,drug).run()
 
                             //確率で依存レベルを下げる
-                            if (c.weakenProbability != null){
+                            if (c.weakenProbability != null && c.weakenProbability!!.isNotEmpty()){
                                 val r = Random().nextInt(c.weakenProbability!![pd.level])+1
 
                                 if (r==1){
@@ -241,9 +241,6 @@ class Man10DrugPlugin : JavaPlugin() {
                             }
                         }
 
-                        if(c.weakenProbability == null||c.weakenProbability!!.size <= pd.level){
-                            continue
-                        }
 
                     }
 
