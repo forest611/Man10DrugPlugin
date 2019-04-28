@@ -2,10 +2,12 @@
   <library name="Gradle: com.sk89q.worldedit:worldedit-bukkit:6.1.3-SNAPSHOT">
     <CLASSES>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.sk89q.worldedit/worldedit-bukkit/6.1.3-SNAPSHOT/f89222d229bcb1b670c260885e9e459a5ac9776a/worldedit-bukkit-6.1.3-SNAPSHOT.jar!/" />
+      <root url="jar://C:/gradle/gradle-5.3.1/caches/modules-2/files-2.1/com.sk89q.worldedit/worldedit-bukkit/6.1.3-SNAPSHOT/f89222d229bcb1b670c260885e9e459a5ac9776a/worldedit-bukkit-6.1.3-SNAPSHOT.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.sk89q.worldedit/worldedit-bukkit/6.1.3-SNAPSHOT/ba62d7cfa7796c15e2332a617850518700ef5117/worldedit-bukkit-6.1.3-SNAPSHOT-sources.jar!/" />
+      <root url="jar://C:/gradle/gradle-5.3.1/caches/modules-2/files-2.1/com.sk89q.worldedit/worldedit-bukkit/6.1.3-SNAPSHOT/ba62d7cfa7796c15e2332a617850518700ef5117/worldedit-bukkit-6.1.3-SNAPSHOT-sources.jar!/" />
     </SOURCES>
   </library>
 </component>
