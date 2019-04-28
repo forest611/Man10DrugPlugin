@@ -28,7 +28,6 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
             if(plugin.reload){return@Runnable }
             val mysql = MySQLManager(plugin,"man10drugplugin")
             plugin.db.loadDataBase(event.player,mysql)
-            mysql.close()
         }).start()
     }
 
@@ -38,7 +37,6 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
         Thread(Runnable {
             val mysql = MySQLManager(plugin,"man10drugplugin")
             plugin.db.saveDataBase(event.player,mysql)
-            mysql.close()
         }).start()
     }
 

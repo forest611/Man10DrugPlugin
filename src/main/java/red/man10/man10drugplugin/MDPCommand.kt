@@ -157,7 +157,6 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
                     plugin.db.loadDataBase(p,mysql)
                 }
 
-                mysql.close()
                 sender.sendMessage("$chatMessage§eオンラインプレイヤーのドラッグデータを読み込みました")
                 Bukkit.getLogger().info("オンラインプレイヤーのドラッグデータを読み込みました")
 

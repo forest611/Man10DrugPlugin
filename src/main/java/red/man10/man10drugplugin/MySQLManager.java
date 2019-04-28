@@ -185,8 +185,8 @@ public class MySQLManager {
             ret = false;
 
         }
+        //this.close();
 
-//        this.close();
         return ret;
     }
 
@@ -214,7 +214,6 @@ public class MySQLManager {
             this.plugin.getLogger().info(query);
         }
 
-//        this.close();
 
         return rs;
     }
@@ -226,7 +225,6 @@ public class MySQLManager {
             this.st.close();
             this.con.close();
             this.MySQL.close(this.con);
-            Bukkit.getLogger().info("MySQL closed");
 
         } catch (SQLException var4) {
             Bukkit.getLogger().info(var4.getMessage());

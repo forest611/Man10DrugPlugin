@@ -74,9 +74,13 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
 
                 rs = mysql.query(sql)
 
+
+
                 Bukkit.getLogger().info("${player.name}...insert $name")
 
                 rs.next()
+
+
             }
 
             try{
@@ -88,7 +92,11 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
                 data.time.time = rs.getLong("used_time")
                 data.usedCount = rs.getInt("used_count")
 
+                mysql.close()
+                mysql.close()
                 rs.close()
+
+
 
                 if (data.usedLevel > 0 || data.level > 0){
                     data.isDependence = true
@@ -110,8 +118,6 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
 
         Bukkit.getLogger().info(player.name+"...Loaded DB")
 
-//        mysql.close()
-
     }
 
     /////////////////////////////
@@ -123,7 +129,6 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
             return
         }
 
-//        val mysql = MySQLManager(plugin,"man10drugPlugin")
 
         if (!canConnect){
             Bukkit.getLogger().info("MySQLに接続できません")
@@ -164,7 +169,6 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
         saveLog(player,mysql)
         Bukkit.getLogger().info("${player.name}...save Logs")
 
-//        mysql.close()
 
     }
 

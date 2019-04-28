@@ -153,7 +153,6 @@ class Man10DrugPlugin : JavaPlugin() {
         for (p in Bukkit.getServer().onlinePlayers){
             db.loadDataBase(p,mysql)
         }
-        mysql.close()
 
         event = MDPEvent(this)
         Bukkit.getServer().pluginManager.registerEvents(event,this)
@@ -173,11 +172,10 @@ class Man10DrugPlugin : JavaPlugin() {
 
         cancelTask()
 
-        val mysql = MySQLManager(this,"man10drugplugin")
+        val mysql = MySQLManager(this,"say man10drugplugin")
         for (player in Bukkit.getServer().onlinePlayers){
             db.saveDataBase(player,mysql)
         }
-        mysql.close()
     }
 
 
