@@ -9,6 +9,7 @@ import org.bukkit.event.player.*
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
+import red.man10.man10drugplugin.test.MySQLManagerV2
 import java.security.SecureRandom
 import java.text.DateFormat
 import java.util.*
@@ -26,7 +27,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
         Thread(Runnable {
             Thread.sleep(10000)
             if(plugin.reload){return@Runnable }
-            val mysql = MySQLManager(plugin,"man10drugplugin")
+            val mysql = MySQLManagerV2(plugin,"man10drugplugin")
             plugin.db.loadDataBase(event.player,mysql)
         }).start()
     }
@@ -35,7 +36,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
     fun leftEvent(event:PlayerQuitEvent){
         if(plugin.reload){ return}
         Thread(Runnable {
-            val mysql = MySQLManager(plugin,"man10drugplugin")
+            val mysql = MySQLManagerV2(plugin,"man10drugplugin")
             plugin.db.saveDataBase(event.player,mysql)
         }).start()
     }

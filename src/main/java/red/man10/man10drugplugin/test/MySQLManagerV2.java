@@ -187,7 +187,7 @@ public class MySQLManagerV2 {
         }
     }
 
-    class Query {
+    public class Query {
         private ResultSet rs = null;
         private MySQLConnectV2 connect;
 

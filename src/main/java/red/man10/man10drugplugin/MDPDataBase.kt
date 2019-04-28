@@ -2,10 +2,12 @@ package red.man10.man10drugplugin
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import red.man10.man10drugplugin.test.MySQLManagerV2
 import java.sql.ResultSet
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import red.man10.man10drugplugin.test.MySQLManagerV2.Query as Query
 
 class MDPDataBase(val plugin: Man10DrugPlugin){
 
@@ -16,13 +18,12 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
     ////////////////////////
     //DBのデータを読み込む
     ////////////////////////
-    fun loadDataBase(player: Player,mysql: MySQLManager){
+    fun loadDataBase(player: Player,mysql: MySQLManagerV2){
 
         if (!player.isOnline){
             return
         }
 
-//        val mysql = MySQLManager(plugin,"man10drugPlugin")
 
         if (!canConnect){
             Bukkit.getLogger().info("MySQLに接続できません")
@@ -56,7 +57,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
                     "WHERE uuid='${player.uniqueId}' "+
                     "and drug_name='$name';"
 
-            var rs : ResultSet = mysql.query(sql)
+            var rs : ResultSet = mysql.query(sql).rs
 
             if (!rs.next()){
 
@@ -72,14 +73,11 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
                         "WHERE uuid='${player.uniqueId}' "+
                         "and drug_name='$name';"
 
-                rs = mysql.query(sql)
-
-
+                rs = mysql.query(sql).rs
 
                 Bukkit.getLogger().info("${player.name}...insert $name")
 
                 rs.next()
-
 
             }
 
@@ -91,12 +89,6 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
                 data.time = Date()
                 data.time.time = rs.getLong("used_time")
                 data.usedCount = rs.getInt("used_count")
-
-                mysql.close()
-                mysql.close()
-                rs.close()
-
-
 
                 if (data.usedLevel > 0 || data.level > 0){
                     data.isDependence = true
@@ -123,7 +115,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
     /////////////////////////////
     //データをDBに保存
     //////////////////////////
-    fun saveDataBase(player: Player,mysql: MySQLManager){
+    fun saveDataBase(player: Player,mysql: MySQLManagerV2){
 
         if (online.indexOf(player) == -1){
             return
@@ -174,7 +166,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
 
     /////////////////////////
     //DBにログを保存
-    fun saveLog(player: Player,mysql: MySQLManager){
+    fun saveLog(player: Player,mysql: MySQLManagerV2){
 
         val log = plugin.playerLog[player] ?: return
 
@@ -216,7 +208,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
 
     ////////////////////////
     //プレイヤーレコード追加
-    private fun addRecord(mysql:MySQLManager,player:Player,drug:String){
+    private fun addRecord(mysql:MySQLManagerV2,player:Player,drug:String){
         val sql = "INSERT INTO drug_dependence " +
                 "VALUES('${player.uniqueId}'," +
                 "'${player.name}'," +
