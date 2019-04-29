@@ -1,25 +1,25 @@
 package red.man10.man10drugplugin;
 
-/**
- * Created by takatronix on 2017/03/05.
- */
-
 import org.bukkit.Bukkit;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.logging.Level;
 
-public class MySQLFunc {
+public class MySQLConnectV2 {
+
     String HOST = null;
     String DB = null;
     String USER = null;
     String PASS = null;
     String PORT = null;
     private Connection con = null;
+    private Statement st = null;
+    private boolean closed = false;
 
-    public MySQLFunc(String host, String db, String user, String pass,String port) {
+    public MySQLConnectV2(String host, String db, String user, String pass,String port) {
         this.HOST = host;
         this.DB = db;
         this.USER = user;
@@ -31,14 +31,13 @@ public class MySQLFunc {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             this.con = DriverManager.getConnection("jdbc:mysql://" + this.HOST + ":" + this.PORT +"/" + this.DB + "?useSSL=false", this.USER, this.PASS );
+            this.st = con.createStatement();
             return this.con;
         } catch (SQLException var2) {
             Bukkit.getLogger().log(Level.SEVERE, "Could not connect to MySQL server, error code: " + var2.getErrorCode());
         } catch (ClassNotFoundException var3) {
             Bukkit.getLogger().log(Level.SEVERE, "JDBC driver was not found in this machine.");
         }
-
-
         return this.con;
     }
 
@@ -46,15 +45,21 @@ public class MySQLFunc {
         return this.con != null;
     }
 
-    public void close(Connection c) {
-        c = null;
+    public void close() {
+        try {
+            this.con.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        closed = true;
     }
 
-    public Connection getCon() {
-        return this.con;
+    public Statement getSt() {
+        return st;
     }
 
-    public void setCon(Connection con) {
-        this.con = con;
+    public boolean isClosed() {
+        return closed;
     }
+
 }

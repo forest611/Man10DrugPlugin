@@ -8,10 +8,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
-import org.bukkit.scheduler.BukkitRunnable
-import red.man10.man10drugplugin.test.MySQLManagerV2
 import java.io.File
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -150,7 +147,7 @@ class Man10DrugPlugin : JavaPlugin() {
 
         db = MDPDataBase(this)
 
-        val mysql = MySQLManagerV2(this,"man10drugplugin")
+        val mysql = MySQLManagerV2(this, "man10drugplugin")
         for (p in Bukkit.getServer().onlinePlayers){
             db.loadDataBase(p,mysql)
         }
@@ -173,7 +170,7 @@ class Man10DrugPlugin : JavaPlugin() {
 
         cancelTask()
 
-        val mysql = MySQLManagerV2(this,"say man10drugplugin")
+        val mysql = MySQLManagerV2(this, "say man10drugplugin")
         for (player in Bukkit.getServer().onlinePlayers){
             db.saveDataBase(player,mysql)
         }

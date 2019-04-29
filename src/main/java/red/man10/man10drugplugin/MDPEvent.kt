@@ -9,13 +9,8 @@ import org.bukkit.event.player.*
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
-import red.man10.man10drugplugin.test.MySQLManagerV2
 import java.security.SecureRandom
-import java.text.DateFormat
 import java.util.*
-import java.text.SimpleDateFormat
-
-
 
 
 class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
@@ -27,7 +22,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
         Thread(Runnable {
             Thread.sleep(10000)
             if(plugin.reload){return@Runnable }
-            val mysql = MySQLManagerV2(plugin,"man10drugplugin")
+            val mysql = MySQLManagerV2(plugin, "man10drugplugin")
             plugin.db.loadDataBase(event.player,mysql)
         }).start()
     }
@@ -36,7 +31,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
     fun leftEvent(event:PlayerQuitEvent){
         if(plugin.reload){ return}
         Thread(Runnable {
-            val mysql = MySQLManagerV2(plugin,"man10drugplugin")
+            val mysql = MySQLManagerV2(plugin, "man10drugplugin")
             plugin.db.saveDataBase(event.player,mysql)
         }).start()
     }
@@ -190,7 +185,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
 
         }, drugData.cooldown)
 
-
+        using(pd,drugData,player,drug)
 
         ////////////////////
         //remove 1 item
@@ -199,7 +194,6 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
             player.inventory.itemInMainHand = item
         }
 
-        using(pd,drugData,player,drug)
 
         ////////////////////////
         // Func
@@ -594,14 +588,14 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
                     return@Runnable
                 }
 
-                if (pd.usedLevel >= drugData.weakUsing!![pd2.level]) {
-                    pd.usedLevel = 0
-                    pd2.level --
-                    pd2.usedLevel = 0
+                pd.usedLevel ++
 
-                    if (pd2.level <= 0 && pd2.usedLevel <= 0){
+                if (pd.usedCount>=drugData.weakUsing!![pd2.level]){
+                    pd2.usedLevel = 0
+                    pd2.level --
+                    pd.usedLevel = 0
+                    if (pd2.level <0){
                         pd2.level = 0
-                        pd2.isDependence = false
                     }
                 }
 

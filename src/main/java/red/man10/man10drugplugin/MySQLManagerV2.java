@@ -1,21 +1,22 @@
 package red.man10.man10drugplugin;
 
+
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.HashMap;
 import java.util.logging.Level;
 
 /**
- * Created by takatronix on 2017/03/05.
+ * Created by Mr_IK on 2019/04/29.
  */
 
+public class MySQLManagerV2 {
 
-public class MySQLManager {
-
+    private boolean connected = false;
+    private String conName;
     public  Boolean debugMode = false;
     private JavaPlugin plugin;
     private String HOST = null;
@@ -23,26 +24,27 @@ public class MySQLManager {
     private String USER = null;
     private String PASS = null;
     private String PORT = null;
-    private boolean connected = false;
-    private Statement st = null;
-    private Connection con = null;
-    private String conName;
-    private MySQLFunc MySQL;
+
+    private HashMap<Integer, MySQLConnectV2> connects;
 
     ////////////////////////////////
     //      コンストラクタ
     ////////////////////////////////
-    public MySQLManager(JavaPlugin plugin, String name) {
+    public MySQLManagerV2(JavaPlugin plugin, String name) {
+        this.connects = new HashMap<>();
         this.plugin = plugin;
         this.conName = name;
         this.connected = false;
         loadConfig();
 
-        this.connected = Connect(HOST, DB, USER, PASS,PORT);
+        int result = Connect(HOST, DB, USER, PASS, PORT);
 
-        if(!this.connected) {
+        if(result == -1){
             plugin.getLogger().info("Unable to establish a MySQL connection.");
         }
+
+        //テーブル作成などはここ
+
         //drug table
         execute("CREATE TABLE if not exists drug_dependence " +
                 "(uuid text," +
@@ -73,58 +75,41 @@ public class MySQLManager {
                 "seven text,"   +
                 "eight text,"   +
                 "nine text);");
+
     }
+
 
     /////////////////////////////////
     //       設定ファイル読み込み
     /////////////////////////////////
     public void loadConfig(){
-           plugin.getLogger().info("MYSQL Config loading");
+        plugin.getLogger().info("MySQL Config loading");
         plugin.reloadConfig();
         HOST = plugin.getConfig().getString("mysql.host");
         USER = plugin.getConfig().getString("mysql.user");
         PASS = plugin.getConfig().getString("mysql.pass");
         PORT = plugin.getConfig().getString("mysql.port");
         DB = plugin.getConfig().getString("mysql.db");
-          plugin.getLogger().info("Config loaded");
-
+        plugin.getLogger().info("Config loaded");
     }
 
-    public void commit(){
-        try{
-            this.con.commit();
-        }catch (Exception e){
-
-        }
-    }
 
     ////////////////////////////////
-    //
+    //  接続
     ////////////////////////////////
-    public Boolean Connect(String host, String db, String user, String pass,String port) {
+    public int Connect(String host, String db, String user, String pass,String port) {
         this.HOST = host;
         this.DB = db;
         this.USER = user;
         this.PASS = pass;
-        this.MySQL = new MySQLFunc(host, db, user, pass,port);
-        this.con = this.MySQL.open();
-        if(this.con == null){
+        int data = connects.size()+1;
+        connects.put(connects.size()+1,new MySQLConnectV2(host, db, user, pass,port));
+        if(connects.get(data).open() == null){
             Bukkit.getLogger().info("failed to open MYSQL");
-            return false;
+            return -1;
         }
-
-        try {
-            this.st = this.con.createStatement();
-            this.connected = true;
-            this.plugin.getLogger().info("[" + this.conName + "] Connected to the database.");
-        } catch (SQLException var6) {
-            this.connected = false;
-            this.plugin.getLogger().info("[" + this.conName + "] Could not connect to the database.");
-            this.plugin.getLogger().info(var6.getMessage());
-        }
-
-        this.MySQL.close(this.con);
-        return Boolean.valueOf(this.connected);
+        this.plugin.getLogger().info("[" + this.conName + "] Connected to the database.");
+        return data;
     }
 
     ////////////////////////////////
@@ -132,7 +117,7 @@ public class MySQLManager {
     ////////////////////////////////
     public int countRows(String table) {
         int count = 0;
-        ResultSet set = this.query(String.format("SELECT * FROM %s", new Object[]{table}));
+        ResultSet set = this.query(String.format("SELECT * FROM %s", new Object[]{table})).rs;
 
         try {
             while(set.next()) {
@@ -144,15 +129,16 @@ public class MySQLManager {
 
         return count;
     }
+
     ////////////////////////////////
     //     レコード数
     ////////////////////////////////
     public int count(String table) {
         int count = 0;
-        ResultSet set = this.query(String.format("SELECT usedLevel(*) from %s", table));
+        ResultSet set = this.query(String.format("SELECT count(*) from %s", table)).getRs();
 
         try {
-            count = set.getInt("usedLevel(*)");
+            count = set.getInt("count(*)");
 
         } catch (SQLException var5) {
             Bukkit.getLogger().log(Level.SEVERE, "Could not select all rows from table: " + table + ", error: " + var5.getErrorCode());
@@ -161,13 +147,14 @@ public class MySQLManager {
 
         return count;
     }
+
     ////////////////////////////////
-    //
+    //      実行
     ////////////////////////////////
     public boolean execute(String query) {
-        this.MySQL = new MySQLFunc(this.HOST, this.DB, this.USER, this.PASS,this.PORT);
-        this.con = this.MySQL.open();
-        if(this.con == null){
+        int data = connects.size()+1;
+        connects.put(connects.size()+1,new MySQLConnectV2(this.HOST, this.DB, this.USER, this.PASS,this.PORT));
+        if(connects.get(data).open() == null){
             Bukkit.getLogger().info("failed to open MYSQL");
             return false;
         }
@@ -177,58 +164,83 @@ public class MySQLManager {
         }
 
         try {
-            this.st = this.con.createStatement();
-            this.st.execute(query);
+            connects.get(data).getSt().execute(query);
         } catch (SQLException var3) {
             this.plugin.getLogger().info("[" + this.conName + "] Error executing statement: " +var3.getErrorCode() +":"+ var3.getLocalizedMessage());
             this.plugin.getLogger().info(query);
             ret = false;
-
         }
-        //this.close();
 
+        connects.get(data).close();
         return ret;
     }
 
     ////////////////////////////////
     //      クエリ
     ////////////////////////////////
-    public ResultSet query(String query) {
-        this.MySQL = new  MySQLFunc(this.HOST, this.DB, this.USER, this.PASS,this.PORT);
-        this.con = this.MySQL.open();
-        ResultSet rs = null;
-        if(this.con == null){
+    public Query query(String query) {
+        int data = connects.size()+1;
+        connects.put(connects.size()+1,new MySQLConnectV2(this.HOST, this.DB, this.USER, this.PASS,this.PORT));
+        if(connects.get(data).open() == null){
             Bukkit.getLogger().info("failed to open MYSQL");
-            return rs;
+            return null;
         }
-
+        ResultSet rs = null;
         if (debugMode){
-            plugin.getLogger().info("[DEBUG] query:" + query);
+            plugin.getLogger().info("query:" + query);
         }
 
         try {
-            this.st = this.con.createStatement();
-            rs = this.st.executeQuery(query);
+            rs = connects.get(data).getSt().executeQuery(query);
         } catch (SQLException var4) {
             this.plugin.getLogger().info("[" + this.conName + "] Error executing query: " + var4.getErrorCode());
             this.plugin.getLogger().info(query);
         }
 
-
-        return rs;
+        //query.close();
+        return new Query(rs,connects.get(data));
     }
 
+    public int notClosedConnectionCount(){
+        int count = 0;
+        for(MySQLConnectV2 connect : connects.values()){
+            if(!connect.isClosed()){
+                count++;
+            }
+        }
+        return count;
+    }
 
-    public void close(){
+    public void forceCloseAllConnection(){
+        for(MySQLConnectV2 connect : connects.values()){
+            if(!connect.isClosed()){
+                connect.close();
+            }
+        }
+    }
 
-        try {
-            this.st.close();
-            this.con.close();
-            this.MySQL.close(this.con);
+    public class Query {
+        private ResultSet rs = null;
+        private MySQLConnectV2 connect;
 
-        } catch (SQLException var4) {
-            Bukkit.getLogger().info(var4.getMessage());
+        public Query(ResultSet rs,MySQLConnectV2 connect){
+            this.connect = connect;
+            this.rs = rs;
         }
 
+        public ResultSet getRs() {
+            return rs;
+        }
+
+        public void close(){
+            try {
+                rs.close();
+                connect.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
+
+
 }

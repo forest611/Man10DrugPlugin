@@ -2,12 +2,11 @@ package red.man10.man10drugplugin
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import red.man10.man10drugplugin.test.MySQLManagerV2
 import java.sql.ResultSet
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import red.man10.man10drugplugin.test.MySQLManagerV2.Query as Query
+import red.man10.man10drugplugin.MySQLManagerV2.Query as Query
 
 class MDPDataBase(val plugin: Man10DrugPlugin){
 
@@ -57,7 +56,9 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
                     "WHERE uuid='${player.uniqueId}' "+
                     "and drug_name='$name';"
 
-            var rs : ResultSet = mysql.query(sql).rs
+            val query = mysql.query(sql)
+
+            var rs : ResultSet = query.rs
 
             if (!rs.next()){
 
@@ -96,6 +97,8 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
 
 
                 playerMap[key] = data
+                query.close()
+                query.close()
 
 
             }catch (e:Exception){
@@ -208,7 +211,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
 
     ////////////////////////
     //プレイヤーレコード追加
-    private fun addRecord(mysql:MySQLManagerV2,player:Player,drug:String){
+    private fun addRecord(mysql: MySQLManagerV2, player:Player, drug:String){
         val sql = "INSERT INTO drug_dependence " +
                 "VALUES('${player.uniqueId}'," +
                 "'${player.name}'," +
@@ -222,9 +225,10 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
     //DBとメモリから累計使用回数取得
     fun getDrugServerTotal(drug:String):Int{
 
-        val mysql = MySQLManager(plugin,"man10drugplugin")
+        val query = MySQLManagerV2(plugin, "man10drugplugin")
+                .query("SELECT SUM(used_count) FROM drug_dependence WHERE drug_name='$drug';")
 
-        val rs = mysql.query("SELECT SUM(used_count) FROM drug_dependence WHERE drug_name='$drug';")
+        val rs = query.rs
 
         rs.next()
 
@@ -236,8 +240,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
             total += pd.countOnline
         }
 
-        rs.close()
-        mysql.close()
+        query.close()
 
         return total
 
@@ -249,16 +252,16 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
 
         val list = ArrayList<Int>()
 
-        val mysql = MySQLManager(plugin,"man10drugplugin")
+        val query = MySQLManagerV2(plugin, "man10drugplugin")
+                .query("SELECT level , COUNT(level) FROM drug_dependence WHERE drug_name='$drug' AND used_count!='0' group BY LEVEL;")
 
-        val rs = mysql.query("SELECT level , COUNT(level) FROM drug_dependence WHERE drug_name='$drug' AND used_count!='0' group BY LEVEL;")
+        val rs = query.rs
 
         while (rs.next()){
             list.add(rs.getInt(1))
         }
 
-        rs.close()
-        mysql.close()
+        query.close()
 
         return list
     }

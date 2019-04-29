@@ -5,7 +5,6 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import red.man10.man10drugplugin.test.MySQLManagerV2
 
 
 class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
@@ -141,7 +140,7 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
 
             Thread(Runnable {
 
-                val mysql = MySQLManagerV2(plugin,"man10drugPlugin")
+                val mysql = MySQLManagerV2(plugin, "man10drugPlugin")
 
                 for (p in Bukkit.getServer().onlinePlayers){
                     plugin.db.saveDataBase(p,mysql)
