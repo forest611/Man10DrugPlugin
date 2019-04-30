@@ -51,6 +51,11 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
         getHashMap("CommandRandom",config,data.commandRandom)
         getHashMap("CommandDelay",config,data.commandDelay)
         getHashMap("CommandRandomDelay",config,data.commandRandomDelay)
+        //command player
+        getHashMap("PlayerCmd",config,data.playerCmd)
+        getHashMap("PlayerCmdRandom",config,data.playerCmdRandom)
+        getHashMap("PlayerCmdDelay",config,data.playerCmdDelay)
+        getHashMap("PlayerCmdRandomDelay",config,data.playerCmdRandomDelay)
         //buff
         getHashMap("Buff",config,data.buff)
         getHashMap("BuffRandom",config,data.buffRandom)
@@ -203,6 +208,11 @@ class Data{
     val commandRandom = HashMap<Int,MutableList<String>>()
     val commandDelay = HashMap<Int,MutableList<String>>()
     val commandRandomDelay = HashMap<Int,MutableList<String>>()
+    //player dispatch
+    val playerCmd = HashMap<Int,MutableList<String>>()
+    val playerCmdRandom = HashMap<Int,MutableList<String>>()
+    val playerCmdDelay = HashMap<Int,MutableList<String>>()
+    val playerCmdRandomDelay = HashMap<Int,MutableList<String>>()
     //buff
     val buff = HashMap<Int,MutableList<String>>()
     val buffRandom = HashMap<Int,MutableList<String>>()

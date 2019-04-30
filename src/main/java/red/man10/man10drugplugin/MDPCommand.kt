@@ -86,9 +86,41 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
                 return true
             }
 
+            //////////////////
+            //詳細データ
+            if (args.size == 2 && args[1] == "data"){
+
+                if (plugin.db.online.indexOf(sender) == -1){
+                    sender.sendMessage("§e現在データの読み込み中です.....")
+                    return true
+                }
+
+
+                sender.sendMessage("$chatMessage§e依存データ(累計使用回数、現在のレベル値)")
+
+                for(drug in plugin.drugName){
+                    val pd = plugin.db.get(sender.name+drug)
+
+                    if (pd.usedCount == 0 && pd.level == 0){continue}
+
+                    val c = plugin.mdpConfig.drugData[drug]?:continue
+
+                    sender.sendMessage("$chatMessage${c.displayName}§e§l:${pd.usedCount},${pd.level+1}")
+                }
+                return true
+
+            }
+
             ///////////////////////////////
             //運営用show コマンド
             if (sender.hasPermission("man10drug.showop") && args.size == 2){
+
+                if (plugin.db.online.indexOf(Bukkit.getPlayer(args[1])) == -1){
+                    sender.sendMessage("§e現在データの読み込み中です.....")
+                    return true
+                }
+
+
                 try {
                     sender.sendMessage("$chatMessage§e${args[1]}の依存状況(カウント、レベル)")
 
@@ -104,7 +136,7 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
                         sender.sendMessage(
                                 "$chatMessage§e§l$drug" +
                                         ":${pd.usedCount}" +
-                                        ",${pd.level}"
+                                        ",${pd.level+1}"
                         )
                     }
                 }catch (e:Exception){
@@ -249,6 +281,43 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
         }
 
         if (cmd == "clear"){
+            if (args.size == 1){
+                for (drug in plugin.drugName){
+                    val pd = plugin.db.get(sender.name+drug)
+
+                    pd.level = 0
+                    pd.usedCount = 0
+                    pd.usedLevel = 0
+                    pd.isDependence = false
+                    pd.symptomsTotal = 0
+
+                    plugin.db.playerMap[sender.name+drug] = pd
+
+                }
+
+                sender.sendMessage("$chatMessage§eドラッグの依存データを削除しました")
+                return true
+            }
+
+            if (args.size == 2){
+                for (drug in plugin.drugName){
+                    val pd = plugin.db.get(args[1]+drug)
+
+                    pd.level = 0
+                    pd.usedCount = 0
+                    pd.usedLevel = 0
+                    pd.isDependence = false
+                    pd.symptomsTotal = 0
+
+                    plugin.db.playerMap[sender.name+drug] = pd
+
+
+                }
+
+                sender.sendMessage("$chatMessage§e${args[1]}のドラッグの依存データを削除しました")
+                return true
+            }
+
             if (args.size !=3)return true
             val pd = plugin.db.get(args[1]+args[2])
 

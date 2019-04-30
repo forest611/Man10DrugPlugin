@@ -309,6 +309,61 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
 
                 }, command[1].toLong())
             }
+            ////////////////////
+            //player cmd
+            ////////////////////
+            if (drugData.playerCmd[pd.level] != null){
+                for (c in drugData.playerCmd[pd.level]!!) {
+                    val cmd = plugin.repStr(c, player, pd, drugData)
+
+                    Bukkit.dispatchCommand(player, cmd)
+
+                }
+            }
+
+            ////////////////////////
+            //random pcmd
+            ///////////////////////
+            if (drugData.playerCmdRandom[pd.level] != null) {
+
+                val cmd = plugin.repStr(drugData.playerCmdRandom[pd.level]!![Random().nextInt(
+                        drugData.playerCmdRandom[pd.level]!!.size
+                )], player, pd, drugData)
+
+                Bukkit.dispatchCommand(player, cmd)
+
+            }
+
+            ////////////////////////
+            //pcmd delay
+            ///////////////////////
+            if (drugData.playerCmdDelay[pd.level] != null) {
+
+                for (c in drugData.playerCmdDelay[pd.level]!!) {
+                    val command = c.split(";")
+
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
+
+                        Bukkit.dispatchCommand(player, plugin.repStr(command[0], player, pd, drugData))
+
+                    }, command[1].toLong())
+                }
+            }
+
+            ////////////////////////
+            //pcmd random delay
+            ///////////////////////
+            if (drugData.playerCmdRandomDelay[pd.level] != null) {
+
+                val command = drugData.playerCmdRandomDelay[pd.level]!![
+                        drugData.playerCmdRandomDelay[pd.level]!!.size - 1].split(";")
+
+                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
+
+                    Bukkit.dispatchCommand(player, plugin.repStr(command[0], player, pd, drugData))
+
+                }, command[1].toLong())
+            }
 
             ////////////////////////
             //buff
