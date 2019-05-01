@@ -341,18 +341,29 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
         if (cmd == "stat" && args.size == 2){
             sender.sendMessage("$chatMessage§e${args[1]}の利用統計")
 
-            Thread(Runnable {
-
-                val list = plugin.db.getDrugServerLevel(args[1])
 
 
-                sender.sendMessage("$chatMessage§e累計使用回数:§l${plugin.db.getDrugServerTotal(args[1])}")
-                sender.sendMessage("$chatMessage§e各依存レベルの依存人数")
+            Bukkit.getScheduler().runTask(plugin) {
+                val mysql = MySQLManagerV2(plugin,"man10drugplugin")
+
+                sender.sendMessage("$chatMessage§e累計使用回数:§l${plugin.db.getDrugServerTotal(args[1],mysql)}")
+
+                val list = plugin.db.getDrugServerLevel(args[1],mysql)
+
+                var total = 0
+
+                sender.sendMessage("$chatMessage§eレベル別の依存者、感染者の人数")
+
                 for (i in 0 until list.size){
-                    sender.sendMessage("$chatMessage§e§lLv.$i:${list[i]}")
+                    sender.sendMessage("${chatMessage}§e§lLv.$i:${list[i]}")
+                    total +=list[i]
                 }
 
-            }).start()
+                sender.sendMessage("$chatMessage§e§l依存者、感染者の合計:$total")
+
+                Bukkit.getLogger().info("check thread")
+
+            }
 
             return true
 

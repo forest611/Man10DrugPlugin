@@ -223,10 +223,9 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
 
     ///////////////////////
     //DBとメモリから累計使用回数取得
-    fun getDrugServerTotal(drug:String):Int{
+    fun getDrugServerTotal(drug:String,mysql:MySQLManagerV2):Int{
 
-        val query = MySQLManagerV2(plugin, "man10drugplugin")
-                .query("SELECT SUM(used_count) FROM drug_dependence WHERE drug_name='$drug';")
+        val query = mysql.query("SELECT SUM(used_count) FROM drug_dependence WHERE drug_name='$drug';")
 
         val rs = query.rs
 
@@ -248,22 +247,27 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
 
     ////////////////////
     //DBからレベルごとの人数を取得
-    fun getDrugServerLevel(drug:String):ArrayList<Int>{
+    fun getDrugServerLevel(drug:String,mysql: MySQLManagerV2):ArrayList<Int>{
 
         val list = ArrayList<Int>()
 
-        val query = MySQLManagerV2(plugin, "man10drugplugin")
-                .query("SELECT level , COUNT(level) FROM drug_dependence WHERE drug_name='$drug' AND used_count!='0' group BY LEVEL;")
+        val query = mysql.query("SELECT level,COUNT(player) FROM drug_dependence WHERE drug_name='$drug' GROUP BY level ORDER BY level;")
 
         val rs = query.rs
 
         while (rs.next()){
-            list.add(rs.getInt(1))
+            list.add(rs.getInt("COUNT(player)"))
         }
 
-        query.close()
+        for(player in Bukkit.getOnlinePlayers()){
+            val pd = get(player.name+drug)
 
+            if (pd.usedLevel==0&&pd.level==0){ continue}
+
+            list[pd.level]++
+        }
         return list
+
     }
 
 }

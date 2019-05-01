@@ -645,12 +645,13 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
 
                 pd.usedLevel ++
 
-                if (pd.usedCount>=drugData.weakUsing!![pd2.level]){
+                if (pd.usedCount> drugData.weakUsing!![pd2.level]){
                     pd2.usedLevel = 0
                     pd2.level --
                     pd.usedLevel = 0
                     if (pd2.level <0){
                         pd2.level = 0
+                        pd2.isDependence = false
                     }
                 }
 
