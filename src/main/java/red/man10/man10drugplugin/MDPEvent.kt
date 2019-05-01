@@ -163,7 +163,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
             return
         }
 
-        if (plugin.stop || !plugin.db.canConnect) {
+        if (plugin.stop || !plugin.db.canConnect || plugin.db.playerMap[player.name + drug] == null) {
             player.sendMessage("§e今は使う気分ではないようだ")
             return
         }
@@ -372,7 +372,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
 
                 for (b in drugData.buff[pd.level]!!) {
                     val buff = b.split(",")
-                    buff(player,buff)
+                    buff(player,buff,drugData)
                 }
             }
 
@@ -385,7 +385,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
                 val buff = drugData.buffRandom[pd.level]!![Random()
                         .nextInt(drugData.buffRandom[pd.level]!!.size - 1)].split(",")
 
-                buff(player,buff)
+                buff(player,buff,drugData)
             }
 
             ////////////////////////
@@ -397,7 +397,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
                     val time = b.split(";")
                     val buff = time[0].split(",")
 
-                    Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {buff(player, buff)}, time[1].toLong())
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {buff(player, buff,drugData)}, time[1].toLong())
                 }
             }
 
@@ -409,7 +409,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
                         .nextInt(drugData.buffRandomDelay[pd.level]!!.size - 1)].split(";")
                 val buff = time[0].split(",")
 
-                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {buff(player,buff)}, time[1].toLong())
+                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {buff(player,buff,drugData)}, time[1].toLong())
 
             }
 
@@ -712,7 +712,16 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
     }
 
     ///////////////buff (コード短縮用)
-    fun buff(player:Player,buff:List<String>){
+    fun buff(player:Player,buff:List<String>,c:Data){
+        if (c.hideBuff){
+            player.addPotionEffect(PotionEffect(
+                    PotionEffectType.getByName(buff[0]),
+                    buff[1].toInt(),
+                    buff[2].toInt(),
+                    false,false
+            ))
+            return
+        }
         player.addPotionEffect(PotionEffect(
                 PotionEffectType.getByName(buff[0]),
                 buff[1].toInt(),

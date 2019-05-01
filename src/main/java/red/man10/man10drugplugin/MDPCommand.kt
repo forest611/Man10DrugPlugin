@@ -60,11 +60,6 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
 
             if (args.size == 1){
 
-                if (plugin.db.online.indexOf(sender) == -1){
-                    sender.sendMessage("§e現在データの読み込み中です.....")
-                    return true
-                }
-
                 sender.sendMessage("$chatMessage §e現在の依存状況")
 
                 for (drug in plugin.drugName){
@@ -73,6 +68,12 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
                     if (!c.isDependence){
                         continue
                     }
+
+                    if (plugin.db.playerMap[sender.name+drug] == null){
+                        sender.sendMessage("§e現在データの読み込み中です.....")
+                        return true
+                    }
+
 
                     val pd = plugin.db.get(sender.name+drug)
 
@@ -90,15 +91,16 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
             //詳細データ
             if (args.size == 2 && args[1] == "data"){
 
-                if (plugin.db.online.indexOf(sender) == -1){
-                    sender.sendMessage("§e現在データの読み込み中です.....")
-                    return true
-                }
 
 
                 sender.sendMessage("$chatMessage§e依存データ(累計使用回数、現在のレベル値)")
 
                 for(drug in plugin.drugName){
+                    if (plugin.db.playerMap[sender.name+drug] == null){
+                        sender.sendMessage("§e現在データの読み込み中です.....")
+                        return true
+                    }
+
                     val pd = plugin.db.get(sender.name+drug)
 
                     if (pd.usedCount == 0 && pd.level == 0){continue}
@@ -115,10 +117,6 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
             //運営用show コマンド
             if (sender.hasPermission("man10drug.showop") && args.size == 2){
 
-                if (plugin.db.online.indexOf(Bukkit.getPlayer(args[1])) == -1){
-                    sender.sendMessage("§e現在データの読み込み中です.....")
-                    return true
-                }
 
 
                 try {
@@ -126,6 +124,12 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
 
 
                     for (drug in plugin.drugName){
+
+                        if (plugin.db.playerMap[args[1]+drug] == null){
+                            sender.sendMessage("§e現在データの読み込み中です.....")
+                            return true
+                        }
+
 
                         val pd = plugin.db.playerMap[args[1]+drug]
 
@@ -367,9 +371,6 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
                 }
             }
 
-
-
-
             return true
         }
 
@@ -385,8 +386,6 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
     fun helpChat(player: Player) {
 
         player.sendMessage("$chatMessage§e§lMan10DrugPlugin HELP")
-
-        if (player.hasPermission("man10drug.help")){ player.sendMessage("$chatMessage§e/mdp show 薬の使用情報を見ることができます") }
 
         if (!player.hasPermission("man10drug.helpop"))return
         player.sendMessage("$chatMessage§e/mdp get [drugName] 薬を手に入れる drugNameはDataNameに書いた値を入力してください")

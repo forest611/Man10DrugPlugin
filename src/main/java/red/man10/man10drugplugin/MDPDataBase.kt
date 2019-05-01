@@ -12,7 +12,6 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
 
     var playerMap = ConcurrentHashMap<String,playerData>()
     var canConnect = true
-    var online = ArrayList<Player>()
 
     ////////////////////////
     //DBのデータを読み込む
@@ -109,7 +108,6 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
             }
 
         }
-        online.add(player)
 
         Bukkit.getLogger().info(player.name+"...Loaded DB")
 
@@ -120,9 +118,6 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
     //////////////////////////
     fun saveDataBase(player: Player,mysql: MySQLManagerV2){
 
-        if (online.indexOf(player) == -1){
-            return
-        }
 
 
         if (!canConnect){
@@ -143,6 +138,11 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
             }
 
             val key = player.name+plugin.drugName[i]
+
+            if (playerMap[key] == null){
+                return
+            }
+
 
             val data = get(key)
 
