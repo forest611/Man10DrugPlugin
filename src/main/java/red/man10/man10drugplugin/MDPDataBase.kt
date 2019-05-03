@@ -251,7 +251,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
 
         val list = ArrayList<Int>()
 
-        val query = mysql.query("SELECT level,COUNT(player) FROM drug_dependence WHERE drug_name='$drug' GROUP BY level ORDER BY level;")
+        val query = mysql.query("SELECT level,COUNT(player) FROM drug_dependence WHERE drug_name='$drug' AND used_level !=0 GROUP BY level ORDER BY level;")
 
         val rs = query.rs
 

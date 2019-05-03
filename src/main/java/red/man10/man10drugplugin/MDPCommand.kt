@@ -80,7 +80,7 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
                     if (pd.usedLevel == 0 && pd.level == 0){
                         continue
                     }
-                    if(c.dependenceMsg != null){ sender.sendMessage("$chatMessage§e§l${c.displayName}:${c.dependenceMsg!![pd.level]}") }
+                    if(c.dependenceMsg!!.isNotEmpty()){ sender.sendMessage("$chatMessage§e§l${c.displayName}:${c.dependenceMsg!![pd.level]}") }
 
                 }
 
@@ -360,8 +360,6 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
                 }
 
                 sender.sendMessage("$chatMessage§e§l依存者、感染者の合計:$total")
-
-                Bukkit.getLogger().info("check thread")
 
             }
 

@@ -173,6 +173,11 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
         val pd = plugin.db.get(key)
         val drugData = plugin.mdpConfig.get(drug)
 
+        if (drugData.disableWorld!!.isNotEmpty() && drugData.disableWorld!!.indexOf(player.world.name) >= 1){
+            player.sendMessage("§eここではドラッグは使えません")
+            return
+        }
+
         ////////////////////////
         //cooldown
         ///////////////////////

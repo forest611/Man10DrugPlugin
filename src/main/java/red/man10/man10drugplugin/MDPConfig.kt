@@ -84,6 +84,7 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
 
         data.removeItem = config.getBoolean("RemoveItem",true)
         data.hideBuff = config.getBoolean("HideBuff",true)
+        data.disableWorld = config.getStringList("DisableWorld")
 
         //type 0 only
         if (data.type == 0){
@@ -272,6 +273,7 @@ class Data{
     var symptomsNearPlayer : MutableList<String>? = null
     var dependenceMsg : MutableList<String>? = null
     var weakenProbability : MutableList<Int>? = null
+    var disableWorld : MutableList<String>? = null
 
     //func
     var funcLvUp : MutableList<String>? = null
