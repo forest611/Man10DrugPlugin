@@ -388,6 +388,62 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
             return true
         }
 
+        if(cmd == "near"){
+            if (args.size != 3)return true
+            val data = plugin.mdpConfig.get(args[1])
+
+            if (data.nearPlayer!=null&&data.nearPlayer!!.isNotEmpty()) {
+                val d = data.nearPlayer!![0].split(";")[1]
+                val list = plugin.event!!.getNearByPlayers(sender, args[2].toInt())
+                for (p in list) {
+                    plugin.mdpfunc.runFunc(p, d)
+                }
+                return true
+            }
+            sender.sendMessage("$chatMessage§e指定したドラッグにはNearPlayerの項目がありません")
+            return true
+        }
+
+        if(cmd == "nears"){
+            if (args.size != 3)return true
+            val data = plugin.mdpConfig.get(args[1])
+
+            if (data.symptomsNearPlayer!=null&&data.symptomsNearPlayer!!.isNotEmpty()) {
+                val d = data.symptomsNearPlayer!![0].split(";")[1]
+                val list = plugin.event!!.getNearByPlayers(sender, args[2].toInt())
+                for (p in list) {
+                    plugin.mdpfunc.runFunc(p, d)
+                }
+                return true
+            }
+            sender.sendMessage("$chatMessage§e指定したドラッグにはNearPlayerの項目がありません")
+            return true
+        }
+
+        if(cmd == "removedependence"){
+
+            if (plugin.drugName.indexOf(args[1]) <= 0){
+                Bukkit.getLogger().info("$chatMessage§e指定ドラッグは存在しません")
+                return true
+            }
+
+            Bukkit.getScheduler().runTask(plugin) {
+                for (p in Bukkit.getOnlinePlayers()){
+                    val pd = plugin.db.get(p.name+args[1])
+
+                    pd.usedLevel = 0
+                    pd.level = 0
+                    pd.isDependence = false
+                    pd.symptomsTotal = 0
+
+                    plugin.db.playerMap[p.name+args[1]] = pd
+
+                }
+            }
+
+            sender.sendMessage("$chatMessage§eオンラインプレイヤーの依存、感染は消えました")
+        }
+
 
         return true
     }
@@ -409,6 +465,9 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
         player.sendMessage("$chatMessage§e/mdp using [player] [drug] ドラッグを消費せずにドラッグの使用状態を再現します(console用)")
         player.sendMessage("$chatMessage§e/mdp stat [drug] 指定ドラッグの利用統計を表示します")
         player.sendMessage("$chatMessage§e/mdp highspeed 禁断症状が3分毎に発生するようになります(デバッグ用)")
+        player.sendMessage("$chatMessage§e/mdp near [drug] [範囲] 指定した範囲で指定したドラッグのNearPlayerを実行します")
+        player.sendMessage("$chatMessage§e/mdp nears [drug] [範囲] NearPlayerの禁断症状バージョンです")
+        player.sendMessage("$chatMessage§e/mdp removedependence [drug] オンラインプレイヤーの指定ドラッグの依存を消します")
         player.sendMessage("---------------------------------------------------------")
 
         when(plugin.stop){
