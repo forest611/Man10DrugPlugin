@@ -1,5 +1,6 @@
 package red.man10.man10drugplugin
 
+import org.bukkit.Bukkit
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
@@ -86,6 +87,8 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
         data.hideBuff = config.getBoolean("HideBuff",true)
         data.disableWorld = config.getStringList("DisableWorld")
 
+        data.isAttack = config.getBoolean("IsAttack",false)
+
         //type 0 only
         if (data.type == 0){
             data.isDependence = config.getBoolean("IsDependence") //禁断症状が出るか
@@ -129,12 +132,24 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
 
         }
 
-        //type1
+        //type1 2
         if (data.type == 1 || data.type == 2){
             data.weakDrug = config.getString("WeakDrug") //DataName
             data.weakUsing = config.getIntegerList("WeakUsing")
             data.stopTask = config.getBoolean("StopTask")
         }
+
+        //type3 ... free item
+
+        if(data.type == 4){
+            data.defenseNear = config.getInt("DefenseNear")
+            data.defenseTouch = config.getInt("DefenseTouch")
+            data.usePlace = config.getInt("UsePlace")
+
+            //0 頭装備 1 オンハンド 2オフハンド
+
+        }
+
 
         drugData[config.getString("DataName")] = data
     }
@@ -242,6 +257,8 @@ class Data{
     var removeItem = true
     var hideBuff = true
 
+    var isAttack = false
+
     //type0
     var isDependence = false
     var dependenceLevel = 0  //依存レベル
@@ -290,5 +307,9 @@ class Data{
     var weakUsing : MutableList<Int>? = null//弱めるのに必要な量
     var stopTask = false //薬で依存を止めるか
 
+    //type4 defense
+    var defenseNear = 0
+    var defenseTouch = 0
+    var usePlace = 0
 
 }

@@ -142,22 +142,25 @@ class Man10DrugPlugin : JavaPlugin() {
 
         saveConfig()
 
+        val mysql = MySQLManagerV2(this, "man10drugplugin")
+
         //drug load
+        getCommand("mdp").executor = MDPCommand(this)
+
         load()
+
+        event = MDPEvent(this)
+
+        Bukkit.getServer().pluginManager.registerEvents(event,this)
+
 
         db = MDPDataBase(this)
 
-        val mysql = MySQLManagerV2(this, "man10drugplugin")
         for (p in Bukkit.getServer().onlinePlayers){
             db.loadDataBase(p,mysql)
         }
 
-        event = MDPEvent(this)
-        Bukkit.getServer().pluginManager.registerEvents(event,this)
-        getCommand("mdp").executor = MDPCommand(this)
-
         vault = VaultManager(this)
-
 
         startDependenceTask()
 
@@ -170,7 +173,7 @@ class Man10DrugPlugin : JavaPlugin() {
 
         cancelTask()
 
-        val mysql = MySQLManagerV2(this, "say man10drugplugin")
+        val mysql = MySQLManagerV2(this, "man10drugplugin")
         for (player in Bukkit.getServer().onlinePlayers){
             db.saveDataBase(player,mysql)
         }
