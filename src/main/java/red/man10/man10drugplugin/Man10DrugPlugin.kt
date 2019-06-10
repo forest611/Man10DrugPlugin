@@ -102,10 +102,10 @@ class Man10DrugPlugin : JavaPlugin() {
             loreData.append("§").append(nameData[i])
         }
 
-        if (data.lore == null){
+        if (data.lore.isEmpty()){
             data.lore = mutableListOf(loreData.toString())
         }else{
-            data.lore!!.add(loreData.toString())
+            data.lore.add(loreData.toString())
         }
 
         meta.lore = data.lore
@@ -204,7 +204,7 @@ class Man10DrugPlugin : JavaPlugin() {
 
                         val pd = db.get(p.name + drug)
 
-                        if (!pd.isDependence || (pd.symptomsTotal > c.symptomsCount!![pd.level] &&c.symptomsCount!![pd.level] !=0)){
+                        if (!pd.isDependence || (pd.symptomsTotal > c.symptomsCount[pd.level] &&c.symptomsCount[pd.level] !=0)){
                             continue
                         }
 
@@ -217,8 +217,8 @@ class Man10DrugPlugin : JavaPlugin() {
                             依存レベルチェック、debugモードの場合は3分ごとに発生
 
                          */
-                        if ((pd.symptomsTotal >0&&c.symptomsNextTime!![pd.level] <= differenceTick.toInt() )
-                                || c.symptomsTime!![pd.level] <= differenceTick.toInt()
+                        if ((pd.symptomsTotal >0&&c.symptomsNextTime[pd.level] <= differenceTick.toInt() )
+                                || c.symptomsTime[pd.level] <= differenceTick.toInt()
                                 || (debug && differenceTick > 180)){
 
                             SymptomsTask(p,c,pd,this@Man10DrugPlugin,db,drug).run()

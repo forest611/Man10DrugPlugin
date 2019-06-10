@@ -122,8 +122,8 @@ class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData,val 
         /////////////////////////
         //周囲に迷惑
         ///////////////////////
-        if (drugData.symptomsNearPlayer != null && plugin.size(drugData.symptomsNearPlayer!!, pd)) {
-            val data = drugData.symptomsNearPlayer!![pd.level].split(";")
+        if (plugin.size(drugData.symptomsNearPlayer, pd)) {
+            val data = drugData.symptomsNearPlayer[pd.level].split(";")
             val list = plugin.event!!.getNearByPlayers(player, data[0].toInt())
             for (p in list) {
                 plugin.mdpfunc.runFunc(p, data[1])
@@ -132,8 +132,8 @@ class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData,val 
 
 
         //send msg
-        if (drugData.msgSymptoms != null && plugin.size(drugData.msgSymptoms!!,pd)){
-            player.sendMessage(plugin.repStr(drugData.msgSymptoms!![pd.level],player,pd,drugData))
+        if (plugin.size(drugData.msgSymptoms,pd)){
+            player.sendMessage(plugin.repStr(drugData.msgSymptoms[pd.level],player,pd,drugData))
         }
 
         pd.symptomsTotal ++
@@ -142,7 +142,7 @@ class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData,val 
 
         db.playerMap[player.name+drug] = pd
         //一定回数禁断症状が出た時
-        if(drugData.symptomsCount!![pd.level] <= pd.symptomsTotal&&drugData.symptomsCount!![pd.level] !=0){
+        if(drugData.symptomsCount[pd.level] <= pd.symptomsTotal&&drugData.symptomsCount[pd.level] !=0){
 
             pd.isDependence = false
 

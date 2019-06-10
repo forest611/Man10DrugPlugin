@@ -5,18 +5,15 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
-import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.player.*
 import org.bukkit.inventory.ItemStack
-import org.bukkit.potion.PotionEffect
-import org.bukkit.potion.PotionEffectType
 import java.security.SecureRandom
 import java.util.*
 
 
 class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
 
-    public var cooldownMap: MutableList<String> = ArrayList()
+    var cooldownMap: MutableList<String> = ArrayList()
 
     @EventHandler
     fun joinEvent(event: PlayerJoinEvent) {
@@ -55,7 +52,6 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
             if (item.itemMeta == null) return
             if (item.itemMeta.lore == null) return
             if (item.itemMeta.lore.isEmpty()) return
-//            if (item.type == Material.AIR) return
             if (plugin.reload) return
 
             val drug = item.itemMeta.lore[item.itemMeta.lore.size - 1].replace("§", "")
@@ -83,47 +79,6 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
             event.isCancelled = true
             return
         }
-    }
-
-    ////////////////////
-    //プレイヤー攻撃
-    /////////////
-    @EventHandler
-    fun playerTouch(event: EntityDamageByEntityEvent) {
-        val p = event.entity
-
-        val attacker = event.damager
-
-        if (!(p is Player && attacker is Player)) {
-            return
-        }
-
-        val item = attacker.inventory.itemInMainHand ?: return
-
-        if (item.itemMeta == null) return
-        if (item.itemMeta.lore == null) return
-        if (item.itemMeta.lore.isEmpty()) return
-//        if (item.type == Material.AIR) return
-        if (plugin.reload) return
-
-        val drug = item.itemMeta.lore[item.itemMeta.lore.size - 1].replace("§", "")
-
-        if (plugin.drugName.indexOf(drug) == -1) {
-            return
-        }
-
-        if (!plugin.mdpConfig.get(drug).isAttack) {
-            return
-        }
-
-        if(defenseCheck(0,p,true))return
-        if(defenseCheck(1,p,true))return
-        if(defenseCheck(2,p,true))return
-
-        event.isCancelled = true
-
-        useDrug(p, item, drug)
-
     }
 
 
@@ -158,7 +113,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
         val pd = plugin.db.get(key)
         val drugData = plugin.mdpConfig.get(drug)
 
-        if (drugData.disableWorld!!.isNotEmpty() && drugData.disableWorld!!.indexOf(player.world.name) >= 1) {
+        if (drugData.disableWorld.isNotEmpty() && drugData.disableWorld!!.indexOf(player.world.name) >= 1) {
             player.sendMessage("§eここではドラッグは使えません")
             return
         }
@@ -188,38 +143,34 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
         ////////////////////////
         // Func
         ///////////////////////
-        if (drugData.func != null) {
-            for (funcname in drugData.func!!) {
-                plugin.mdpfunc.runFunc(player, funcname)
-            }
+        for (funcname in drugData.func) {
+            plugin.mdpfunc.runFunc(player, funcname)
         }
         ////////////////////////
         // FuncDelay
         ///////////////////////
-        if (drugData.funcDelay != null) {
-            for (funcname in drugData.funcDelay!!) {
-                val times = funcname.split(";")
-                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
-                    plugin.mdpfunc.runFunc(player, times[0])
-                }, times[1].toLong())
-            }
+        for (funcname in drugData.funcDelay) {
+            val times = funcname.split(";")
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
+                plugin.mdpfunc.runFunc(player, times[0])
+            }, times[1].toLong())
         }
         ////////////////////////
         // FuncRandom
         ///////////////////////
-        if (drugData.funcRandom != null && drugData.funcRandom!!.size > 0) {
+        if (drugData.funcRandom.size > 0) {
             val rnd = SecureRandom()
-            val r = rnd.nextInt(drugData.funcRandom!!.size)
-            val s = drugData.funcRandom!![r]
+            val r = rnd.nextInt(drugData.funcRandom.size)
+            val s = drugData.funcRandom[r]
             plugin.mdpfunc.runFunc(player, s)
         }
         ////////////////////////
         // FuncRandomDelay
         ///////////////////////
-        if (drugData.funcRandomDelay != null && drugData.funcRandomDelay!!.size > 0) {
+        if (drugData.funcRandomDelay.size > 0) {
             val rnd = SecureRandom()
-            val r = rnd.nextInt(drugData.funcRandomDelay!!.size)
-            val funcname = drugData.funcRandomDelay!![r]
+            val r = rnd.nextInt(drugData.funcRandomDelay.size)
+            val funcname = drugData.funcRandomDelay[r]
             val times = funcname.split(";")
             Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
                 plugin.mdpfunc.runFunc(player, times[0])
@@ -245,8 +196,8 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
             /////////////////////////
             //周囲に迷惑
             ///////////////////////
-            if (drugData.nearPlayer != null && plugin.size(drugData.nearPlayer!!, pd)) {
-                val data = drugData.nearPlayer!![pd.level].split(";")
+            if (plugin.size(drugData.nearPlayer, pd)) {
+                val data = drugData.nearPlayer[pd.level].split(";")
                 val list = getNearByPlayers(player, data[0].toInt())
                 for (p in list) {
                     plugin.mdpfunc.runFunc(p, data[1])
@@ -295,38 +246,34 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
                     ////////////////////////
                     // Func
                     ///////////////////////
-                    if (drugData.func != null) {
-                        for (funcname in drugData.func!!) {
-                            plugin.mdpfunc.runFunc(player, funcname)
-                        }
+                    for (funcname in drugData.func) {
+                        plugin.mdpfunc.runFunc(player, funcname)
                     }
                     ////////////////////////
                     // FuncDelay
                     ///////////////////////
-                    if (drugData.funcDelayLvUp != null) {
-                        for (funcname in drugData.funcDelayLvUp!!) {
-                            val times = funcname.split(";")
-                            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
-                                plugin.mdpfunc.runFunc(player, times[0])
-                            }, times[1].toLong())
-                        }
+                    for (funcname in drugData.funcDelayLvUp) {
+                        val times = funcname.split(";")
+                        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
+                            plugin.mdpfunc.runFunc(player, times[0])
+                        }, times[1].toLong())
                     }
                     ////////////////////////
                     // FuncRandom
                     ///////////////////////
-                    if (drugData.funcRandomLvUp != null && drugData.funcRandomLvUp!!.size > 0) {
+                    if (drugData.funcRandomLvUp.size > 0) {
                         val rnd = SecureRandom()
-                        val r = rnd.nextInt(drugData.funcRandomLvUp!!.size)
-                        val s = drugData.funcRandomLvUp!![r]
+                        val r = rnd.nextInt(drugData.funcRandomLvUp.size)
+                        val s = drugData.funcRandomLvUp[r]
                         plugin.mdpfunc.runFunc(player, s)
                     }
                     ////////////////////////
                     // FuncRandomDelay
                     ///////////////////////
-                    if (drugData.funcRandomDelayLvUp != null && drugData.funcRandomDelayLvUp!!.size > 0) {
+                    if (drugData.funcRandomDelayLvUp.size > 0) {
                         val rnd = SecureRandom()
-                        val r = rnd.nextInt(drugData.funcRandomDelayLvUp!!.size)
-                        val funcname = drugData.funcRandomDelayLvUp!![r]
+                        val r = rnd.nextInt(drugData.funcRandomDelayLvUp.size)
+                        val funcname = drugData.funcRandomDelayLvUp[r]
                         val times = funcname.split(";")
                         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
                             plugin.mdpfunc.runFunc(player, times[0])
@@ -371,7 +318,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
 
                 pd.usedLevel++
 
-                if (pd.usedCount > drugData.weakUsing!![pd2.level]) {
+                if (pd.usedCount > drugData.weakUsing[pd2.level]) {
                     pd2.usedLevel = 0
                     pd2.level--
                     pd.usedLevel = 0
@@ -393,13 +340,13 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
             ////////////////////////
             //message
             ///////////////////////
-            if (drugData.useMsg != null && plugin.size(drugData.useMsg!!, pd)) {
-                player.sendMessage(plugin.repStr(drugData.useMsg!![pd.level], player, pd, drugData))
+            if (plugin.size(drugData.useMsg, pd)) {
+                player.sendMessage(plugin.repStr(drugData.useMsg[pd.level], player, pd, drugData))
             }
 
             //Delay message
-            if (drugData.useMsgDelay != null && plugin.size(drugData.useMsgDelay!!, pd)) {
-                val times = drugData.useMsgDelay!![pd.level].split(";")
+            if (plugin.size(drugData.useMsgDelay, pd)) {
+                val times = drugData.useMsgDelay[pd.level].split(";")
 
                 Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
                     player.sendMessage(plugin.repStr(times[0], player, pd, drugData))
@@ -433,8 +380,8 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
             if (player.world == world && player.location.distanceSquared(loc) < ds) {
 
                 if (defenseCheck(0,player,false))continue
-                if (defenseCheck(1,player,false))continue
-                if (defenseCheck(2,player,false))continue
+//                if (defenseCheck(1,player,false))continue
+//                if (defenseCheck(2,player,false))continue
 
                 players.add(player)
 
@@ -451,12 +398,12 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
             0 -> {
                 player.inventory.helmet ?: return false
             }
-            1 -> {
-                player.inventory.itemInMainHand ?: return false
-            }
-            2 -> {
-                player.inventory.itemInOffHand ?: return false
-            }
+//            1 -> {
+//                player.inventory.itemInMainHand ?: return false
+//            }
+//            2 -> {
+//                player.inventory.itemInOffHand ?: return false
+//            }
 
             else -> return false
         }
@@ -470,24 +417,21 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
 
         ////////////////////////
         /// 副流煙をうけないかどうか
-        if (plugin.drugName.indexOf(drug) >= 1) {
-            Bukkit.getLogger().info("chance")
+        if (plugin.drugName.indexOf(drug) < 0) { return false }
 
-            val c = plugin.mdpConfig.get(drug)
+        val c = plugin.mdpConfig.get(drug)
 
-            if (c.type !=4)return false
+        if (c.type !=4)return false
 
-            val r = if (touch){
-                Random().nextInt(c.defenseTouch) + 1
-            }else{
-                Random().nextInt(c.defenseNear) + 1
-            }
+        val r = if (touch){
+            Random().nextInt(c.defenseTouch) + 1
+        }else{
+            Random().nextInt(c.defenseNear) + 1
+        }
 
-            if (r <= 10 && r != 0) {
-                Bukkit.getLogger().info("continue")
+        if (r <= 10 && r != 0) {
 
-                return true
-            }
+            return true
         }
 
         return false

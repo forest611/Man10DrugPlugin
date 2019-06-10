@@ -198,10 +198,10 @@ class Data{
 
     //全レベル使用可
     //lore
-    var lore : MutableList<String>? = null
+    var lore = mutableListOf<String>()
     //message
-    var useMsg : MutableList<String>? = null
-    var useMsgDelay : MutableList<String>? = null
+    var useMsg = mutableListOf<String>()
+    var useMsgDelay = mutableListOf<String>()
 
     var enchantEffect = false
 
@@ -211,13 +211,13 @@ class Data{
     */
 
     //func
-    var func : MutableList<String>? = null
+    var func = mutableListOf<String>()
     //funcDelay
-    var funcDelay : MutableList<String>? = null
+    var funcDelay = mutableListOf<String>()
     //funcRandom
-    var funcRandom : MutableList<String>? = null
+    var funcRandom = mutableListOf<String>()
     //funcRandomDelay
-    var funcRandomDelay : MutableList<String>? = null
+    var funcRandomDelay = mutableListOf<String>()
 
 
     //command
@@ -248,7 +248,7 @@ class Data{
 
     var isCrashChat = false
 
-    var crashChance : MutableList<String>? = null
+    var crashChance = mutableListOf<String>()
 
     var stockMode = false
     var addStock = 0
@@ -265,9 +265,9 @@ class Data{
     var nextLevelCount : MutableList<Int>? = null //次のレベルに上がるまでの回数
 
     //type0 HM
-    var symptomsTime : MutableList<Long>? = null
-    var symptomsNextTime : MutableList<Long>? = null
-    var symptomsCount : MutableList<Int>? = null //何回禁断症状が出るか (終わるまでの回数)
+    var symptomsTime = mutableListOf<Long>()
+    var symptomsNextTime  = mutableListOf<Long>()
+    var symptomsCount  = mutableListOf<Int>() //何回禁断症状が出るか (終わるまでの回数)
 
     val buffSymptoms = HashMap<Int,MutableList<String>>()
     val buffSymptomsRandom = HashMap<Int,MutableList<String>>()
@@ -275,7 +275,7 @@ class Data{
     val commandSymptoms = HashMap<Int,MutableList<String>>()
     val commandSymptomsRandom = HashMap<Int,MutableList<String>>()
 
-    var msgSymptoms : MutableList<String>? = null
+    var msgSymptoms = mutableListOf<String>()
 
     var particleSymptoms = HashMap<Int,MutableList<String>>()
     var particleSymptomsRandom = HashMap<Int,MutableList<String>>()
@@ -286,25 +286,25 @@ class Data{
     val commandLvUp = HashMap<Int,MutableList<String>>()
     val commandRandomLvUp = HashMap<Int,MutableList<String>>()
 
-    var nearPlayer : MutableList<String>? = null
-    var symptomsNearPlayer : MutableList<String>? = null
-    var dependenceMsg : MutableList<String>? = null
+    var nearPlayer = mutableListOf<String>()
+    var symptomsNearPlayer = mutableListOf<String>()
+    var dependenceMsg = mutableListOf<String>()
     var weakenProbability : MutableList<Int>? = null
-    var disableWorld : MutableList<String>? = null
+    var disableWorld = mutableListOf<String>()
 
     //func
-    var funcLvUp : MutableList<String>? = null
+    var funcLvUp = mutableListOf<String>()
     //funcDelay
-    var funcDelayLvUp : MutableList<String>? = null
+    var funcDelayLvUp = mutableListOf<String>()
     //funcRandom
-    var funcRandomLvUp : MutableList<String>? = null
+    var funcRandomLvUp = mutableListOf<String>()
     //funcRandomDelay
-    var funcRandomDelayLvUp : MutableList<String>? = null
+    var funcRandomDelayLvUp = mutableListOf<String>()
 
 
     //type1
     var weakDrug = "drug" //type2
-    var weakUsing : MutableList<Int>? = null//弱めるのに必要な量
+    var weakUsing  = mutableListOf<Int>()//弱めるのに必要な量
     var stopTask = false //薬で依存を止めるか
 
     //type4 defense
