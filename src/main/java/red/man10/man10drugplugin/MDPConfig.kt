@@ -1,6 +1,5 @@
 package red.man10.man10drugplugin
 
-import org.bukkit.Bukkit
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
@@ -89,6 +88,8 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
 
         data.isAttack = config.getBoolean("IsAttack",false)
 
+        data.immunity = config.getString("Immunity","")
+
         //type 0 only
         if (data.type == 0){
             data.isDependence = config.getBoolean("IsDependence") //禁断症状が出るか
@@ -100,8 +101,9 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
             data.symptomsTime = config.getLongList("SymptomsTime")
             data.symptomsNextTime = config.getLongList("SymptomsNextTime")
             data.symptomsCount = config.getIntegerList("SymptomsCount")
+            data.symptomsLeUpProb = config.getDoubleList("SymptomsLvUpProb")
 
-            data.weakenProbability = config.getIntegerList("WeakenProb")
+            data.weakenProbability = config.getDoubleList("WeakenProb")
 
             getHashMap("BuffSymptoms",config,data.buffSymptoms)
             getHashMap("BuffSymptomsRandom",config,data.buffSymptomsRandom)
@@ -142,12 +144,11 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
         //type3 ... free item
 
         if(data.type == 4){
-            data.defenseNear = config.getInt("DefenseNear")
-            data.defenseTouch = config.getInt("DefenseTouch")
+            data.defenseNear = config.getDouble("DefenseNear")
+            data.defenseTouch = config.getDouble("DefenseTouch")
             data.usePlace = config.getInt("UsePlace")
 
             //0 頭装備 1 オンハンド 2オフハンド
-
         }
 
 
@@ -248,6 +249,8 @@ class Data{
 
     var isCrashChat = false
 
+    var immunity = ""
+
     var crashChance = mutableListOf<String>()
 
     var stockMode = false
@@ -262,12 +265,13 @@ class Data{
     //type0
     var isDependence = false
     var dependenceLevel = 0  //依存レベル
-    var nextLevelCount : MutableList<Int>? = null //次のレベルに上がるまでの回数
+    var nextLevelCount = mutableListOf<Int>() //次のレベルに上がるまでの回数
 
     //type0 HM
     var symptomsTime = mutableListOf<Long>()
     var symptomsNextTime  = mutableListOf<Long>()
     var symptomsCount  = mutableListOf<Int>() //何回禁断症状が出るか (終わるまでの回数)
+    var symptomsLeUpProb = mutableListOf<Double>()//レベルアップする確率
 
     val buffSymptoms = HashMap<Int,MutableList<String>>()
     val buffSymptomsRandom = HashMap<Int,MutableList<String>>()
@@ -289,7 +293,7 @@ class Data{
     var nearPlayer = mutableListOf<String>()
     var symptomsNearPlayer = mutableListOf<String>()
     var dependenceMsg = mutableListOf<String>()
-    var weakenProbability : MutableList<Int>? = null
+    var weakenProbability = mutableListOf<Double>()
     var disableWorld = mutableListOf<String>()
 
     //func
@@ -308,8 +312,8 @@ class Data{
     var stopTask = false //薬で依存を止めるか
 
     //type4 defense
-    var defenseNear = 0
-    var defenseTouch = 0
+    var defenseNear :Double = 0.0
+    var defenseTouch :Double = 0.0
     var usePlace = 0
 
 }

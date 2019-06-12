@@ -52,7 +52,7 @@ class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData,val 
 
             for (i in 0 until drugData.commandSymptoms[pd.level]!!.size){
 
-                val cmd = plugin.repStr(drugData.commandSymptoms[pd.level]!![i],player,pd,drugData)
+                val cmd = plugin.repStr(drugData.commandSymptoms[pd.level]!![i],player,pd)
 
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
 
@@ -66,7 +66,7 @@ class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData,val 
 
             val cmd = plugin.repStr(drugData.commandSymptomsRandom[pd.level]!![Random().nextInt(
                     drugData.commandSymptomsRandom[pd.level]!!.size
-            )],player,pd,drugData)
+            )],player,pd)
 
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
 
@@ -124,7 +124,7 @@ class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData,val 
         ///////////////////////
         if (plugin.size(drugData.symptomsNearPlayer, pd)) {
             val data = drugData.symptomsNearPlayer[pd.level].split(";")
-            val list = plugin.event!!.getNearByPlayers(player, data[0].toInt())
+            val list = plugin.event!!.getNearByPlayers(player, data[0].toInt(),drug)
             for (p in list) {
                 plugin.mdpfunc.runFunc(p, data[1])
             }
@@ -133,7 +133,7 @@ class SymptomsTask (val player: Player,val drugData:Data,val pd :playerData,val 
 
         //send msg
         if (plugin.size(drugData.msgSymptoms,pd)){
-            player.sendMessage(plugin.repStr(drugData.msgSymptoms[pd.level],player,pd,drugData))
+            player.sendMessage(plugin.repStr(drugData.msgSymptoms[pd.level],player,pd))
         }
 
         pd.symptomsTotal ++

@@ -70,7 +70,7 @@ class EventManager(val plugin: Man10DrugPlugin,val player: Player,val pd:playerD
     fun cmd(){
         if (data.command[pd.level] != null){
             for (c in data.command[pd.level]!!) {
-                val cmd = plugin.repStr(c, player, pd, data)
+                val cmd = plugin.repStr(c, player, pd)
 
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
 
@@ -84,7 +84,7 @@ class EventManager(val plugin: Man10DrugPlugin,val player: Player,val pd:playerD
 
             val cmd = plugin.repStr(data.commandRandom[pd.level]!![Random().nextInt(
                     data.commandRandom[pd.level]!!.size
-            )], player, pd, data)
+            )], player, pd)
 
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
 
@@ -100,7 +100,7 @@ class EventManager(val plugin: Man10DrugPlugin,val player: Player,val pd:playerD
 
                 Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
 
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.repStr(command[0], player, pd, data))
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.repStr(command[0], player, pd))
 
                 }, command[1].toLong())
             }
@@ -117,7 +117,7 @@ class EventManager(val plugin: Man10DrugPlugin,val player: Player,val pd:playerD
 
             Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
 
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.repStr(command[0], player, pd, data))
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), plugin.repStr(command[0], player, pd))
 
             }, command[1].toLong())
         }
@@ -127,7 +127,7 @@ class EventManager(val plugin: Man10DrugPlugin,val player: Player,val pd:playerD
     fun pCmd(){
         if (data.playerCmd[pd.level] != null){
             for (c in data.playerCmd[pd.level]!!) {
-                val cmd = plugin.repStr(c, player, pd, data)
+                val cmd = plugin.repStr(c, player, pd)
 
                 Bukkit.dispatchCommand(player, cmd)
 
@@ -141,7 +141,7 @@ class EventManager(val plugin: Man10DrugPlugin,val player: Player,val pd:playerD
 
             val cmd = plugin.repStr(data.playerCmdRandom[pd.level]!![Random().nextInt(
                     data.playerCmdRandom[pd.level]!!.size
-            )], player, pd, data)
+            )], player, pd)
 
             Bukkit.dispatchCommand(player, cmd)
 
@@ -157,7 +157,7 @@ class EventManager(val plugin: Man10DrugPlugin,val player: Player,val pd:playerD
 
                 Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
 
-                    Bukkit.dispatchCommand(player, plugin.repStr(command[0], player, pd, data))
+                    Bukkit.dispatchCommand(player, plugin.repStr(command[0], player, pd))
 
                 }, command[1].toLong())
             }
@@ -173,7 +173,7 @@ class EventManager(val plugin: Man10DrugPlugin,val player: Player,val pd:playerD
 
             Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
 
-                Bukkit.dispatchCommand(player, plugin.repStr(command[0], player, pd, data))
+                Bukkit.dispatchCommand(player, plugin.repStr(command[0], player, pd))
 
             }, command[1].toLong())
         }

@@ -45,11 +45,12 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
                 continue
             }
 
-            var sql = "SELECT " +
+            val sql = "SELECT " +
                     "used_count," +
                     "used_level," +
                     "used_time," +
                     "level," +
+                    "immunity," +
                     "symptoms_total " +
                     "FROM drug_dependence " +
                     "WHERE uuid='${player.uniqueId}' "+
@@ -61,17 +62,10 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
 
             if (!rs.next()){
 
-                addRecord(mysql,player,name)
-
-                sql = "SELECT " +
-                        "used_count," +
-                        "used_level," +
-                        "used_time," +
-                        "level," +
-                        "symptoms_total " +
-                        "FROM drug_dependence " +
-                        "WHERE uuid='${player.uniqueId}' "+
-                        "and drug_name='$name';"
+                mysql.execute("INSERT INTO drug_dependence " +
+                        "VALUES('${player.uniqueId}'," +
+                        "'${player.name}'," +
+                        "'$name',0,0,${Date().time},0,0,0);")
 
                 rs = mysql.query(sql).rs
 
@@ -89,6 +83,7 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
                 data.time = Date()
                 data.time.time = rs.getLong("used_time")
                 data.usedCount = rs.getInt("used_count")
+                data.immunity = rs.getInt("immunity")
 
                 if (data.usedLevel > 0 || data.level > 0){
                     data.isDependence = true
@@ -150,7 +145,8 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
                     "SET used_count='${data.usedCount}'"+
                     ",used_level='${data.usedLevel}'"+
                     ",used_time='${data.time.time}'"+
-                    ",level='${data.level}'"+
+                    ",level='${data.level}'" +
+                    ",immunity='${data.immunity}'"+
                     ",symptoms_total='${data.symptomsTotal}' " +
                     " WHERE uuid='${player.uniqueId}' and drug_name='${plugin.drugName[i]}';"
 
@@ -209,17 +205,6 @@ class MDPDataBase(val plugin: Man10DrugPlugin){
         plugin.playerLog[player]!!.add("$drug,${format.format(date)}")
     }
 
-    ////////////////////////
-    //プレイヤーレコード追加
-    private fun addRecord(mysql: MySQLManagerV2, player:Player, drug:String){
-        val sql = "INSERT INTO drug_dependence " +
-                "VALUES('${player.uniqueId}'," +
-                "'${player.name}'," +
-                "'$drug',0,0,${Date().time},0,0);"
-
-        mysql.execute(sql)
-
-    }
 
     ///////////////////////
     //DBとメモリから累計使用回数取得
@@ -280,5 +265,5 @@ class playerData{
     var usedCount = 0
     var time = Date()
     var isDependence = false
+    var immunity = 0
 }
-

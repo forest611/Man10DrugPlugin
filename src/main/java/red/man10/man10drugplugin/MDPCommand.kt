@@ -80,7 +80,7 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
             return true
         }
 
-        if (cmd == "show"){
+        if (cmd == "data"){
 
             if (args.size == 1){
 
@@ -104,7 +104,7 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
                     if (pd.usedLevel == 0 && pd.level == 0){
                         continue
                     }
-                    if(c.dependenceMsg!!.isNotEmpty()){ sender.sendMessage("$chatMessage§e§l${c.displayName}:${c.dependenceMsg!![pd.level]}") }
+                    if(c.dependenceMsg.isNotEmpty()){ sender.sendMessage("$chatMessage§e§l${c.displayName}:${c.dependenceMsg[pd.level]}") }
 
                 }
 
@@ -416,9 +416,9 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
             if (args.size != 3)return true
             val data = plugin.mdpConfig.get(args[1])
 
-            if (data.nearPlayer!=null&&data.nearPlayer!!.isNotEmpty()) {
-                val d = data.nearPlayer!![0].split(";")[1]
-                val list = plugin.event!!.getNearByPlayers(sender, args[2].toInt())
+            if (data.nearPlayer.isNotEmpty()) {
+                val d = data.nearPlayer[0].split(";")[1]
+                val list = plugin.event!!.getNearByPlayers(sender, args[2].toInt(),args[1])
                 for (p in list) {
                     plugin.mdpfunc.runFunc(p, d)
                 }
@@ -432,9 +432,9 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
             if (args.size != 3)return true
             val data = plugin.mdpConfig.get(args[1])
 
-            if (data.symptomsNearPlayer!=null&&data.symptomsNearPlayer!!.isNotEmpty()) {
-                val d = data.symptomsNearPlayer!![0].split(";")[1]
-                val list = plugin.event!!.getNearByPlayers(sender, args[2].toInt())
+            if (data.symptomsNearPlayer.isNotEmpty()) {
+                val d = data.symptomsNearPlayer[0].split(";")[1]
+                val list = plugin.event!!.getNearByPlayers(sender, args[2].toInt(),args[1])
                 for (p in list) {
                     plugin.mdpfunc.runFunc(p, d)
                 }
@@ -499,6 +499,19 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
             return true
         }
 
+        if (cmd == "addwatch"){
+            if (sender.inventory.itemInMainHand == null ||
+                    !sender.inventory.itemInMainHand.hasItemMeta() ||
+                    !sender.inventory.itemInMainHand.itemMeta.hasDisplayName()){
+                sender.sendMessage("$chatMessage§eman10watchを持ってください")
+                return true
+            }
+
+            plugin.watchName.add(sender.inventory.itemInMainHand.itemMeta.displayName)
+            return true
+
+        }
+
 
 
 
@@ -507,12 +520,11 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
 
     fun helpChat(player: Player) {
 
-        player.sendMessage("$chatMessage§e§lMan10DrugPlugin HELP")
-
         if (!player.hasPermission("man10drug.helpop"))return
+        player.sendMessage("$chatMessage§e§lMan10DrugPlugin HELP")
         player.sendMessage("$chatMessage§e/mdp get [drugName] 薬を手に入れる drugNameはDataNameに書いた値を入力してください")
         player.sendMessage("$chatMessage§e/mdp reload 薬の設定ファイルを再読込みします")
-        player.sendMessage("$chatMessage§e/mdp show [player名] 薬の使用情報を見ることができます")
+        player.sendMessage("$chatMessage§e/mdp data [player名] 薬の使用情報を見ることができます")
         player.sendMessage("$chatMessage§e/mdp list 読み込まれている薬の名前を表示します")
         player.sendMessage("$chatMessage§e/mdp log [player名] [回数]プレイヤーの使用ログを見ることができます")
         player.sendMessage("$chatMessage§e/mdp startDependence オンラインプレイヤーのタスクをスタートします")

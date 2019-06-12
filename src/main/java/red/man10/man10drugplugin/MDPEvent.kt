@@ -50,23 +50,31 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
             val item = event.player.inventory.itemInMainHand ?: return
 
             if (item.itemMeta == null) return
-            if (item.itemMeta.lore == null) return
-            if (item.itemMeta.lore.isEmpty()) return
+            if (!item.itemMeta.hasDisplayName())return
             if (plugin.reload) return
 
-            val drug = item.itemMeta.lore[item.itemMeta.lore.size - 1].replace("§", "")
+            val display = item.itemMeta.displayName.replace("§","")
 
-            if (plugin.drugName.indexOf(drug) == -1) {
-                return
+            for(d in plugin.drugName){
+
+                if (plugin.mdpConfig.get(d).type == 4) {
+                    continue
+                }
+
+                if (display.indexOf(d) == -1){
+                    continue
+                }
+
+                if (display.indexOf(plugin.mdpConfig.get(d).displayName.replace("§","")) >=0){
+
+                    event.isCancelled = true
+
+                    useDrug(event.player, item, d)
+
+                    return
+
+                }
             }
-
-            if (plugin.mdpConfig.get(drug).type == 4) {
-                return
-            }
-
-            event.isCancelled = true
-
-            useDrug(event.player, item, drug)
         }
     }
 
@@ -113,7 +121,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
         val pd = plugin.db.get(key)
         val drugData = plugin.mdpConfig.get(drug)
 
-        if (drugData.disableWorld.isNotEmpty() && drugData.disableWorld!!.indexOf(player.world.name) >= 1) {
+        if (drugData.disableWorld.isNotEmpty() && drugData.disableWorld.indexOf(player.world.name) >= 1) {
             player.sendMessage("§eここではドラッグは使えません")
             return
         }
@@ -198,7 +206,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
             ///////////////////////
             if (plugin.size(drugData.nearPlayer, pd)) {
                 val data = drugData.nearPlayer[pd.level].split(";")
-                val list = getNearByPlayers(player, data[0].toInt())
+                val list = getNearByPlayers(player, data[0].toInt(),drug)
                 for (p in list) {
                     plugin.mdpfunc.runFunc(p, data[1])
                 }
@@ -209,15 +217,38 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
             pd.usedCount++  //total
             pd.countOnline++
 
+            //免疫上げる
+            if (drugData.immunity !=""){
+                val i = plugin.db.get(player.name+drugData.immunity)
+                i.immunity++
+                if (i.immunity>10){
+                    player.sendMessage("§2もうこれ吸う必要ないんじゃないかな...")
+                    i.immunity = 10
+                }
+                plugin.db.playerMap[player.name+drugData.immunity] = i
+            }
+
             ////////////////////////
             // type 0 only
             ///////////////////////
             if (drugData.type == 0) {
 
+                var isUp = false
+
+                if (pd.level < drugData.dependenceLevel && pd.usedLevel >= drugData.nextLevelCount[pd.level]
+                        && drugData.nextLevelCount.isNotEmpty()){
+                    isUp = true
+                }
+
                 //レベルアップ
                 //dependenceLevelを5にした場合、level5まで上がる
                 //0も含めるので、6段階となる
-                if (pd.level < drugData.dependenceLevel && pd.usedLevel >= drugData.nextLevelCount!![pd.level]) {
+                if (drugData.symptomsLeUpProb.isNotEmpty()){
+
+                    if (drugData.symptomsLeUpProb[pd.level]>Math.random())isUp = true
+                }
+
+                if (isUp) {
 
                     ////////////////////////
                     //command
@@ -225,7 +256,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
                     if (drugData.commandLvUp[pd.level] != null) {
 
                         for (c in drugData.commandLvUp[pd.level]!!) {
-                            val cmd = plugin.repStr(c, player, pd, drugData)
+                            val cmd = plugin.repStr(c, player, pd)
 
                             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
                         }
@@ -238,7 +269,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
 
                         val cmd = plugin.repStr(drugData.commandRandomLvUp[pd.level]!![Random().nextInt(
                                 drugData.commandRandomLvUp[pd.level]!!.size
-                        )], player, pd, drugData)
+                        )], player, pd)
 
                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd)
 
@@ -341,7 +372,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
             //message
             ///////////////////////
             if (plugin.size(drugData.useMsg, pd)) {
-                player.sendMessage(plugin.repStr(drugData.useMsg[pd.level], player, pd, drugData))
+                player.sendMessage(plugin.repStr(drugData.useMsg[pd.level], player, pd))
             }
 
             //Delay message
@@ -349,7 +380,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
                 val times = drugData.useMsgDelay[pd.level].split(";")
 
                 Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, {
-                    player.sendMessage(plugin.repStr(times[0], player, pd, drugData))
+                    player.sendMessage(plugin.repStr(times[0], player, pd))
                 }, times[1].toLong())
 
             }
@@ -371,7 +402,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
 
     ///////////////////////////
     //周囲のプレイヤーを検知
-    fun getNearByPlayers(centerPlayer: Player, distance: Int): ArrayList<Player> {
+    fun getNearByPlayers(centerPlayer: Player, distance: Int,drug:String): ArrayList<Player> {
         val ds = distance * distance
         val players = ArrayList<Player>()
         val loc = centerPlayer.location
@@ -379,7 +410,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
         for (player in Bukkit.getOnlinePlayers()) {
             if (player.world == world && player.location.distanceSquared(loc) < ds) {
 
-                if (defenseCheck(0,player,false))continue
+                if (defenseCheck(0,player,drug))continue
 //                if (defenseCheck(1,player,false))continue
 //                if (defenseCheck(2,player,false))continue
 
@@ -392,7 +423,15 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
     }
 
 
-    fun defenseCheck(place: Int, player: Player,touch:Boolean): Boolean {
+    fun defenseCheck(place: Int, player: Player,drug: String): Boolean {
+
+        val pd = plugin.db.get(player.name+drug)
+
+        if(Random().nextInt(9) +1 <= pd.immunity){
+            pd.immunity --
+            plugin.db.playerMap[player.name+drug] = pd
+            return false
+        }
 
         val item: ItemStack = when (place) {
             0 -> {
@@ -412,27 +451,18 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
         if (item.itemMeta.lore == null) return false
         if (item.itemMeta.lore.isEmpty()) return false
 
-        val drug = item.itemMeta.lore[item.itemMeta.lore.size - 1].replace("§", "")
+        val protecter = item.itemMeta.lore[item.itemMeta.lore.size - 1].replace("§", "")
 
 
         ////////////////////////
         /// 副流煙をうけないかどうか
         if (plugin.drugName.indexOf(drug) < 0) { return false }
 
-        val c = plugin.mdpConfig.get(drug)
+        val c = plugin.mdpConfig.get(protecter)
 
         if (c.type !=4)return false
 
-        val r = if (touch){
-            Random().nextInt(c.defenseTouch) + 1
-        }else{
-            Random().nextInt(c.defenseNear) + 1
-        }
-
-        if (r <= 10 && r != 0) {
-
-            return true
-        }
+        if (c.defenseNear>Math.random()) { return true}
 
         return false
 

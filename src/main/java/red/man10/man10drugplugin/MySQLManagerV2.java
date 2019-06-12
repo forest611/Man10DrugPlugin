@@ -54,6 +54,7 @@ public class MySQLManagerV2 {
                 "used_level int," +
                 "used_time text," +
                 "level int," +
+                "immunity int," +
                 "symptoms_total int);");
 
         //logger table

@@ -14,13 +14,17 @@ import java.util.concurrent.ConcurrentHashMap
 
 class Man10DrugPlugin : JavaPlugin() {
 
-    var drugName = ArrayList<String>()  //command name
+    var drugName = mutableListOf<String>()  //command name
+
+    var watchName = mutableListOf<String>()
+
     var drugItemStack = HashMap<String,ItemStack>()//key drugName
     var playerLog = ConcurrentHashMap<Player,MutableList<String>>()//log
 
     lateinit var db : MDPDataBase
     lateinit var disableWorld : MutableList<String>
 
+    lateinit var plConfig : FileConfiguration
 
     val mdpConfig = MDPConfig(this)
 
@@ -36,6 +40,8 @@ class Man10DrugPlugin : JavaPlugin() {
     var debug = false
 
     var reload = false
+
+    var watchTime = 0
 
     //task作成
 
@@ -91,22 +97,15 @@ class Man10DrugPlugin : JavaPlugin() {
 
         val meta = drug.itemMeta
 
-        meta.displayName = data.displayName
 
         //loreに識別コードを書き込む
-        val nameData = name.toCharArray()
 
         val loreData = StringBuffer()
 
-        for (i in 0 until  nameData.size){
-            loreData.append("§").append(nameData[i])
+        for (i in name.toCharArray()){
+            loreData.append("§").append(i)
         }
-
-        if (data.lore.isEmpty()){
-            data.lore = mutableListOf(loreData.toString())
-        }else{
-            data.lore.add(loreData.toString())
-        }
+        meta.displayName = data.displayName + loreData.toString()
 
         meta.lore = data.lore
 
@@ -116,6 +115,10 @@ class Man10DrugPlugin : JavaPlugin() {
         meta.isUnbreakable = true
         meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE)
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS)
+        meta.addItemFlags(ItemFlag.HIDE_DESTROYS)
+        meta.addItemFlags(ItemFlag.HIDE_PLACED_ON)
+        meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS)
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
 
         drug.itemMeta = meta
 
@@ -130,15 +133,13 @@ class Man10DrugPlugin : JavaPlugin() {
         //config load
         saveDefaultConfig()
 
-        val config:FileConfiguration = config
+        plConfig = config
 
-        canMilk = config.getBoolean("CanUseMilk",false)
-        stop = config.getBoolean("Stop",false)
-        disableWorld = config.getStringList("DisableWorld")
+        canMilk = plConfig.getBoolean("CanUseMilk",false)
+        stop = plConfig.getBoolean("Stop",false)
+        disableWorld = plConfig.getStringList("DisableWorld")
+        watchName = plConfig.getStringList("Watches")
 
-        config.set("CanUseMilk",canMilk)
-        config.set("Stop",stop)
-        config.set("DisableWorld",disableWorld)
 
         saveConfig()
 
@@ -170,6 +171,12 @@ class Man10DrugPlugin : JavaPlugin() {
     //シャットダウン、ストップ時
     ///////////////////////
     override fun onDisable() {
+
+        config.set("CanUseMilk",canMilk)
+        config.set("Stop",stop)
+        config.set("DisableWorld",disableWorld)
+        config.set("Watches",watchName)
+
 
         cancelTask()
 
@@ -224,10 +231,9 @@ class Man10DrugPlugin : JavaPlugin() {
                             SymptomsTask(p,c,pd,this@Man10DrugPlugin,db,drug).run()
 
                             //確率で依存レベルを下げる
-                            if (c.weakenProbability != null && c.weakenProbability!!.isNotEmpty()){
-                                val r = Random().nextInt(c.weakenProbability!![pd.level])+1
+                            if (c.weakenProbability.isNotEmpty()){
 
-                                if (r==1){
+                                if (c.weakenProbability[pd.level]>Math.random()){
 
                                     pd.level --
                                     pd.usedLevel = 0
@@ -239,14 +245,16 @@ class Man10DrugPlugin : JavaPlugin() {
                                 }
                             }
                         }
-
-
                     }
 
+                watchTime ++
+                if (watchTime >=360){
+                    watch(p)
+                    watchTime = 0
+                    }
                 }
             }
-        },200,200)
-
+        },200,200)//10秒ごと
     }
 
     fun cancelTask(){
@@ -254,6 +262,41 @@ class Man10DrugPlugin : JavaPlugin() {
         isTask = false
     }
 
+    fun watch(player: Player){
+
+        val item = player.inventory.itemInOffHand.itemMeta.displayName?:return
+
+        if (watchName.indexOf(item) < 1)return
+
+        player.sendMessage("§b§l[§a§lMan§f§l10§d§lWatch§b§l]§e§lドラッグの依存データ計測中§kX")
+
+
+        Bukkit.getScheduler().scheduleSyncDelayedTask(this, {
+            for (drug in drugName){
+                val c = mdpConfig.drugData[drug]?:continue
+
+                if (!c.isDependence){
+                    continue
+                }
+
+                if (db.playerMap[player.name+drug] == null){
+                    player.sendMessage("§e現在データの読み込み中です.....")
+                    return@scheduleSyncDelayedTask
+                }
+
+
+                val pd = db.get(player.name+drug)
+
+                if (pd.usedLevel == 0 && pd.level == 0){
+                    continue
+                }
+                if(c.dependenceMsg.isNotEmpty()){
+                    player.sendMessage("§b§l[§a§lMan§f§l10§d§lWatch§b§l]§e§l${c.displayName}:${c.dependenceMsg[pd.level]}") }
+
+            }
+
+        },100)
+    }
 
     ///////////////////////////////
     //複数のクラスで使うメソッド
@@ -264,7 +307,7 @@ class Man10DrugPlugin : JavaPlugin() {
         return false
     }
 
-    fun repStr(str:String,player: Player,pd:playerData,d:Data):String{
+    fun repStr(str:String,player: Player,pd:playerData):String{
         return str.replace("<player>",player.name).replace("<level>",pd.level.toString())
                 .replace("<usedLevel>",pd.usedLevel.toString()).replace("<symptomsTotal>",pd.symptomsTotal.toString())
                 //.replace("<stock>",d.stock.toString())
