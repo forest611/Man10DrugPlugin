@@ -193,6 +193,8 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
         if (cmd == "reload"){
 
             Bukkit.broadcastMessage("${chatMessage}§eドラッグプラグインのリロードを始めます")
+            Bukkit.broadcastMessage("${chatMessage}§eリロード中は、ドラッグの使用をやめてください")
+
 
             plugin.cancelTask()
 
