@@ -520,6 +520,35 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
 
         }
 
+        if (cmd == "status"){
+            sender.sendMessage("---------------------------------------------------------")
+
+            when(plugin.stop){
+                false -> sender.sendMessage("$chatMessage§e§l現在プラグインは可動しています")
+                true -> sender.sendMessage("$chatMessage§e§l現在プラグインはストップしています")
+
+            }
+            sender.sendMessage("")
+            when(plugin.db.canConnect){
+                false -> sender.sendMessage("$chatMessage§e§lMySQLの接続ができてません")
+                true -> sender.sendMessage("$chatMessage§e§lMySQLに接続できています")
+
+            }
+            sender.sendMessage("")
+
+            when(plugin.isTask){
+                false -> sender.sendMessage("$chatMessage§e§l依存タスクは停止しています")
+                true -> sender.sendMessage("$chatMessage§e§l依存タスクは動いています")
+
+            }
+            sender.sendMessage("")
+            sender.sendMessage("$chatMessage§e読み込みドラッグの数：${plugin.drugName.size}")
+
+
+            sender.sendMessage("---------------------------------------------------------")
+
+        }
+
 
 
 
@@ -546,6 +575,7 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
         player.sendMessage("$chatMessage§e/mdp nears [drug] [範囲] NearPlayerの禁断症状バージョンです")
         player.sendMessage("$chatMessage§e/mdp removedependence [drug] オンラインプレイヤーの指定ドラッグの依存を消します")
         player.sendMessage("$chatMessage§e/mdp set [player] [drug] [level] [count] 値を指定します")
+        player.sendMessage("$chatMessage§e/mdp addwatch 手持ちアイテムをWatchに追加します")
         player.sendMessage("---------------------------------------------------------")
 
         when(plugin.stop){
