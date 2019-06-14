@@ -299,6 +299,8 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
         if (cmd =="on"){
             plugin.stop = false
             plugin.startDependenceTask()
+            plugin.config.set("Stop",false)
+            plugin.saveConfig()
             sender.sendMessage("$chatMessage§eプラグインをスタートしました")
             return true
         }
@@ -306,6 +308,8 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
         if (cmd == "off"){
             plugin.stop = true
             plugin.cancelTask()
+            plugin.config.set("Stop",true)
+            plugin.saveConfig()
             sender.sendMessage("$chatMessage§eプラグインをストップしました")
             return true
         }
@@ -510,6 +514,8 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
             }
 
             plugin.watchName.add(sender.inventory.itemInMainHand.itemMeta.displayName)
+            plugin.config.set("Watches",plugin.watchName)
+            plugin.saveConfig()
             return true
 
         }

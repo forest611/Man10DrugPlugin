@@ -24,7 +24,6 @@ class Man10DrugPlugin : JavaPlugin() {
     lateinit var db : MDPDataBase
     lateinit var disableWorld : MutableList<String>
 
-    lateinit var plConfig : FileConfiguration
 
     val mdpConfig = MDPConfig(this)
 
@@ -135,16 +134,20 @@ class Man10DrugPlugin : JavaPlugin() {
         //config load
         saveDefaultConfig()
 
-        plConfig = config
+        canMilk = config.getBoolean("CanUseMilk",false)
+        stop = config.getBoolean("Stop",false)
+        disableWorld = config.getStringList("DisableWorld")
+        watchName = config.getStringList("Watches")
+        watchInterval = config.getInt("WatchInterval",360)
 
-        canMilk = plConfig.getBoolean("CanUseMilk",false)
-        stop = plConfig.getBoolean("Stop",false)
-        disableWorld = plConfig.getStringList("DisableWorld")
-        watchName = plConfig.getStringList("Watches")
-        watchInterval = plConfig.getInt("WatchInterval",360)
-
+        config.set("CanUseMilk",canMilk)
+        config.set("Stop",stop)
+        config.set("DisableWorld",disableWorld)
+        config.set("Watches",watchName)
+        config.set("WatchInterval",watchInterval)
 
         saveConfig()
+
 
         val mysql = MySQLManagerV2(this, "man10drugplugin")
 
@@ -174,12 +177,6 @@ class Man10DrugPlugin : JavaPlugin() {
     //シャットダウン、ストップ時
     ///////////////////////
     override fun onDisable() {
-
-        plConfig.set("CanUseMilk",canMilk)
-        plConfig.set("Stop",stop)
-        plConfig.set("DisableWorld",disableWorld)
-        plConfig.set("Watches",watchName)
-        plConfig.set("WatchInterval",watchInterval)
 
 
         cancelTask()
@@ -278,7 +275,7 @@ class Man10DrugPlugin : JavaPlugin() {
 
         val item = player.inventory.itemInOffHand.itemMeta.displayName?:return
 
-        if (watchName.indexOf(item) < 1)return
+        if (watchName.indexOf(item) < 0)return
 
         player.sendMessage("§b§l[§a§lMan§f§l10§d§lWatch§b§l]§e§lドラッグの依存データ計測中§kX")
 
