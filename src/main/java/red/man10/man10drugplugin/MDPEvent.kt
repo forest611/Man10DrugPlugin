@@ -411,8 +411,6 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
             if (player.world == world && player.location.distanceSquared(loc) < ds) {
 
                 if (defenseCheck(0,player,drug))continue
-//                if (defenseCheck(1,player,false))continue
-//                if (defenseCheck(2,player,false))continue
 
                 players.add(player)
 
@@ -437,12 +435,6 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
             0 -> {
                 player.inventory.helmet ?: return false
             }
-//            1 -> {
-//                player.inventory.itemInMainHand ?: return false
-//            }
-//            2 -> {
-//                player.inventory.itemInOffHand ?: return false
-//            }
 
             else -> return false
         }
@@ -451,18 +443,26 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
         if (item.itemMeta.lore == null) return false
         if (item.itemMeta.lore.isEmpty()) return false
 
-        val protecter = item.itemMeta.lore[item.itemMeta.lore.size - 1].replace("§", "")
-
+        val protecter = item.itemMeta.displayName.replace("§", "")
 
         ////////////////////////
         /// 副流煙をうけないかどうか
-        if (plugin.drugName.indexOf(drug) < 0) { return false }
+        for(d in plugin.drugName){
 
-        val c = plugin.mdpConfig.get(protecter)
+            if (plugin.mdpConfig.get(d).type != 4) {
+                continue
+            }
 
-        if (c.type !=4)return false
+            if (protecter.indexOf(d) == -1){
+                continue
+            }
 
-        if (c.defenseNear>Math.random()) { return true}
+            if (protecter.indexOf(plugin.mdpConfig.get(d).displayName.replace("§","")) >=0){
+
+                if (plugin.mdpConfig.get(protecter).defenseNear>Math.random()) { return true}
+
+            }
+        }
 
         return false
 
