@@ -1,5 +1,6 @@
 package red.man10.man10drugplugin
 
+import org.bukkit.Bukkit
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
@@ -18,14 +19,19 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
 
         val config = YamlConfiguration.loadConfiguration(drug)
 
+        if(config.getString("DataName") == null){
+            Bukkit.getLogger().info("DataNameが設定されていません")
+            return
+        }
+
         val data = get(config.getString("DataName"))
         //コマンド用の名前を登録
         plugin.drugName.add(config.getString("DataName"))
 
         data.displayName = config.getString("DisplayName")
-        data.material = config.getString("Material")
-        data.damage = config.getInt("Damage").toShort()
-        data.type =  config.getInt("Type")
+        data.material = config.getString("Material","DIAMOND_HOE")
+        data.damage = config.getInt("Damage",0).toShort()
+        data.type =  config.getInt("Type",0)
         data.isChange = config.getBoolean("IsChange")
         if(data.isChange)data.changeItem = config.getString("ChangeItem")
 

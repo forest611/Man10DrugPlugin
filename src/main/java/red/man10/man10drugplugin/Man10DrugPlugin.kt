@@ -43,6 +43,8 @@ class Man10DrugPlugin : JavaPlugin() {
 
     var watchTime = 0
 
+    var watchInterval = 0
+
     //task作成
 
 
@@ -72,7 +74,7 @@ class Man10DrugPlugin : JavaPlugin() {
         var i = 0
         while (i<drugFiles.size){
 
-            if (drugFiles[i].name == "config.yml"||drugFiles[i].isDirectory){
+            if (drugFiles[i].name == "config.yml"||drugFiles[i].isDirectory||!drugFiles[i].path.endsWith("yml")){
                 drugFiles.removeAt(i)
                 continue
             }
@@ -139,6 +141,7 @@ class Man10DrugPlugin : JavaPlugin() {
         stop = plConfig.getBoolean("Stop",false)
         disableWorld = plConfig.getStringList("DisableWorld")
         watchName = plConfig.getStringList("Watches")
+        watchInterval = plConfig.getInt("WatchInterval",360)
 
 
         saveConfig()
@@ -172,10 +175,11 @@ class Man10DrugPlugin : JavaPlugin() {
     ///////////////////////
     override fun onDisable() {
 
-        config.set("CanUseMilk",canMilk)
-        config.set("Stop",stop)
-        config.set("DisableWorld",disableWorld)
-        config.set("Watches",watchName)
+        plConfig.set("CanUseMilk",canMilk)
+        plConfig.set("Stop",stop)
+        plConfig.set("DisableWorld",disableWorld)
+        plConfig.set("Watches",watchName)
+        plConfig.set("WatchInterval",watchInterval)
 
 
         cancelTask()
@@ -248,7 +252,15 @@ class Man10DrugPlugin : JavaPlugin() {
                     }
 
                 watchTime ++
-                if (watchTime >=360){
+                if (watchTime >=watchInterval){
+
+                    ///////////////////
+                    //watch実行時にデータセーブ
+                    val mysql = MySQLManagerV2(this@Man10DrugPlugin, "man10drugPlugin")
+
+                    db.saveDataBase(p,mysql)
+                    db.loadDataBase(p,mysql)
+
                     watch(p)
                     watchTime = 0
                     }
