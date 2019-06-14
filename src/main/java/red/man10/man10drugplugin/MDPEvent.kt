@@ -443,7 +443,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
         if (item.itemMeta.lore == null) return false
         if (item.itemMeta.lore.isEmpty()) return false
 
-        val protecter = item.itemMeta.displayName.replace("§", "")
+        val protect = item.itemMeta.displayName.replace("§", "")
 
         ////////////////////////
         /// 副流煙をうけないかどうか
@@ -453,13 +453,13 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
                 continue
             }
 
-            if (protecter.indexOf(d) == -1){
+            if (protect.indexOf(d) == -1){
                 continue
             }
 
-            if (protecter.indexOf(plugin.mdpConfig.get(d).displayName.replace("§","")) >=0){
+            if (protect.indexOf(plugin.mdpConfig.get(d).displayName.replace("§","")) >=0){
 
-                if (plugin.mdpConfig.get(protecter).defenseNear>Math.random()) { return true}
+                if (plugin.mdpConfig.get(protect).defenseNear>Math.random()) { return true}
 
             }
         }
