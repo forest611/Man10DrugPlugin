@@ -59,6 +59,22 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
 
                 Bukkit.getLogger().info("オンラインプレイヤーの依存、感染は消えました")
             }
+            if (cmd == "clear"){
+                    for (drug in plugin.drugName){
+                        val pd = plugin.db.get(args[1]+drug)
+
+                        pd.level = 0
+                        pd.usedCount = 0
+                        pd.usedLevel = 0
+                        pd.isDependence = false
+                        pd.symptomsTotal = 0
+
+                        plugin.db.playerMap[args[1]+drug] = pd
+
+                    }
+
+                    return true
+            }
 
 
             return true
@@ -413,10 +429,6 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
             return true
         }
 
-        if(cmd == "restore"){
-            plugin.reload = false
-            return true
-        }
 
         if(cmd == "near"){
             if (args.size != 3)return true

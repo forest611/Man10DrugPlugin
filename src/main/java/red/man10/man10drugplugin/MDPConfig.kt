@@ -143,7 +143,7 @@ class MDPConfig(val plugin: Man10DrugPlugin) {
         //type1 2
         if (data.type == 1 || data.type == 2){
             data.weakDrug = config.getString("WeakDrug") //DataName
-            data.weakUsing = config.getIntegerList("WeakUsing")
+            data.weakProb = config.getDoubleList("WeakProb")
             data.stopTask = config.getBoolean("StopTask")
         }
 
@@ -314,7 +314,7 @@ class Data{
 
     //type1
     var weakDrug = "drug" //type2
-    var weakUsing  = mutableListOf<Int>()//弱めるのに必要な量
+    var weakProb  = mutableListOf<Double>()//弱めるのに必要な量
     var stopTask = false //薬で依存を止めるか
 
     //type4 defense

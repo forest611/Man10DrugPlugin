@@ -61,11 +61,7 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
                     continue
                 }
 
-                if (display.indexOf(d) == -1){
-                    continue
-                }
-
-                if (display.indexOf(plugin.mdpConfig.get(d).displayName.replace("§","")) >=0){
+                if (display == (plugin.mdpConfig.get(d).displayName+d).replace("§","")){
 
                     event.isCancelled = true
 
@@ -346,17 +342,27 @@ class MDPEvent(val plugin: Man10DrugPlugin) : Listener {
                     player.sendMessage("§aあれ？.....解毒薬を飲む必要ってあるのかな...")
                     return@Runnable
                 }
+//
+//                pd.usedLevel++
+//
+//                if (pd.usedCount > drugData.weakProb[pd2.level]) {
+//                    pd2.usedLevel = 0
+//                    pd2.level--
+//                    pd.usedLevel = 0
+//                    if (pd2.level < 0) {
+//                        pd2.level = 0
+//                        pd2.isDependence = false
+//                    }
+//                }
 
-                pd.usedLevel++
-
-                if (pd.usedCount > drugData.weakUsing[pd2.level]) {
+                if (drugData.weakProb[pd.level]>Math.random()){
                     pd2.usedLevel = 0
                     pd2.level--
-                    pd.usedLevel = 0
                     if (pd2.level < 0) {
                         pd2.level = 0
                         pd2.isDependence = false
                     }
+
                 }
 
                 plugin.db.playerMap[key2] = pd2
