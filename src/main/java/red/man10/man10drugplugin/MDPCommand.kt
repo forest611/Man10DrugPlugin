@@ -76,6 +76,29 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
                     return true
             }
 
+            if (cmd == "set"){
+                if (args.size != 5)return true
+
+                val key = args[1]+args[2]
+
+                if (plugin.db.playerMap[key] == null){
+                    Bukkit.getLogger().info("$chatMessage§e指定したプレイヤー、ドラッグは存在しません")
+                    return true
+                }
+
+                val pd = plugin.db.get(key)
+
+                pd.level = args[3].toInt()
+                pd.usedLevel = args[4].toInt()
+
+                plugin.db.playerMap[key] = pd
+
+                Bukkit.getLogger().info("$chatMessage§e値を設定しました")
+
+                return true
+            }
+
+
 
             return true
         }
