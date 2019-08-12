@@ -280,7 +280,7 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
         if (cmd == "list"){
             sender.sendMessage("${chatMessage}§e読み込まれているドラッグ一覧")
             for (d in plugin.drugName){
-                sender.sendMessage("${chatMessage}§e$d")
+                sender.sendMessage("${chatMessage}§e$d:${plugin.mdpConfig.get(d).displayName}")
             }
         }
 
@@ -444,7 +444,7 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
                     plugin.debug = false
                 }
                 false -> {
-                    sender.sendMessage("$chatMessage§eデバッグ機能：禁断症状が3分ごとに発生するようになりました")
+                    sender.sendMessage("$chatMessage§eデバッグ機能：禁断症状が1分ごとに発生するようになりました")
                     plugin.debug = true
                 }
             }
@@ -605,7 +605,7 @@ class MDPCommand (val plugin: Man10DrugPlugin) : CommandExecutor {
         player.sendMessage("$chatMessage§e/mdp clear [player] [drug] 指定プレイヤー、ドラッグの依存データをリセットします")
         player.sendMessage("$chatMessage§e/mdp using [player] [drug] ドラッグを消費せずにドラッグの使用状態を再現します(console用)")
         player.sendMessage("$chatMessage§e/mdp stat [drug] 指定ドラッグの利用統計を表示します")
-        player.sendMessage("$chatMessage§e/mdp highspeed 禁断症状が3分毎に発生するようになります(デバッグ用)")
+        player.sendMessage("$chatMessage§e/mdp highspeed 禁断症状が1分毎に発生するようになります(デバッグ用)")
         player.sendMessage("$chatMessage§e/mdp near [drug] [範囲] 指定した範囲で指定したドラッグのNearPlayerを実行します")
         player.sendMessage("$chatMessage§e/mdp nears [drug] [範囲] NearPlayerの禁断症状バージョンです")
         player.sendMessage("$chatMessage§e/mdp removedependence [drug] オンラインプレイヤーの指定ドラッグの依存を消します")

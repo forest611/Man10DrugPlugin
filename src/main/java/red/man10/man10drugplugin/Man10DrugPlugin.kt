@@ -8,6 +8,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.scheduler.BukkitRunnable
 import java.io.File
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -39,14 +40,6 @@ class Man10DrugPlugin : JavaPlugin() {
     var debug = false
 
     var reload = false
-
-    var watchTime = 0
-
-    var watchInterval = 0
-
-    //task作成
-
-
     ////////////////////////
     //config load
     /////////////////////
@@ -137,14 +130,10 @@ class Man10DrugPlugin : JavaPlugin() {
         canMilk = config.getBoolean("CanUseMilk",false)
         stop = config.getBoolean("Stop",false)
         disableWorld = config.getStringList("DisableWorld")
-        watchName = config.getStringList("Watches")
-        watchInterval = config.getInt("WatchInterval",360)
 
         config.set("CanUseMilk",canMilk)
         config.set("Stop",stop)
         config.set("DisableWorld",disableWorld)
-        config.set("Watches",watchName)
-        config.set("WatchInterval",watchInterval)
 
         saveConfig()
 
@@ -192,13 +181,10 @@ class Man10DrugPlugin : JavaPlugin() {
     //日付差分で禁断症状
     fun startDependenceTask(){
 
-
-        Bukkit.getScheduler().runTaskTimer(this,object: TimerTask() {
-            override fun run() {
-
+        Bukkit.getScheduler().runTaskTimer(this, {
                 if (stop || !isTask){
-                    cancel()
-                    return
+                    cancelTask()
+                    return@runTaskTimer
                 }
 
                 isTask = true
@@ -222,12 +208,12 @@ class Man10DrugPlugin : JavaPlugin() {
                         val differenceTick = (now - time) / 1000
 
                         /*
-                            依存レベルチェック、debugモードの場合は3分ごとに発生
+                            依存レベルチェック、debugモードの場合は1分ごとに発生
 
                          */
                         if ((pd.symptomsTotal >0&&c.symptomsNextTime[pd.level] <= differenceTick.toInt() )
                                 || c.symptomsTime[pd.level] <= differenceTick.toInt()
-                                || (debug && differenceTick > 180)){
+                                || (debug && differenceTick > 60)){
 
                             SymptomsTask(p,c,pd,this@Man10DrugPlugin,db,drug).run()
 
@@ -247,23 +233,10 @@ class Man10DrugPlugin : JavaPlugin() {
                             }
                         }
                     }
-
-                watchTime ++
-                if (watchTime >=watchInterval){
-
-                    ///////////////////
-                    //watch実行時にデータセーブ
-                    val mysql = MySQLManagerV2(this@Man10DrugPlugin, "man10drugPlugin")
-
-                    db.saveDataBase(p,mysql)
-                    db.loadDataBase(p,mysql)
-
-                    watch(p)
-                    watchTime = 0
-                    }
                 }
-            }
-        },200,200)//10秒ごと
+
+            },200,200)
+
     }
 
     fun cancelTask(){
@@ -271,41 +244,6 @@ class Man10DrugPlugin : JavaPlugin() {
         isTask = false
     }
 
-    fun watch(player: Player){
-
-        val item = player.inventory.itemInOffHand.itemMeta.displayName?:return
-
-        if (watchName.indexOf(item) < 0)return
-
-        player.sendMessage("§b§l[§a§lMan§f§l10§d§lWatch§b§l]§e§lドラッグの依存データ計測中§kX")
-
-
-        Bukkit.getScheduler().scheduleSyncDelayedTask(this, {
-            for (drug in drugName){
-                val c = mdpConfig.drugData[drug]?:continue
-
-                if (!c.isDependence){
-                    continue
-                }
-
-                if (db.playerMap[player.name+drug] == null){
-                    player.sendMessage("§e現在データの読み込み中です.....")
-                    return@scheduleSyncDelayedTask
-                }
-
-
-                val pd = db.get(player.name+drug)
-
-                if (pd.usedLevel == 0 && pd.level == 0){
-                    continue
-                }
-                if(c.dependenceMsg.isNotEmpty()){
-                    player.sendMessage("§b§l[§a§lMan§f§l10§d§lWatch§b§l]§e§l${c.displayName}:${c.dependenceMsg[pd.level]}") }
-
-            }
-
-        },100)
-    }
 
     ///////////////////////////////
     //複数のクラスで使うメソッド
