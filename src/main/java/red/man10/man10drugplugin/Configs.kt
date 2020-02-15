@@ -1,7 +1,14 @@
 package red.man10.man10drugplugin
 
+import net.minecraft.server.v1_12_R1.Item
+import net.minecraft.server.v1_12_R1.NBTTagCompound
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack
+import org.bukkit.enchantments.Enchantment
+import org.bukkit.inventory.ItemFlag
+import org.bukkit.inventory.ItemStack
 import java.io.File
 import java.lang.Exception
 
@@ -41,11 +48,11 @@ class Configs(private val plugin: Man10DrugPlugin){
                 continue
             }
 
-            plugin.drugName.add(cfg.getString("dataname"))
+            val dataName = cfg.getString("dataName")
 
-            val data = HashMap<String,DrugData>()[cfg.getString("dataname")]!!
+            plugin.drugName.add(dataName)
 
-            plugin.drugName.add(cfg.getString("DataName"))
+            val data = HashMap<String,DrugData>()[dataName]!!
 
             data.displayName = cfg.getString("displayName")
             data.material = cfg.getString(",material","DIAMOND_HOE")
@@ -140,6 +147,38 @@ class Configs(private val plugin: Man10DrugPlugin){
                 data.stopDepend = cfg.getBoolean("stopDepend")
             }
 
+            Bukkit.getLogger().info("Loaded file $dataName (${file.name})")
+
+            //////////////
+            //nbtにdataNameを仕込む
+            ////////////////
+            var drugItem = ItemStack(Material.valueOf(data.material),1)
+            val drugNbt = CraftItemStack.asNMSCopy(drugItem)
+            val drugTag = NBTTagCompound()
+            drugTag.setString("name",dataName)
+            drugNbt.tag = drugTag
+            drugItem = CraftItemStack.asBukkitCopy(drugNbt)
+
+            val meta = drugItem.itemMeta
+
+            meta.displayName = data.displayName
+            if (data.hasEnchantEffect){
+                meta.addEnchant(Enchantment.DURABILITY,0,false)
+            }
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
+            meta.addItemFlags(ItemFlag.HIDE_DESTROYS)
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS)
+            meta.addItemFlags(ItemFlag.HIDE_PLACED_ON)
+            meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS)
+            meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE)
+
+            meta.lore = data.lore
+
+            drugItem.itemMeta = meta
+
+            data.itemStack = drugItem
+
+            plugin.drugData[dataName] = data
         }
     }
 
@@ -164,6 +203,7 @@ class Configs(private val plugin: Man10DrugPlugin){
 
     class DrugData{
 
+        var itemStack :ItemStack? = null
         //必須
         var displayName = "drug"
         var material = "DIAMOND_HOE"
