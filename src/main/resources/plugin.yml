@@ -1,9 +1,3 @@
 name: Man10DrugPlugin
-version: 1.0
+version: @version@
 main: red.man10.man10drugplugin.Man10DrugPlugin
-depend: [Vault,WorldGuard]
-commands:
-  mdp:
-    description: Man10DrugPlugin
-    usage: /<command>
-    default: op
