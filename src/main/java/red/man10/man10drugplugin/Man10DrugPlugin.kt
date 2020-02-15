@@ -12,11 +12,14 @@ class Man10DrugPlugin : JavaPlugin() {
     var debugMode = false
     var disableWorld = mutableListOf<String>()
 
+    var isReload = false//リロード中かどうか
+
     val drugName = mutableListOf<String>()
     val drugData = HashMap<String,Configs.DrugData>()
 
     lateinit var cmds : Commands
     lateinit var events : Events
+    lateinit var db :DataBase
     lateinit var configs : Configs
 
     //////////////////////////
@@ -34,9 +37,13 @@ class Man10DrugPlugin : JavaPlugin() {
         cmds = Commands(this)
         events = Events(this)
         configs = Configs(this)
+        db = DataBase(this)
 
         getCommand("mdp").executor = cmds
         Bukkit.getServer().pluginManager.registerEvents(events,this)
+        db.loginConnection = MySQLManager(this,"DrugPluginLogin")
+        db.executeDBQueue()
+
 
     }
 
