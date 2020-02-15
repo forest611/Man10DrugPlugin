@@ -56,10 +56,28 @@ class DataBase (private val plugin: Man10DrugPlugin){
                 mysql.close()
 
             }
-
         }
-
     }
+
+    fun logoutDB(p:Player){
+        for (drug in plugin.drugName){
+            val data = playerData[Pair(p,drug)]!!
+
+            executeQueue.add(
+            "UPDATE drug_dependence " +
+                    "SET used_count='${data.usedCount}'"+
+                    ",used_level='${data.usedLevel}'"+
+                    ",used_time='${data.finalUseTime}'"+
+                    ",level='${data.level}'" +
+                    ",symptoms_total='${data.totalSymptoms}' " +
+                    " WHERE uuid='${p.uniqueId}' and" +
+                    " drug_name='${drug}';"
+            )
+            playerData.remove(Pair(p,drug))
+        }
+    }
+
+
 
     ////////////////////
     //DBに保存するためのキュー
