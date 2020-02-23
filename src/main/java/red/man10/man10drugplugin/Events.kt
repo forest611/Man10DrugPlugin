@@ -45,7 +45,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
 
             if (plugin.drugName.indexOf(dataName) == -1)return
 
-            useDrug(p,dataName,e.item)
+            useDrug(p,dataName)
         }
     }
 
@@ -63,20 +63,21 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
     @EventHandler
     fun loginEvent(e : PlayerJoinEvent){
         Thread(Runnable {
-            Thread.sleep(10000)
+            Thread.sleep(5000)
             plugin.db.loginDB(e.player)
         }).start()
     }
 
     @EventHandler
     fun logoutEvent(e:PlayerQuitEvent){
+        if (plugin.isReload)return
         plugin.db.logoutDB(e.player)
     }
 
     /////////////////////////////////
     //ドラッグ使用時の処理
     /////////////////////////////////
-    fun useDrug(p: Player, dataName:String, item: org.bukkit.inventory.ItemStack){
+    fun useDrug(p: Player, dataName:String){
 
         val data = plugin.drugData[dataName]!!
 
@@ -90,7 +91,8 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
 
         /////////////
         //remove an item
-        if (data.isRemoveItem){
+        if (data.isRemoveItem && p.inventory.itemInMainHand !=null){
+            val item = p.inventory.itemInMainHand
             item.amount = item.amount -1
             p.inventory.itemInMainHand = item
         }
@@ -130,7 +132,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
                 pd2.level --
                 if (pd2.level == -1){
                     pd2.level = 0
-                    pd2.usedCount = 0
+//                    pd2.usedCount = 0
                     pd2.isDepend = false
                     pd2.totalSymptoms = 0
                     p.sendMessage("§a§l症状が完全に治ったようだ")

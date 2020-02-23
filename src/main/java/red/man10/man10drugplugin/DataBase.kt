@@ -54,6 +54,7 @@ class DataBase (private val plugin: Man10DrugPlugin){
 
                 playerData[Pair(p,drug)] = data
                 mysql.close()
+                rs.close()
 
             }
         }
@@ -77,6 +78,22 @@ class DataBase (private val plugin: Man10DrugPlugin){
         }
     }
 
+
+    fun getServerTotal(drug:String):Int{
+        val mysql = MySQLManager(plugin,"DrugStat")
+
+        val rs = mysql.query("SELECT COUNT(drug_name) FROM log WHERE drug_name='$drug';") ?: return 0
+
+        rs.next()
+
+        val total = rs.getInt(1)
+
+        rs.close()
+        mysql.close()
+
+        return total
+
+    }
 
 
     ////////////////////

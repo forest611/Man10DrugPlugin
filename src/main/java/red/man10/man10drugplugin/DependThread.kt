@@ -14,6 +14,8 @@ class DependThread (private val plugin: Man10DrugPlugin){
 
             while (true){
 
+                if (plugin.isReload || !plugin.pluginEnable)break
+
                 for (p in Bukkit.getOnlinePlayers()){
 
                     for (drug in plugin.drugName){
@@ -60,7 +62,7 @@ class DependThread (private val plugin: Man10DrugPlugin){
                                 pd.level --
                                 if (pd.level == -1){
                                     pd.level = 0
-                                    pd.usedCount =0
+//                                    pd.usedCount =0
                                     pd.isDepend = false
                                     pd.totalSymptoms = 0
                                     p.sendMessage("§e§l依存が完全に治ったようだ")

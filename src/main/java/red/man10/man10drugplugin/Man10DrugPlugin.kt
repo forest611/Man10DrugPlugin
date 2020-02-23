@@ -28,18 +28,13 @@ class Man10DrugPlugin : JavaPlugin() {
     //////////////////////////
     override fun onEnable() { // Plugin startup logic
 
-        saveDefaultConfig()
-
-        pluginEnable = config.getBoolean("enableplugin",true)
-        useMilk = config.getBoolean("usemilk",false)
-        debugMode = config.getBoolean("debugmode",false)
-        disableWorld = config.getStringList("disableworld")
-
         cmds = Commands(this)
         events = Events(this)
         configs = Configs(this)
         db = DataBase(this)
         thread = DependThread(this)
+
+        configs.loadPluginConfig()
 
         getCommand("mdp").executor = cmds
         Bukkit.getServer().pluginManager.registerEvents(events,this)
@@ -47,6 +42,7 @@ class Man10DrugPlugin : JavaPlugin() {
         db.executeDBQueue()
         thread.dependThread()
 
+        configs.loadDrugs()
 
     }
 

@@ -22,7 +22,6 @@ class Configs(private val plugin: Man10DrugPlugin){
         plugin.drugName.clear()
         plugin.drugData.clear()
 
-
         val drugFolder = File(Bukkit.getServer()
                 .pluginManager.getPlugin("Man10DrugPlugin")
                 .dataFolder, File.separator)
@@ -63,7 +62,6 @@ class Configs(private val plugin: Man10DrugPlugin){
             data.lore = cfg.getStringList("Lore")
             //use message
             data.useMsg = cfg.getStringList("useMsg")
-            data.useMsgDelay = cfg.getStringList("useMsgDelay")
             data.hasEnchantEffect = cfg.getBoolean("hasEnchantEffect")
 
             data.cooldown = cfg.getLong("cooldown")
@@ -73,33 +71,21 @@ class Configs(private val plugin: Man10DrugPlugin){
             //func lists
             data.func = cfg.getStringList("func")
             data.funcRandom = cfg.getStringList("funcrandom")
-            data.funcDelay = cfg.getStringList("funcdelay")
-            data.funcRandomDelay = cfg.getStringList("funcrandomdelay")
 
             data.cmd = getHMList("cmd",cfg)
             data.cmdRandom = getHMList("cmdRandom",cfg)
-            data.cmdDelay = getHMList("cmdDelay",cfg)// - commandName;time(tick)
-            data.cmdRandomDelay = getHMList("cmdDelayRandom",cfg)
 
             data.playerCmd = getHMList("pCmd",cfg)
             data.playerCmdRandom = getHMList("pCmdRandom",cfg)
-            data.playerCmdDelay = getHMList("pCmdDelay",cfg)
-            data.playerCmdRandomDelay = getHMList("pCmdDelayRandom",cfg)
 
             data.buff = getHMList("buff",cfg)
             data.buffRandom = getHMList("buffRandom",cfg)
-            data.buffDelay = getHMList("buffDelay",cfg)
-            data.buffRandomDelay = getHMList("buffDelayRandom",cfg)
 
             data.particle = getHMList("particle",cfg)
             data.particleRandom = getHMList("particleRandom",cfg)
-            data.particleDelay = getHMList("particleDelay",cfg)
-            data.particleRandomDelay = getHMList("particleDelayRandom",cfg)
 
             data.sound = getHMList("sound",cfg)
             data.soundRandom = getHMList("soundRandom",cfg)
-            data.soundDelay = getHMList("soundDelay",cfg)
-            data.soundRandomDelay = getHMList("soundDelayRandom",cfg)
 
             data.crashChance = cfg.getDoubleList("crashChance")//無記名で壊れなくなる
 
@@ -152,9 +138,9 @@ class Configs(private val plugin: Man10DrugPlugin){
 
             Bukkit.getLogger().info("Loaded file $dataName (${file.name})")
 
-            //////////////
-            //nbtにdataNameを仕込む
-            ////////////////
+            /////////////////////////////
+            //ItemStackの作成
+            //////////////////////////////
             var drugItem = ItemStack(Material.valueOf(data.material),1)
             val drugNbt = CraftItemStack.asNMSCopy(drugItem)
             val drugTag = NBTTagCompound()
@@ -204,6 +190,16 @@ class Configs(private val plugin: Man10DrugPlugin){
 
     }
 
+    fun loadPluginConfig(){
+        plugin.saveDefaultConfig()
+
+        plugin.pluginEnable = plugin.config.getBoolean("enableplugin",true)
+        plugin.useMilk = plugin.config.getBoolean("usemilk",false)
+        plugin.debugMode = plugin.config.getBoolean("debugmode",false)
+        plugin.disableWorld = plugin.config.getStringList("disableworld")
+
+    }
+
     class DrugData{
 
         var itemStack :ItemStack? = null
@@ -229,7 +225,6 @@ class Configs(private val plugin: Man10DrugPlugin){
         var lore = mutableListOf<String>()
         //message
         var useMsg = mutableListOf<String>()
-        var useMsgDelay = mutableListOf<String>()
 
         var hasEnchantEffect = false
 
@@ -240,39 +235,25 @@ class Configs(private val plugin: Man10DrugPlugin){
 
         //func
         var func = mutableListOf<String>()
-        //funcDelay
-        var funcDelay = mutableListOf<String>()
         //funcRandom
         var funcRandom = mutableListOf<String>()
-        //funcRandomDelay
-        var funcRandomDelay = mutableListOf<String>()
 
 
         //cmd
         var cmd = HashMap<Int,MutableList<String>>()
         var cmdRandom = HashMap<Int,MutableList<String>>()
-        var cmdDelay = HashMap<Int,MutableList<String>>()
-        var cmdRandomDelay = HashMap<Int,MutableList<String>>()
         //player dispatch
         var playerCmd = HashMap<Int,MutableList<String>>()
         var playerCmdRandom = HashMap<Int,MutableList<String>>()
-        var playerCmdDelay = HashMap<Int,MutableList<String>>()
-        var playerCmdRandomDelay = HashMap<Int,MutableList<String>>()
         //buff
         var buff = HashMap<Int,MutableList<String>>()
         var buffRandom = HashMap<Int,MutableList<String>>()
-        var buffDelay = HashMap<Int,MutableList<String>>()
-        var buffRandomDelay = HashMap<Int,MutableList<String>>()
         //particle
         var particle = HashMap<Int,MutableList<String>>()
         var particleRandom = HashMap<Int,MutableList<String>>()
-        var particleDelay = HashMap<Int,MutableList<String>>()
-        var particleRandomDelay = HashMap<Int,MutableList<String>>()
         //sound
         var sound = HashMap<Int,MutableList<String>>()
         var soundRandom = HashMap<Int,MutableList<String>>()
-        var soundDelay = HashMap<Int,MutableList<String>>()
-        var soundRandomDelay = HashMap<Int,MutableList<String>>()
 
         //アイテムが一定確率で消える
         var crashChance = mutableListOf<Double>()
