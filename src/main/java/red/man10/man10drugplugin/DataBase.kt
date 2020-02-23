@@ -91,6 +91,41 @@ class DataBase (private val plugin: Man10DrugPlugin){
 
     }
 
+    fun createTable(){
+        val mysql = MySQLManager(plugin,"drugTable")
+
+        mysql.execute("CREATE TABLE if not exists drug_dependence " +
+                "(uuid text," +
+                "player text," +
+                "drug_name text," +
+                "used_count int," +
+                "used_level int," +
+                "used_time text," +
+                "level int," +
+                "immunity int," +
+                "symptoms_total int);");
+
+        //logger table
+        mysql.execute("CREATE TABLE if not exists log " +
+                "(uuid text, " +
+                "player text, " +
+                "drug_name text, " +
+                "date text);");
+
+        //drug box
+        mysql.execute("CREATE TABLE if not exists box " +
+                "(id int,"  +
+                "one text,"     +
+                "two text,"     +
+                "three text,"   +
+                "four text,"    +
+                "five text,"    +
+                "six text,"     +
+                "seven text,"   +
+                "eight text,"   +
+                "nine text);");
+    }
+
 
     ////////////////////
     //DBに保存するためのキュー
@@ -103,7 +138,6 @@ class DataBase (private val plugin: Man10DrugPlugin){
                 while (true){
                     val take = executeQueue.take()
                     sql.execute(take)
-                    sql.close()
                 }
             }catch (e:InterruptedException){
 

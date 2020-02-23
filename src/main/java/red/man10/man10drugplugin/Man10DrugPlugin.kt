@@ -42,6 +42,7 @@ class Man10DrugPlugin : JavaPlugin() {
 
         Bukkit.getServer().pluginManager.registerEvents(events,this)
         db.mysql = MySQLManager(this,"DrugPluginLogin")
+        db.createTable()
         db.executeDBQueue()
         thread.dependThread()
 
