@@ -41,7 +41,7 @@ class Man10DrugPlugin : JavaPlugin() {
 
         getCommand("mdp").executor = cmds
         Bukkit.getServer().pluginManager.registerEvents(events,this)
-        db.loginConnection = MySQLManager(this,"DrugPluginLogin")
+        db.mysql = MySQLManager(this,"DrugPluginLogin")
         db.executeDBQueue()
 
 

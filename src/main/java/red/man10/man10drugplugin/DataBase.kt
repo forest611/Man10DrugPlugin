@@ -104,7 +104,7 @@ class DataBase (private val plugin: Man10DrugPlugin){
         var usedLevel = 0//レベルごとにリセット
         var level = 0
         var totalSymptoms = 0
-        var finalUseTime : Long = 0
+        var finalUseTime : Long = 0//最終使用時刻(cooldownのでも使用)
         var isDepend = false
     }
 }
