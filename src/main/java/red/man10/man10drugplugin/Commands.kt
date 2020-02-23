@@ -170,6 +170,7 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
                 plugin.configs.loadPluginConfig()
 
                 plugin.configs.loadDrugs()
+                plugin.func.loadFunction()
 
                 sender.sendMessage("§e§lドラッグデータ、プラグインのコンフィグ読み込み完了")
 

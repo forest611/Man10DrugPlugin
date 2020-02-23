@@ -74,6 +74,9 @@ class Configs(private val plugin: Man10DrugPlugin){
             data.cmd = getHMList("cmd",cfg)
             data.cmdRandom = getHMList("cmdRandom",cfg)
 
+            data.sCmd = getHMList("serverCmd",cfg)
+            data.sCmdRandom = getHMList("serverCmdRandom",cfg)
+
             data.playerCmd = getHMList("pCmd",cfg)
             data.playerCmdRandom = getHMList("pCmdRandom",cfg)
 
@@ -87,11 +90,12 @@ class Configs(private val plugin: Man10DrugPlugin){
             data.soundRandom = getHMList("soundRandom",cfg)
 
             data.crashChance = cfg.getDoubleList("crashChance")//無記名で壊れなくなる
+            data.crashMsg = cfg.getString("crashMsg")
 
             data.removeBuffs = cfg.getBoolean("removeBuff")//使ったときに今のバフを消す
 
-            data.isRemoveItem = cfg.getBoolean("RemoveItem",true)
-            data.disableWorld = cfg.getStringList("DisableWorld")
+            data.isRemoveItem = cfg.getBoolean("removeItem",true)
+            data.disableWorld = cfg.getStringList("disableWorld")
 
             if (data.type == 0){
                 data.isdepend = cfg.getBoolean("isDepend")
@@ -239,6 +243,9 @@ class Configs(private val plugin: Man10DrugPlugin){
         //cmd
         var cmd = HashMap<Int,MutableList<String>>()
         var cmdRandom = HashMap<Int,MutableList<String>>()
+        //server cmd
+        var sCmd = HashMap<Int,MutableList<String>>()
+        var sCmdRandom = HashMap<Int,MutableList<String>>()
         //player dispatch
         var playerCmd = HashMap<Int,MutableList<String>>()
         var playerCmdRandom = HashMap<Int,MutableList<String>>()
@@ -254,6 +261,7 @@ class Configs(private val plugin: Man10DrugPlugin){
 
         //アイテムが一定確率で消える
         var crashChance = mutableListOf<Double>()
+        var crashMsg = ""//消えたときのメッセージ
 
         var removeBuffs = false //使用時 バフが消えるかどうか
         var isRemoveItem = true //使用時 アイテムを消去するか

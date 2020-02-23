@@ -22,6 +22,7 @@ class Man10DrugPlugin : JavaPlugin() {
     lateinit var db :DataBase
     lateinit var configs : Configs
     lateinit var thread: DependThread
+    lateinit var func : MDPFunction
 
     //////////////////////////
     //起動時の処理
@@ -33,6 +34,7 @@ class Man10DrugPlugin : JavaPlugin() {
         configs = Configs(this)
         db = DataBase(this)
         thread = DependThread(this)
+        func = MDPFunction(this)
 
         configs.loadPluginConfig()
 
@@ -43,6 +45,7 @@ class Man10DrugPlugin : JavaPlugin() {
         thread.dependThread()
 
         configs.loadDrugs()
+        func.loadFunction()
 
     }
 
