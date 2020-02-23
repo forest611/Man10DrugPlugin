@@ -1,6 +1,5 @@
 package red.man10.man10drugplugin
 
-import net.minecraft.server.v1_12_R1.Item
 import net.minecraft.server.v1_12_R1.NBTTagCompound
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -118,7 +117,7 @@ class Configs(private val plugin: Man10DrugPlugin){
                 data.symptomsFirstTime = cfg.getLongList("symptomsFirstTime")//最初の一回目
                 data.symptomsTime = cfg.getLongList("symptomsTime")//それ以降
 
-                data.symptomsCount = cfg.getIntegerList("symptomsCount")//禁断症状が止まる確率
+                data.symptomsStopProb = cfg.getDoubleList("symptomsStopProb")//禁断症状が止まる確率
 
                 data.buffSymptoms = getHMList("buffSymptoms",cfg)
                 data.buffSymptomsRandom = getHMList("buffSymptomsRandom",cfg)
@@ -290,7 +289,7 @@ class Configs(private val plugin: Man10DrugPlugin){
         //type0 HM
         var symptomsFirstTime = mutableListOf<Long>()
         var symptomsTime  = mutableListOf<Long>()
-        var symptomsCount  = mutableListOf<Int>() //何回禁断症状が出るか (終わるまでの回数)
+        var symptomsStopProb  = mutableListOf<Double>() //禁断症状が終わる確率
 
         var buffSymptoms = HashMap<Int,MutableList<String>>()
         var buffSymptomsRandom = HashMap<Int,MutableList<String>>()
@@ -319,7 +318,7 @@ class Configs(private val plugin: Man10DrugPlugin){
         var stopDepend = false
 
         //type2(マスクなど)
-        var defenseProb :Double = 0
+        var defenseProb :Double = 0.0
 
     }
 

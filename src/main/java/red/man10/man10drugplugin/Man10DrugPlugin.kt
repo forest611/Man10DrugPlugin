@@ -21,6 +21,7 @@ class Man10DrugPlugin : JavaPlugin() {
     lateinit var events : Events
     lateinit var db :DataBase
     lateinit var configs : Configs
+    lateinit var thread: DependThread
 
     //////////////////////////
     //起動時の処理
@@ -38,11 +39,13 @@ class Man10DrugPlugin : JavaPlugin() {
         events = Events(this)
         configs = Configs(this)
         db = DataBase(this)
+        thread = DependThread(this)
 
         getCommand("mdp").executor = cmds
         Bukkit.getServer().pluginManager.registerEvents(events,this)
         db.mysql = MySQLManager(this,"DrugPluginLogin")
         db.executeDBQueue()
+        thread.dependThread()
 
 
     }

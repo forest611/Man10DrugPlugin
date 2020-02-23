@@ -132,6 +132,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
                     pd2.level = 0
                     pd2.usedCount = 0
                     pd2.isDepend = false
+                    pd2.totalSymptoms = 0
                     p.sendMessage("§a§l症状が完全に治ったようだ")
                 }
                 plugin.db.playerData[Pair(p,data.weakDrug)] = pd2
