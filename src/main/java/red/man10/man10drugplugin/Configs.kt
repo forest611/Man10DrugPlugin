@@ -147,6 +147,10 @@ class Configs(private val plugin: Man10DrugPlugin){
                 data.stopDepend = cfg.getBoolean("stopDepend")
             }
 
+            if (data.type == 2){
+                data.defenseProb = cfg.getDouble("defenseProb")
+            }
+
             Bukkit.getLogger().info("Loaded file $dataName (${file.name})")
 
             //////////////
@@ -277,7 +281,7 @@ class Configs(private val plugin: Man10DrugPlugin){
         var removeBuffs = false //使用時 バフが消えるかどうか
         var isRemoveItem = true //使用時 アイテムを消去するか
 
-        //type0
+        //type0(依存薬物など)
         var isdepend = false    //依存するかどうか
         var dependLevel = 0  //依存レベル
         var dependLvUp = mutableListOf<Double>() //レベルアップする確率
@@ -309,12 +313,13 @@ class Configs(private val plugin: Man10DrugPlugin){
         var dependMsg = mutableListOf<String>()//チェッカーで表示する依存度
         var disableWorld = mutableListOf<String>()//使えなくするワールド
 
-        //type1
+        //type1(治療薬など)
         var weakDrug = "drug" //type2
         var weakProb  = mutableListOf<Double>()//飲むときに、確率で治る
         var stopDepend = false
 
-
+        //type2(マスクなど)
+        var defenseProb :Double = 0
 
     }
 

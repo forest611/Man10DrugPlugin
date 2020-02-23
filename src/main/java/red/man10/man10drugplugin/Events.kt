@@ -144,5 +144,38 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
 
     }
 
+    //周囲のプレイヤーを検知
+    fun getNearPlayer(centerPlayer:Player,distance:Int):MutableList<Player>{
+        val ds = distance * distance
+        val players = mutableListOf<Player>()
+        val loc = centerPlayer.location
+        val world =centerPlayer.world
+        for (p in Bukkit.getOnlinePlayers()){
+            if (p.world != world)continue
+            if (p.location.distanceSquared(loc)>=ds)continue
+
+            players.add(p)
+        }
+        return players
+
+    }
+
+    //周囲からの影響を受ける確率
+    fun defenseCheck(p:Player):Boolean{
+        val helmet = p.inventory.helmet?:return false
+
+        if (!CraftItemStack.asNMSCopy(helmet).hasTag())return false
+
+        val dataName = CraftItemStack.asNMSCopy(helmet).tag!!.getString("name")
+
+        if (plugin.drugName.indexOf(dataName) == -1)return false
+
+        val data = plugin.drugData[dataName]!!
+
+        if (Math.random()<data.defenseProb)return true
+
+        return false
+    }
+
 
 }
