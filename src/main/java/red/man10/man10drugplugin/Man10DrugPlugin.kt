@@ -48,4 +48,8 @@ class Man10DrugPlugin : JavaPlugin() {
 
     override fun onDisable() { // Plugin shutdown logic
     }
+
+    fun random(list : MutableList<String>):String{
+        return list[list.size-1]
+    }
 }

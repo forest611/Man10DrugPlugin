@@ -35,7 +35,7 @@ class Configs(private val plugin: Man10DrugPlugin){
 
         for (file in drugFiles){
             if (file.name == "config.yml" || !file.path.endsWith(".yml") || file.isDirectory){
-                Bukkit.getLogger().info("${file.name} Was not drug file.")
+                Bukkit.getLogger().info("${file.name} はyamlファイルではありません")
                 continue
             }
 
@@ -70,7 +70,6 @@ class Configs(private val plugin: Man10DrugPlugin){
 
             //func lists
             data.func = cfg.getStringList("func")
-            data.funcRandom = cfg.getStringList("funcrandom")
 
             data.cmd = getHMList("cmd",cfg)
             data.cmdRandom = getHMList("cmdRandom",cfg)
@@ -235,8 +234,6 @@ class Configs(private val plugin: Man10DrugPlugin){
 
         //func
         var func = mutableListOf<String>()
-        //funcRandom
-        var funcRandom = mutableListOf<String>()
 
 
         //cmd
@@ -245,13 +242,13 @@ class Configs(private val plugin: Man10DrugPlugin){
         //player dispatch
         var playerCmd = HashMap<Int,MutableList<String>>()
         var playerCmdRandom = HashMap<Int,MutableList<String>>()
-        //buff
+        //buff    buffname,tick,bufflevel
         var buff = HashMap<Int,MutableList<String>>()
         var buffRandom = HashMap<Int,MutableList<String>>()
-        //particle
+        //particle    particlename,size
         var particle = HashMap<Int,MutableList<String>>()
         var particleRandom = HashMap<Int,MutableList<String>>()
-        //sound
+        //sound       soundname,volume,speed
         var sound = HashMap<Int,MutableList<String>>()
         var soundRandom = HashMap<Int,MutableList<String>>()
 

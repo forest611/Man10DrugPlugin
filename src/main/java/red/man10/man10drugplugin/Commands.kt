@@ -150,7 +150,7 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
         if (sender !is Player)return true
 
         if (cmd == "get"){
-            if (plugin.drugName.indexOf(args[1]) == -1 || sender !is Player)return true
+            if (plugin.drugName.indexOf(args[1]) == -1)return true
             sender.inventory.addItem(plugin.drugData[args[1]]!!.itemStack)
             return true
         }
