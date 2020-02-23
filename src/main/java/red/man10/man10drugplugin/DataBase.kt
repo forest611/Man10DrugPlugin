@@ -5,6 +5,7 @@ import org.bukkit.entity.Player
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.TimeUnit
 import kotlin.math.log
 
 class DataBase (private val plugin: Man10DrugPlugin){
@@ -20,43 +21,38 @@ class DataBase (private val plugin: Man10DrugPlugin){
 
         for (drug in plugin.drugName){
             val data = PlayerData()
-            val drugData = plugin.drugData[drug]!!
 
-            if (drugData.type == 0){
-                val rs = mysql.query("SELECT * FROM drug_dependence" +
-                        " WHERE uuid=${p.uniqueId} and drug_name=$drug")
+            val rs = mysql.query("SELECT * FROM drug_dependence" +
+                    " WHERE uuid='${p.uniqueId}' and drug_name='$drug';")
 
-                rs?.next()
+            if (rs==null){
+                p.sendMessage("§e§lデータベースのエラーです。お近くの運営に報告してください。")
+                return
+            }
 
-                if (rs==null){
-                    p.sendMessage("§e§lデータベースのエラーです。お近くの運営に報告してください。")
-                    return
-                }
-
-                if (!rs.next()){
-                    executeQueue.add("INSERT INTO `drug_dependence` " +
-                            "(`uuid`, `player`, `drug_name`, `used_count`, `used_level`, `used_time`, `level`, `symptoms_total`)" +
-                            " VALUES ('${p.uniqueId}', '${p.name}', '$drug', '0', '0', '${Date().time}', '0', '0');")
-                    Bukkit.getLogger().info("insert new data ${p.name} $drug")
-
-                    playerData[Pair(p,drug)] = data
-                    mysql.close()
-                    continue
-                }
-
-                data.usedCount = rs.getInt("used_count")
-                data.usedLevel = rs.getInt("used_level")
-                data.finalUseTime = rs.getLong("used_time")
-                data.totalSymptoms = rs.getInt("symptoms_total")
-                if (data.usedLevel>0 || data.level >0){
-                    data.isDepend = true
-                }
+            if (!rs.next()){
+                executeQueue.add("INSERT INTO `drug_dependence` " +
+                        "(`uuid`, `player`, `drug_name`, `used_count`, `used_level`, `used_time`, `level`, `symptoms_total`)" +
+                        " VALUES ('${p.uniqueId}', '${p.name}', '$drug', '0', '0', '${Date().time}', '0', '0');")
+                Bukkit.getLogger().info("insert new data ${p.name} $drug")
 
                 playerData[Pair(p,drug)] = data
                 mysql.close()
-                rs.close()
-
+                continue
             }
+
+            data.usedCount = rs.getInt("used_count")
+            data.usedLevel = rs.getInt("used_level")
+            data.finalUseTime = rs.getLong("used_time")
+            data.totalSymptoms = rs.getInt("symptoms_total")
+            if (data.usedLevel>0 || data.level >0){
+                data.isDepend = true
+            }
+
+            playerData[Pair(p,drug)] = data
+            mysql.close()
+            rs.close()
+
         }
     }
 
@@ -102,16 +98,15 @@ class DataBase (private val plugin: Man10DrugPlugin){
     /////////////////////
     fun executeDBQueue(){
         Thread(Runnable {
-            val sql = MySQLManager(plugin,"DrugPluginExecute")
-
-            while (true){
-                try {
+            try{
+                val sql = MySQLManager(plugin,"DrugPluginExecute")
+                while (true){
                     val take = executeQueue.take()
                     sql.execute(take)
                     sql.close()
-                }catch (e:InterruptedException){
-                    Bukkit.getLogger().info(e.message)
                 }
+            }catch (e:InterruptedException){
+
             }
         }).start()
     }

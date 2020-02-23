@@ -50,7 +50,7 @@ class Configs(private val plugin: Man10DrugPlugin){
 
             plugin.drugName.add(dataName)
 
-            val data = HashMap<String,DrugData>()[dataName]!!
+            val data = DrugData()
 
             data.displayName = cfg.getString("displayName")
             data.material = cfg.getString(",material","DIAMOND_HOE")
@@ -59,7 +59,7 @@ class Configs(private val plugin: Man10DrugPlugin){
             data.isChange = cfg.getBoolean("isChange")
             if(data.isChange)data.changeItem = cfg.getString("changeItem")
 
-            data.lore = cfg.getStringList("Lore")
+            data.lore = cfg.getStringList("lore")
             //use message
             data.useMsg = cfg.getStringList("useMsg")
             data.hasEnchantEffect = cfg.getBoolean("hasEnchantEffect")
@@ -176,20 +176,14 @@ class Configs(private val plugin: Man10DrugPlugin){
 
     fun getHMList(path:String,cfg:YamlConfiguration): HashMap<Int, MutableList<String>> {
 
-        val listInHashMap = HashMap<Int,MutableList<String>>()
+        val map = HashMap<Int,MutableList<String>>()
 
-        for (i in 0 .. 100){
-            try {
-                listInHashMap[i] = cfg.getStringList("$path.$i")
+        if (cfg.getConfigurationSection(path) == null)return map
 
-            }catch (e:Exception){
-                Bukkit.getLogger().info(e.message)
-                break
-            }
-
+        for (i in cfg.getConfigurationSection(path).getKeys(false)) {
+            map[i.toInt()] = cfg.getStringList("$path.$i")
         }
-
-        return listInHashMap
+        return map
 
     }
 

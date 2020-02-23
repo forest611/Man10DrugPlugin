@@ -234,6 +234,5 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
         p.sendMessage("§e/mdp using [player] [drug] ドラッグを消費せずにドラッグの使用状態を再現します(console用)")
         p.sendMessage("§e/mdp stat [drug] 指定ドラッグの利用統計を表示します")
         p.sendMessage("§e/mdp removedependence [drug] オンラインプレイヤーの指定ドラッグの依存を消します")
-        p.sendMessage("---------------------------------------------------------")
     }
 }
