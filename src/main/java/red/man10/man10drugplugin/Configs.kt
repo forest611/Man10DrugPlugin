@@ -144,7 +144,7 @@ class Configs(private val plugin: Man10DrugPlugin){
             /////////////////////////////
             //ItemStackの作成
             //////////////////////////////
-            var drugItem = ItemStack(Material.valueOf(data.material),1)
+            var drugItem = ItemStack(Material.valueOf(data.material),1,data.damage)
             val drugNbt = CraftItemStack.asNMSCopy(drugItem)
             val drugTag = NBTTagCompound()
             drugTag.setString("name",dataName)
@@ -163,6 +163,7 @@ class Configs(private val plugin: Man10DrugPlugin){
             meta.addItemFlags(ItemFlag.HIDE_PLACED_ON)
             meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS)
             meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE)
+            meta.isUnbreakable = true
 
             meta.lore = data.lore
 

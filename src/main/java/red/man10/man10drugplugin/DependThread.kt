@@ -30,7 +30,7 @@ class DependThread (private val plugin: Man10DrugPlugin){
                         val now = Date().time
                         val time = pd.finalUseTime
 
-                        val difference = (now-time)*1000 //時間差(second)
+                        val difference = (now-time)/1000 //時間差(second)
 
                         //デバッグモード
                         if (plugin.debugMode && difference>60){

@@ -32,7 +32,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
                 return
             }
 
-            var dataName = ""
+            val dataName : String
 
             //NBTTagからドラッグを識別
             try {
@@ -41,7 +41,6 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
                 Bukkit.getLogger().info(e.message)
                 return
             }
-            Bukkit.getLogger().info(dataName)
 
             if (plugin.drugName.indexOf(dataName) == -1)return
 
@@ -83,10 +82,11 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
 
         if (data.disableWorld.indexOf(p.world.name) != -1)return
 
-        val pd = plugin.db.playerData[Pair(p,dataName)]!!
+        val pd = plugin.db.playerData[Pair(p,dataName)]?:return
 
         //cooldown
-        if (data.cooldown > (Date().time - pd.finalUseTime))return
+        val difference = (Date().time - pd.finalUseTime)/1000
+        if (data.cooldown > difference && data.cooldown != 0L)return
 
 
         /////////////
@@ -97,7 +97,9 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
             p.inventory.itemInMainHand = item
         }
 
-        p.sendMessage(data.useMsg[pd.level])
+        if (data.useMsg.size > pd.level){
+            p.sendMessage(data.useMsg[pd.level])
+        }
 
         //add logs
         plugin.db.executeQueue.add("INSERT INTO `log` " +
