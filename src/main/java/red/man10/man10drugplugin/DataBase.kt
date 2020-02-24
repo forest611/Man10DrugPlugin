@@ -58,7 +58,7 @@ class DataBase (private val plugin: Man10DrugPlugin){
 
     fun logoutDB(p:Player){
         for (drug in plugin.drugName){
-            val data = playerData[Pair(p,drug)]!!
+            val data = playerData[Pair(p,drug)]?:continue
 
             executeQueue.add(
             "UPDATE drug_dependence " +

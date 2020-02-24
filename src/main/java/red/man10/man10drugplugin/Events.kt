@@ -13,6 +13,7 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerItemConsumeEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import java.lang.Exception
@@ -47,6 +48,8 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
             }
 
             if (plugin.drugName.indexOf(dataName) == -1)return
+
+            e.isCancelled = true
 
             useDrug(p,dataName)
         }
@@ -96,11 +99,12 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
 
         ///////////////////////
         //remove an item
-        if (data.isRemoveItem){
+        if (data.isRemoveItem && p.inventory.itemInMainHand != null){
             val item = p.inventory.itemInMainHand
             item.amount = item.amount -1
             p.inventory.itemInMainHand = item
-        }else if(data.crashChance[pd.level] !=0.0 && Math.random()<data.crashChance[pd.level]){
+        }else if(data.crashChance[pd.level] !=0.0 && Math.random()<data.crashChance[pd.level]
+                && p.inventory.itemInMainHand != null){
             val item = p.inventory.itemInMainHand
             item.amount = item.amount -1
             p.inventory.itemInMainHand = item
@@ -116,13 +120,18 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
                 "(`uuid`, `player`, `drug_name`,`date`)" +
                 " VALUES ('${p.uniqueId}', '${p.name}', '$dataName',now());")
 
+        if (data.removeBuffs){
+            for (e in p.activePotionEffects){
+                p.removePotionEffect(e.type)
+            }
+        }
 
         if (!data.buff[pd.level].isNullOrEmpty()){
             for (b in data.buff[pd.level]!!){
                 val s = b.split(",")
                 p.addPotionEffect(PotionEffect(
                         PotionEffectType.getByName(s[0]),
-                        s[1].toInt(),s[2].toInt()))
+                        s[1].toInt(),s[2].toInt(),false,false))
             }
         }
 
@@ -130,7 +139,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
             val s = plugin.random(data.buffRandom[pd.level]!!).split(",")
             p.addPotionEffect(PotionEffect(
                     PotionEffectType.getByName(s[0]),
-                    s[1].toInt(),s[2].toInt()))
+                    s[1].toInt(),s[2].toInt(),false,false))
 
         }
 
@@ -195,12 +204,6 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
             plugin.func.runFunc(data.func[pd.level],p)
         }
 
-        if (data.removeBuffs){
-            for (e in p.activePotionEffects){
-                p.removePotionEffect(e.type)
-            }
-        }
-
         if (data.nearPlayer.size>pd.level){
             val s = data.nearPlayer[pd.level].split(";")
 
@@ -220,7 +223,6 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
             //確率で依存レベルアップ
             if (pd.level < data.dependLevel &&Math.random()<data.dependLvUp[pd.level]){
                 pd.level ++
-                Bukkit.getLogger().info("level up")
             }
         }
 

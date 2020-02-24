@@ -53,7 +53,7 @@ class Configs(private val plugin: Man10DrugPlugin){
             val data = DrugData()
 
             data.displayName = cfg.getString("displayName")
-            data.material = cfg.getString(",material","DIAMOND_HOE")
+            data.material = cfg.getString("material","DIAMOND_HOE")
             data.damage = cfg.getInt("damage",0).toShort()
             data.type =  cfg.getInt("type",0)
             data.isChange = cfg.getBoolean("isChange")
@@ -89,7 +89,7 @@ class Configs(private val plugin: Man10DrugPlugin){
             data.soundRandom = getHMList("soundRandom",cfg)
 
             data.crashChance = cfg.getDoubleList("crashChance")//無記名で壊れなくなる
-            data.crashMsg = cfg.getString("crashMsg")
+            data.crashMsg = cfg.getString("crashMsg","")
 
             data.removeBuffs = cfg.getBoolean("removeBuff")//使ったときに今のバフを消す
 

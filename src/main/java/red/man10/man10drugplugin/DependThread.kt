@@ -91,7 +91,7 @@ class DependThread (private val plugin: Man10DrugPlugin){
                 val s = b.split(",")
                 p.addPotionEffect(PotionEffect(
                         PotionEffectType.getByName(s[0]),
-                        s[1].toInt(),s[2].toInt()))
+                        s[1].toInt(),s[2].toInt(),false,false))
             }
         }
 

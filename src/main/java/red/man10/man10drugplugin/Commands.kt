@@ -123,7 +123,7 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
                 sender.sendMessage("§e§l============================================")
                 for (drug in plugin.drugName){
                     val data = plugin.drugData[drug]!!
-                    val pd = plugin.db.playerData[Pair(sender,drug)]!!
+                    val pd = plugin.db.playerData[Pair(sender,drug)]?:return true
 
                     sender.sendMessage("${data.displayName}§f§l:${data.dependMsg[pd.level]}")
                 }
@@ -137,7 +137,7 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
                 sender.sendMessage("§e§l============================================")
                 for (drug in plugin.drugName){
                     val data = plugin.drugData[drug]!!
-                    val pd = plugin.db.playerData[Pair(p,drug)]!!
+                    val pd = plugin.db.playerData[Pair(p,drug)]?:return true
 
                     sender.sendMessage("${data.displayName}§f§l:${data.dependMsg[pd.level]}")
                     sender.sendMessage("§f§lcount:${pd.usedCount},isDepend:${pd.isDepend}")
@@ -216,6 +216,10 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
                 sender.sendMessage("§lトータル:$total")
                 
             }
+        }
+
+        if (cmd == "debug"){
+            plugin.debugMode = !plugin.debugMode
         }
 
         return false
