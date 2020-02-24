@@ -14,75 +14,71 @@ class DependThread (private val plugin: Man10DrugPlugin){
     //依存処理に関するスレッド プラグイン起動時にスレッドスタート
     //////////////////////
     fun dependThread(){
-        Thread(Runnable {
+        Bukkit.getScheduler().runTaskTimer(plugin, {
 
-            while (true){
+            if (plugin.isReload || !plugin.pluginEnable)return@runTaskTimer
 
-                if (plugin.isReload || !plugin.pluginEnable)break
+            for (p in Bukkit.getOnlinePlayers()) {
 
-                for (p in Bukkit.getOnlinePlayers()){
+                for (drug in plugin.drugName) {
 
-                    for (drug in plugin.drugName){
-
-                        val data = plugin.drugData[drug]!!
-                        val pd = plugin.db.playerData[Pair(p,drug)]?:continue
+                    val data = plugin.drugData[drug]!!
+                    val pd = plugin.db.playerData[Pair(p, drug)] ?: continue
 
 
-                        if (!pd.isDepend)continue
-                        if (data.type !=0)continue
+                    if (!pd.isDepend) continue
+                    if (data.type != 0) continue
 
-                        val now = Date().time
-                        val time = pd.finalUseTime
+                    val now = Date().time
+                    val time = pd.finalUseTime
 
-                        val difference = (now-time)/1000 //時間差(second)
+                    val difference = (now - time) / 1000 //時間差(second)
 
-                        //デバッグモード
-                        if (plugin.debugMode && difference>60){
+                    //デバッグモード
+                    if (plugin.debugMode && difference > 60) {
 
-                            symptoms(p,data,pd)
+                        symptoms(p, data, pd)
 
-                            pd.totalSymptoms ++
-                            plugin.db.playerData[Pair(p,drug)] = pd
-                            continue
-                        }
+                        pd.totalSymptoms++
+                        plugin.db.playerData[Pair(p, drug)] = pd
+                        continue
+                    }
 
-                        //最初の禁断症状
-                        if (pd.totalSymptoms == 0 && data.symptomsFirstTime[pd.level]<difference){
+                    //最初の禁断症状
+                    if (pd.totalSymptoms == 0 && data.symptomsFirstTime[pd.level] < difference) {
 
-                            symptoms(p,data,pd)
+                        symptoms(p, data, pd)
 
-                            pd.totalSymptoms ++
-                            plugin.db.playerData[Pair(p,drug)] = pd
-                            continue
-                        }
-                        //2回目以降の禁断症状
-                        if (data.symptomsTime[pd.level]<difference){
+                        pd.totalSymptoms++
+                        pd.finalUseTime = Date().time
+                        plugin.db.playerData[Pair(p, drug)] = pd
+                        continue
+                    }
+                    //2回目以降の禁断症状
+                    if (data.symptomsTime[pd.level] < difference) {
 
-                            symptoms(p,data,pd)
+                        symptoms(p, data, pd)
 
-                            pd.totalSymptoms ++
-                            //依存レベルダウン
-                            if (Math.random()<data.symptomsStopProb[pd.level]){
-                                pd.level --
-                                if (pd.level == -1){
-                                    pd.level = 0
-//                                    pd.usedCount =0
-                                    pd.isDepend = false
-                                    pd.totalSymptoms = 0
-                                    p.sendMessage("§e§l依存が完全に治ったようだ")
-                                }
+                        pd.totalSymptoms++
+                        pd.finalUseTime = Date().time
+                        //依存レベルダウン
+                        if (Math.random() < data.symptomsStopProb[pd.level]) {
+                            pd.level--
+                            if (pd.level == -1) {
+                                pd.level = 0
+                                pd.usedCount = 0
+                                pd.isDepend = false
+                                pd.totalSymptoms = 0
+                                p.sendMessage("§e§l依存が完全に治ったようだ")
                             }
-
-                            plugin.db.playerData[Pair(p,drug)] = pd
-                            continue
                         }
+
+                        plugin.db.playerData[Pair(p, drug)] = pd
+                        continue
                     }
                 }
-
-                Thread.sleep(100000)
-
             }
-        }).start()
+        },200,200)
     }
 
     fun symptoms(p:Player,data:Configs.DrugData,pd:DataBase.PlayerData){
@@ -98,7 +94,7 @@ class DependThread (private val plugin: Man10DrugPlugin){
         if (!data.soundSymptoms[pd.level].isNullOrEmpty()){
             for (so in data.soundSymptoms[pd.level]!!){
                 val s = so.split(",")
-                p.location.world.playSound(p.location, Sound.valueOf(s[0]),
+                p.location.world.playSound(p.location, s[0],
                         s[1].toFloat(),s[2].toFloat())
             }
 
@@ -131,6 +127,10 @@ class DependThread (private val plugin: Man10DrugPlugin){
             for (pla in plugin.events.getNearPlayer(p,s[1].toInt())){
                 plugin.func.runFunc(s[0],p)
             }
+        }
+
+        if (data.msgSymptoms.size > pd.level){
+            p.sendMessage(data.msgSymptoms[pd.level])
         }
 
     }

@@ -88,13 +88,13 @@ class MDPFunction (private val plugin: Man10DrugPlugin){
         if (data.sound.isNotEmpty()){
             for (so in data.sound){
                 val s = so.split(",")
-                p.location.world.playSound(p.location,Sound.valueOf(s[0]),
+                p.location.world.playSound(p.location,s[0],
                         s[1].toFloat(),s[2].toFloat())
             }
         }
         if (data.soundRandom.isNotEmpty()){
             val s = plugin.random(data.soundRandom).split(",")
-            p.location.world.playSound(p.location,Sound.valueOf(s[0]),
+            p.location.world.playSound(p.location,s[0],
                     s[1].toFloat(),s[2].toFloat())
 
         }

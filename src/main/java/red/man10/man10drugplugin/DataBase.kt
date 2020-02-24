@@ -32,9 +32,8 @@ class DataBase (private val plugin: Man10DrugPlugin){
 
             if (!rs.next()){
                 executeQueue.add("INSERT INTO `drug_dependence` " +
-                        "(`uuid`, `player`, `drug_name`, `used_count`, `used_level`, `used_time`, `level`, `symptoms_total`)" +
-                        " VALUES ('${p.uniqueId}', '${p.name}', '$drug', '0', '0', '${Date().time}', '0', '0');")
-                Bukkit.getLogger().info("insert new data ${p.name} $drug")
+                        "(`uuid`, `player`, `drug_name`, `used_count`, `used_time`, `level`, `symptoms_total`)" +
+                        " VALUES ('${p.uniqueId}', '${p.name}', '$drug', '0', '${Date().time}', '0', '0');")
 
                 playerData[Pair(p,drug)] = data
                 mysql.close()
@@ -42,10 +41,9 @@ class DataBase (private val plugin: Man10DrugPlugin){
             }
 
             data.usedCount = rs.getInt("used_count")
-            data.usedLevel = rs.getInt("used_level")
             data.finalUseTime = rs.getLong("used_time")
             data.totalSymptoms = rs.getInt("symptoms_total")
-            if (data.usedLevel>0 || data.level >0){
+            if (data.usedCount !=0 || data.level >0){
                 data.isDepend = true
             }
 
@@ -63,7 +61,6 @@ class DataBase (private val plugin: Man10DrugPlugin){
             executeQueue.add(
             "UPDATE drug_dependence " +
                     "SET used_count='${data.usedCount}'"+
-                    ",used_level='${data.usedLevel}'"+
                     ",used_time='${data.finalUseTime}'"+
                     ",level='${data.level}'" +
                     ",symptoms_total='${data.totalSymptoms}' " +
@@ -99,7 +96,6 @@ class DataBase (private val plugin: Man10DrugPlugin){
                 "player text," +
                 "drug_name text," +
                 "used_count int," +
-                "used_level int," +
                 "used_time text," +
                 "level int," +
                 "immunity int," +
@@ -147,7 +143,6 @@ class DataBase (private val plugin: Man10DrugPlugin){
 
     class PlayerData{
         var usedCount = 0//トータル
-        var usedLevel = 0//レベルごとにリセット
         var level = 0
         var totalSymptoms = 0
         var finalUseTime : Long = 0//最終使用時刻(cooldownのでも使用)

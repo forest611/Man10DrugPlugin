@@ -52,6 +52,9 @@ class Man10DrugPlugin : JavaPlugin() {
     }
 
     override fun onDisable() { // Plugin shutdown logic
+        for (p in Bukkit.getOnlinePlayers()){
+            db.logoutDB(p)
+        }
     }
 
     fun random(list : MutableList<String>):String{

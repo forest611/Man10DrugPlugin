@@ -42,7 +42,6 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
                 for (p in Bukkit.getOnlinePlayers()){
                     val pd = plugin.db.playerData[Pair(p,drug)]!!
 
-                    pd.usedLevel = 0
                     pd.level = 0
                     pd.isDepend = false
                     pd.totalSymptoms = 0
@@ -125,7 +124,9 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
                     val data = plugin.drugData[drug]!!
                     val pd = plugin.db.playerData[Pair(sender,drug)]?:return true
 
-                    sender.sendMessage("${data.displayName}§f§l:${data.dependMsg[pd.level]}")
+                    if(data.dependMsg.isNotEmpty() && pd.usedCount !=0){
+                        sender.sendMessage("${data.displayName}§f§l:${data.dependMsg[pd.level]}")
+                    }
                 }
                 sender.sendMessage("§e§l============================================")
 
@@ -139,9 +140,9 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
                     val data = plugin.drugData[drug]!!
                     val pd = plugin.db.playerData[Pair(p,drug)]?:return true
 
-                    sender.sendMessage("${data.displayName}§f§l:${data.dependMsg[pd.level]}")
+                    sender.sendMessage(data.displayName)
                     sender.sendMessage("§f§lcount:${pd.usedCount},isDepend:${pd.isDepend}")
-                    sender.sendMessage("§f§ltime:${pd.finalUseTime},totalSympoms:${pd.totalSymptoms}")
+                    sender.sendMessage("§f§ltime:${pd.finalUseTime},totalSymptoms:${pd.totalSymptoms}")
                 }
                 sender.sendMessage("§e§l============================================")
 

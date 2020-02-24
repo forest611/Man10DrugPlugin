@@ -151,7 +151,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
         if (!data.sound[pd.level].isNullOrEmpty()){
             for (so in data.sound[pd.level]!!){
                 val s = so.split(",")
-                p.location.world.playSound(p.location, Sound.valueOf(s[0]),
+                p.location.world.playSound(p.location, s[0],
                         s[1].toFloat(),s[2].toFloat())
             }
 
@@ -159,7 +159,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
 
         if (!data.soundRandom[pd.level].isNullOrEmpty()){
             val s = plugin.random(data.soundRandom[pd.level]!!).split(",")
-            p.location.world.playSound(p.location,Sound.valueOf(s[0]),
+            p.location.world.playSound(p.location,s[0],
                     s[1].toFloat(),s[2].toFloat())
 
         }
@@ -242,7 +242,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
                 pd2.level --
                 if (pd2.level == -1){
                     pd2.level = 0
-//                    pd2.usedCount = 0
+                    pd2.usedCount = 0
                     pd2.isDepend = false
                     pd2.totalSymptoms = 0
                     p.sendMessage("§a§l症状が完全に治ったようだ")
