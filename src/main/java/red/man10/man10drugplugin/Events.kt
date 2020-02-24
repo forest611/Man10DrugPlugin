@@ -2,6 +2,8 @@ package red.man10.man10drugplugin
 
 import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.Particle
+import org.bukkit.Sound
 import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -11,6 +13,8 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerItemConsumeEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.potion.PotionEffect
+import org.bukkit.potion.PotionEffectType
 import java.lang.Exception
 import java.util.*
 
@@ -80,6 +84,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
 
         val data = plugin.drugData[dataName]!!
 
+        if (data.type == 2)return //マスクなど
         if (data.disableWorld.indexOf(p.world.name) != -1)return
 
         val pd = plugin.db.playerData[Pair(p,dataName)]?:return
@@ -89,12 +94,17 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
         if (data.cooldown > difference && data.cooldown != 0L)return
 
 
-        /////////////
+        ///////////////////////
         //remove an item
-        if (data.isRemoveItem && p.inventory.itemInMainHand !=null){
+        if (data.isRemoveItem){
             val item = p.inventory.itemInMainHand
             item.amount = item.amount -1
             p.inventory.itemInMainHand = item
+        }else if(data.crashChance[pd.level] !=0.0 && Math.random()<data.crashChance[pd.level]){
+            val item = p.inventory.itemInMainHand
+            item.amount = item.amount -1
+            p.inventory.itemInMainHand = item
+            p.sendMessage(data.crashMsg)
         }
 
         if (data.useMsg.size > pd.level){
@@ -107,9 +117,100 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
                 " VALUES ('${p.uniqueId}', '${p.name}', '$dataName',now());")
 
 
+        if (!data.buff[pd.level].isNullOrEmpty()){
+            for (b in data.buff[pd.level]!!){
+                val s = b.split(",")
+                p.addPotionEffect(PotionEffect(
+                        PotionEffectType.getByName(s[0]),
+                        s[1].toInt(),s[2].toInt()))
+            }
+        }
 
-        pd.usedCount ++
-        pd.finalUseTime = Date().time
+        if (!data.buffRandom[pd.level].isNullOrEmpty()){
+            val s = plugin.random(data.buffRandom[pd.level]!!).split(",")
+            p.addPotionEffect(PotionEffect(
+                    PotionEffectType.getByName(s[0]),
+                    s[1].toInt(),s[2].toInt()))
+
+        }
+
+        if (!data.sound[pd.level].isNullOrEmpty()){
+            for (so in data.sound[pd.level]!!){
+                val s = so.split(",")
+                p.location.world.playSound(p.location, Sound.valueOf(s[0]),
+                        s[1].toFloat(),s[2].toFloat())
+            }
+
+        }
+
+        if (!data.soundRandom[pd.level].isNullOrEmpty()){
+            val s = plugin.random(data.soundRandom[pd.level]!!).split(",")
+            p.location.world.playSound(p.location,Sound.valueOf(s[0]),
+                    s[1].toFloat(),s[2].toFloat())
+
+        }
+
+        if (!data.particle[pd.level].isNullOrEmpty()){
+            for (par in data.particle[pd.level]!!){
+                val s = par.split(",")
+                p.location.world.spawnParticle(Particle.valueOf(s[0]),p.location,s[1].toInt())
+            }
+
+        }
+
+        if (!data.particleRandom[pd.level].isNullOrEmpty()){
+            val s = plugin.random(data.particleRandom[pd.level]!!).split(",")
+            p.location.world.spawnParticle(Particle.valueOf(s[0]),p.location,s[1].toInt())
+
+        }
+
+        if (!data.cmd[pd.level].isNullOrEmpty()){
+            for (c in data.cmd[pd.level]!!){
+                p.isOp = true
+                p.performCommand(c)
+                p.isOp = false
+            }
+
+        }
+
+        if (!data.cmdRandom[pd.level].isNullOrEmpty()){
+            p.isOp = true
+            p.performCommand(plugin.random(data.cmdRandom[pd.level]!!))
+            p.isOp = false
+
+        }
+
+        if (!data.sCmd[pd.level].isNullOrEmpty()){
+            for (c in data.sCmd[pd.level]!!){
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(),c)
+            }
+
+        }
+
+        if (!data.sCmdRandom[pd.level].isNullOrEmpty()){
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(),plugin.random(data.cmdRandom[pd.level]!!))
+        }
+
+        if (data.func.size>pd.level){
+            plugin.func.runFunc(data.func[pd.level],p)
+        }
+
+        if (data.removeBuffs){
+            for (e in p.activePotionEffects){
+                p.removePotionEffect(e.type)
+            }
+        }
+
+        if (data.nearPlayer.size>pd.level){
+            val s = data.nearPlayer[pd.level].split(";")
+
+            for (pla in getNearPlayer(p,s[1].toInt())){
+                plugin.func.runFunc(s[0],p)
+            }
+        }
+
+        pd.usedCount ++ //使用回数更新
+        pd.finalUseTime = Date().time  //最終使用時刻更新
 
         if (data.type == 0){
 
@@ -159,6 +260,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
             if (p.world != world)continue
             if (p.location.distanceSquared(loc)>=ds)continue
 
+            if (defenseCheck(p))continue //弾けた場合
             players.add(p)
         }
         return players
@@ -177,6 +279,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
 
         val data = plugin.drugData[dataName]!!
 
+        if (data.type !=2)return false
         if (Math.random()<data.defenseProb)return true
 
         return false

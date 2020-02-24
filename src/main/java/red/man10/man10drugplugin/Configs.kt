@@ -71,14 +71,13 @@ class Configs(private val plugin: Man10DrugPlugin){
             //func lists
             data.func = cfg.getStringList("func")
 
+            //プレイヤーが発行するコマンド
             data.cmd = getHMList("cmd",cfg)
             data.cmdRandom = getHMList("cmdRandom",cfg)
 
+            //鯖が発行するコマンド
             data.sCmd = getHMList("serverCmd",cfg)
             data.sCmdRandom = getHMList("serverCmdRandom",cfg)
-
-            data.playerCmd = getHMList("pCmd",cfg)
-            data.playerCmdRandom = getHMList("pCmdRandom",cfg)
 
             data.buff = getHMList("buff",cfg)
             data.buffRandom = getHMList("buffRandom",cfg)
@@ -109,23 +108,22 @@ class Configs(private val plugin: Man10DrugPlugin){
                 data.symptomsStopProb = cfg.getDoubleList("symptomsStopProb")//禁断症状が止まる確率
 
                 data.buffSymptoms = getHMList("buffSymptoms",cfg)
-                data.buffSymptomsRandom = getHMList("buffSymptomsRandom",cfg)
 
                 data.particleSymptoms = getHMList("particleSymptoms",cfg)
-                data.particleSymptomsRandom = getHMList("particleSymptomsRandom",cfg)
 
                 data.soundSymptoms = getHMList("soundSymptoms",cfg)
-                data.soundSymptomsRandom = getHMList("soundSymptomsRandom",cfg)
 
                 data.cmdSymptoms = getHMList("cmdSymptoms",cfg)
-                data.cmdSymptomsRandom = getHMList("cmdSymptomsRandom",cfg)
 
                 data.msgSymptoms = cfg.getStringList("msgSymptoms")
+
+                data.funcSymptoms = cfg.getStringList("funcSymptoms")
+
                 data.dependMsg = cfg.getStringList("dependMsg")
 
                 data.symptomsNearPlayer = cfg.getStringList("nearPlayerSymptoms")
 
-                data.cmdLvUp = getHMList("cmdLvUp",cfg)
+                data.funcLvUp = cfg.getStringList("funcLvUp")
 
             }
 
@@ -234,16 +232,12 @@ class Configs(private val plugin: Man10DrugPlugin){
         //func
         var func = mutableListOf<String>()
 
-
         //cmd
         var cmd = HashMap<Int,MutableList<String>>()
         var cmdRandom = HashMap<Int,MutableList<String>>()
         //server cmd
         var sCmd = HashMap<Int,MutableList<String>>()
         var sCmdRandom = HashMap<Int,MutableList<String>>()
-        //player dispatch
-        var playerCmd = HashMap<Int,MutableList<String>>()
-        var playerCmdRandom = HashMap<Int,MutableList<String>>()
         //buff    buffname,tick,bufflevel
         var buff = HashMap<Int,MutableList<String>>()
         var buffRandom = HashMap<Int,MutableList<String>>()
@@ -273,20 +267,18 @@ class Configs(private val plugin: Man10DrugPlugin){
         var symptomsStopProb  = mutableListOf<Double>() //禁断症状が終わる確率
 
         var buffSymptoms = HashMap<Int,MutableList<String>>()
-        var buffSymptomsRandom = HashMap<Int,MutableList<String>>()
 
         var cmdSymptoms = HashMap<Int,MutableList<String>>()
-        var cmdSymptomsRandom = HashMap<Int,MutableList<String>>()
 
         var msgSymptoms = mutableListOf<String>()
 
         var particleSymptoms = HashMap<Int,MutableList<String>>()
-        var particleSymptomsRandom = HashMap<Int,MutableList<String>>()
 
         var soundSymptoms = HashMap<Int,MutableList<String>>()
-        var soundSymptomsRandom = HashMap<Int,MutableList<String>>()
 
-        var cmdLvUp = HashMap<Int,MutableList<String>>()
+        var funcSymptoms = mutableListOf<String>()
+
+        var funcLvUp = mutableListOf<String>()
 
         var nearPlayer = mutableListOf<String>()//周囲のプレイヤーに干渉
         var symptomsNearPlayer = mutableListOf<String>()//禁断症状が出たときに、周囲のプレイヤーに
