@@ -99,16 +99,21 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
 
         ///////////////////////
         //remove an item
-        if (data.isRemoveItem && p.inventory.itemInMainHand != null){
+        if (data.isRemoveItem && p.inventory.itemInMainHand != null) {
             val item = p.inventory.itemInMainHand
-            item.amount = item.amount -1
+            item.amount = item.amount - 1
             p.inventory.itemInMainHand = item
-        }else if(data.crashChance[pd.level] !=0.0 && Math.random()<data.crashChance[pd.level]
-                && p.inventory.itemInMainHand != null){
-            val item = p.inventory.itemInMainHand
-            item.amount = item.amount -1
-            p.inventory.itemInMainHand = item
-            p.sendMessage(data.crashMsg)
+        }
+        ////////////////////////
+        //remove prob
+        if (!data.isRemoveItem && data.crashChance.size >pd.level){
+            if(data.crashChance[pd.level] !=0.0 && Math.random()<data.crashChance[pd.level]
+                    && p.inventory.itemInMainHand != null){
+                val item = p.inventory.itemInMainHand
+                item.amount = item.amount -1
+                p.inventory.itemInMainHand = item
+                p.sendMessage(data.crashMsg)
+            }
         }
 
         if (data.useMsg.size > pd.level){
