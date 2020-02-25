@@ -213,7 +213,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
             val s = data.nearPlayer[pd.level].split(";")
 
             for (pla in getNearPlayer(p,s[1].toInt())){
-                plugin.func.runFunc(s[0],p)
+                plugin.func.runFunc(s[0],pla)
             }
         }
 
@@ -264,13 +264,14 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
         val loc = centerPlayer.location
         val world =centerPlayer.world
         for (p in Bukkit.getOnlinePlayers()){
+            if (p == centerPlayer)continue
             if (p.world != world)continue
             if (p.location.distanceSquared(loc)>=ds)continue
 
             if (defenseCheck(p))continue //弾けた場合
             players.add(p)
         }
-        return players
+          return players
 
     }
 

@@ -53,6 +53,8 @@ class MDPFunction (private val plugin: Man10DrugPlugin){
 
             data.runDrug = yml.getStringList("runDrug")
 
+            data.msg = yml.getStringList("msg")
+
             funcData[yml.getString("name")] = data
         }
     }
@@ -60,6 +62,11 @@ class MDPFunction (private val plugin: Man10DrugPlugin){
     fun runFunc(name:String,p: Player){
         val data = funcData[name]?:return
 
+        if (data.msg.isNotEmpty()){
+            for (msg in data.msg){
+                p.sendMessage(msg)
+            }
+        }
 
         if (data.buff.isNotEmpty()){
             for (b in data.buff){
