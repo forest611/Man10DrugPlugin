@@ -43,6 +43,7 @@ class DataBase (private val plugin: Man10DrugPlugin){
             data.usedCount = rs.getInt("used_count")
             data.finalUseTime = rs.getLong("used_time")
             data.totalSymptoms = rs.getInt("symptoms_total")
+            data.level = rs.getInt("level")
             if (data.usedCount !=0 || data.level >0){
                 data.isDepend = true
             }
