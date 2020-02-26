@@ -28,7 +28,10 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
         if (cmd == "using"){
             if (plugin.drugName.indexOf(args[1]) == -1)return true
 
-            plugin.events.useDrug(Bukkit.getPlayer(args[1]),args[2])
+            val p = Bukkit.getPlayer(args[1])
+            val drug = args[1]
+
+            plugin.events.useDrug(p,args[2],plugin.drugData[drug]!!,plugin.db.playerData[Pair(p,drug)]!!)
             return true
         }
 

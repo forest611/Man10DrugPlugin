@@ -119,7 +119,7 @@ class MDPFunction (private val plugin: Man10DrugPlugin){
         }
         if (data.runDrug.isNotEmpty()){
             for (d in data.runDrug){
-                plugin.events.useDrug(p,d)
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(),"mdp using $d ${p.name}")
             }
         }
 

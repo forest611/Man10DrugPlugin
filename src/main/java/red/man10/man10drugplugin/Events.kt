@@ -51,7 +51,34 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
 
             e.isCancelled = true
 
-            useDrug(p,dataName)
+            if (!plugin.pluginEnable || plugin.isReload)return
+
+            val data = plugin.drugData[dataName]!!
+
+            if (data.type == 2)return //マスクなど
+            if (data.disableWorld.indexOf(p.world.name) != -1)return
+
+            val pd = plugin.db.playerData[Pair(p,dataName)]?:return
+
+            //cooldown
+            val difference = (Date().time - pd.finalUseTime)/1000
+            if (data.cooldown > difference && data.cooldown != 0L)return
+
+            //buffなどの処理
+            useDrug(p,dataName,data,pd)
+
+            //remove an item
+            if (data.isRemoveItem) {
+                item.amount = item.amount - 1
+            }
+            //remove prob
+            if (!data.isRemoveItem && data.crashChance.size >pd.level){
+                if(data.crashChance[pd.level] !=0.0 && Math.random()<data.crashChance[pd.level]){
+                    item.amount = item.amount -1
+                    p.sendMessage(data.crashMsg)
+                }
+            }
+
         }
     }
 
@@ -83,38 +110,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
     /////////////////////////////////
     //ドラッグ使用時の処理
     /////////////////////////////////
-    fun useDrug(p: Player, dataName:String){
-
-        val data = plugin.drugData[dataName]!!
-
-        if (data.type == 2)return //マスクなど
-        if (data.disableWorld.indexOf(p.world.name) != -1)return
-
-        val pd = plugin.db.playerData[Pair(p,dataName)]?:return
-
-        //cooldown
-        val difference = (Date().time - pd.finalUseTime)/1000
-        if (data.cooldown > difference && data.cooldown != 0L)return
-
-
-        ///////////////////////
-        //remove an item
-        if (data.isRemoveItem && p.inventory.itemInMainHand != null) {
-            val item = p.inventory.itemInMainHand
-            item.amount = item.amount - 1
-            p.inventory.itemInMainHand = item
-        }
-        ////////////////////////
-        //remove prob
-        if (!data.isRemoveItem && data.crashChance.size >pd.level){
-            if(data.crashChance[pd.level] !=0.0 && Math.random()<data.crashChance[pd.level]
-                    && p.inventory.itemInMainHand != null){
-                val item = p.inventory.itemInMainHand
-                item.amount = item.amount -1
-                p.inventory.itemInMainHand = item
-                p.sendMessage(data.crashMsg)
-            }
-        }
+    fun useDrug(p: Player, dataName:String,data:Configs.DrugData,pd:DataBase.PlayerData){
 
         if (data.useMsg.size > pd.level){
             p.sendMessage(data.useMsg[pd.level])
