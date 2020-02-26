@@ -85,13 +85,3 @@
 
 - SoundSymptoms ... 禁断症状発生時のサウンド(list in list)
 - SoundSymptomsRandom ... 禁断症状発生時のランダムサウンド(list in list)
-<br/>
-
-- CommandLvUp ... 依存レベルが上がったときのコマンド(list in list)
-- CommandRandomLvUp ... 依存レベルが上がったときのランダムコマンド(list in list)
-<br/>
-- funcLvUp ... func機能（後述)
-- funcrandomLvUp ... func機能（後述)
-- funcdelayLvUp ... func機能（後述)
-- funcdelayrandomLvUp ... func機能（後述)
-
