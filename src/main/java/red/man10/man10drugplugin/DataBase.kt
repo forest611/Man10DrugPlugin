@@ -1,12 +1,9 @@
 package red.man10.man10drugplugin
 
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.TimeUnit
-import kotlin.math.log
 
 class DataBase (private val plugin: Man10DrugPlugin){
 
