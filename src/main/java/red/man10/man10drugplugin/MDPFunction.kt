@@ -32,7 +32,7 @@ class MDPFunction (private val plugin: Man10DrugPlugin){
                 continue
             }
 
-            val yml = YamlConfiguration.loadConfiguration(f)!!
+            val yml = YamlConfiguration.loadConfiguration(f)
 
             val data = Func()
 
