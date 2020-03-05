@@ -14,9 +14,9 @@ class DependThread (private val plugin: Man10DrugPlugin){
     //依存処理に関するスレッド プラグイン起動時にスレッドスタート
     //////////////////////
     fun dependThread(){
-        Bukkit.getScheduler().runTaskTimer(plugin, {
+        Bukkit.getScheduler().runTaskTimer(plugin, Runnable {
 
-            if (plugin.isReload || !plugin.pluginEnable)return@runTaskTimer
+            if (plugin.isReload || !plugin.pluginEnable) return@Runnable
 
             for (p in Bukkit.getOnlinePlayers()) {
 
@@ -86,7 +86,7 @@ class DependThread (private val plugin: Man10DrugPlugin){
             for (b in data.buffSymptoms[pd.level]!!){
                 val s = b.split(",")
                 p.addPotionEffect(PotionEffect(
-                        PotionEffectType.getByName(s[0]),
+                        PotionEffectType.getByName(s[0])!!,
                         s[1].toInt(),s[2].toInt(),false,false))
             }
         }

@@ -19,7 +19,7 @@ class MDPFunction (private val plugin: Man10DrugPlugin){
 
         val funcFolder = File(Bukkit.getServer()
                 .pluginManager.getPlugin("Man10DrugPlugin")
-                .dataFolder, File.separator+"func")
+                !!.dataFolder, File.separator+"func")
         if (!funcFolder.exists()){
             funcFolder.mkdir()
         }
@@ -55,7 +55,7 @@ class MDPFunction (private val plugin: Man10DrugPlugin){
 
             data.msg = yml.getStringList("msg")
 
-            funcData[yml.getString("name")] = data
+            funcData[yml.getString("name")!!] = data
         }
     }
 
@@ -72,14 +72,14 @@ class MDPFunction (private val plugin: Man10DrugPlugin){
             for (b in data.buff){
                 val s = b.split(",")
                 p.addPotionEffect(PotionEffect(
-                        PotionEffectType.getByName(s[0]),
+                        PotionEffectType.getByName(s[0])!!,
                         s[1].toInt(),s[2].toInt()))
             }
         }
         if (data.buffRandom.isNotEmpty()){
             val s = plugin.random(data.buffRandom).split(",")
             p.addPotionEffect(PotionEffect(
-                    PotionEffectType.getByName(s[0]),
+                    PotionEffectType.getByName(s[0])!!,
                     s[1].toInt(),s[2].toInt()))
         }
         if (data.particle.isNotEmpty()){

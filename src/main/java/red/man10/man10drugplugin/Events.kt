@@ -1,10 +1,6 @@
 package red.man10.man10drugplugin
 
-import org.bukkit.Bukkit
-import org.bukkit.Material
-import org.bukkit.Particle
-import org.bukkit.Sound
-import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack
+import org.bukkit.*
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -13,10 +9,9 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerItemConsumeEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataType
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
-import java.lang.Exception
 import java.util.*
 
 class Events(private val plugin: Man10DrugPlugin):Listener{
@@ -28,8 +23,8 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
 
             val p = e.player
 
-            if (item.itemMeta == null) return
-            if (!CraftItemStack.asNMSCopy(item).hasTag())return
+            val meta = item.itemMeta?:return
+            if (meta.persistentDataContainer.isEmpty)return
             if (plugin.disableWorld.indexOf(p.world.name) != -1){ return }
 
             if (plugin.isReload || !plugin.pluginEnable){
@@ -37,17 +32,9 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
                 return
             }
 
-            val dataName : String
+            val dataName =  meta.persistentDataContainer[NamespacedKey(plugin,"name"), PersistentDataType.STRING]?:return
 
-            //NBTTagからドラッグを識別
-            try {
-               dataName = CraftItemStack.asNMSCopy(item).tag!!.getString("name")
-            }catch (e:Exception){
-                Bukkit.getLogger().info(e.message)
-                return
-            }
-
-            if (plugin.drugName.indexOf(dataName) == -1)return
+            if (plugin.drugName.contains(dataName))return
 
             e.isCancelled = true
 
@@ -131,7 +118,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
             for (b in data.buff[pd.level]!!){
                 val s = b.split(",")
                 p.addPotionEffect(PotionEffect(
-                        PotionEffectType.getByName(s[0]),
+                        PotionEffectType.getByName(s[0])!!,
                         s[1].toInt(),s[2].toInt(),false,false))
             }
         }
@@ -139,7 +126,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
         if (!data.buffRandom[pd.level].isNullOrEmpty()){
             val s = plugin.random(data.buffRandom[pd.level]!!).split(",")
             p.addPotionEffect(PotionEffect(
-                    PotionEffectType.getByName(s[0]),
+                    PotionEffectType.getByName(s[0])!!,
                     s[1].toInt(),s[2].toInt(),false,false))
 
         }
@@ -275,11 +262,13 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
     fun defenseCheck(p:Player):Boolean{
         val helmet = p.inventory.helmet?:return false
 
-        if (!CraftItemStack.asNMSCopy(helmet).hasTag())return false
+        val meta = helmet.itemMeta?:return false
 
-        val dataName = CraftItemStack.asNMSCopy(helmet).tag!!.getString("name")
+        if (meta.persistentDataContainer.isEmpty)return false
 
-        if (plugin.drugName.indexOf(dataName) == -1)return false
+        val dataName = meta.persistentDataContainer[NamespacedKey(plugin,"name"), PersistentDataType.STRING]?:return false
+
+        if (plugin.drugName.contains(dataName))return false
 
         val data = plugin.drugData[dataName]!!
 
