@@ -1,13 +1,13 @@
 package red.man10.man10drugplugin
 
-import net.minecraft.server.v1_12_R1.NBTTagCompound
 import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.configuration.file.YamlConfiguration
-import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataType
 import java.io.File
 import java.lang.Exception
 
@@ -23,7 +23,7 @@ class Configs(private val plugin: Man10DrugPlugin){
         plugin.drugData.clear()
 
         val drugFolder = File(Bukkit.getServer()
-                .pluginManager.getPlugin("Man10DrugPlugin")
+                .pluginManager.getPlugin("Man10DrugPlugin")!!
                 .dataFolder, File.separator)
 
         if (!drugFolder.exists()){
@@ -46,18 +46,18 @@ class Configs(private val plugin: Man10DrugPlugin){
                 continue
             }
 
-            val dataName = cfg.getString("dataName")
+            val dataName = cfg.getString("dataName")!!
 
             plugin.drugName.add(dataName)
 
             val data = DrugData()
 
-            data.displayName = cfg.getString("displayName")
-            data.material = cfg.getString("material","DIAMOND_HOE")
-            data.damage = cfg.getInt("damage",0).toShort()
+            data.displayName = cfg.getString("displayName")!!
+            data.material = cfg.getString("material","DIAMOND_HOE")!!
+            data.modelData = cfg.getInt("modelData",0)
             data.type =  cfg.getInt("type",0)
             data.isChange = cfg.getBoolean("isChange")
-            if(data.isChange)data.changeItem = cfg.getString("changeItem")
+            if(data.isChange)data.changeItem = cfg.getString("changeItem")!!
 
             data.lore = cfg.getStringList("lore")
             //use message
@@ -89,7 +89,7 @@ class Configs(private val plugin: Man10DrugPlugin){
             data.soundRandom = getHMList("soundRandom",cfg)
 
             data.crashChance = cfg.getDoubleList("crashChance")//無記名で壊れなくなる
-            data.crashMsg = cfg.getString("crashMsg","")
+            data.crashMsg = cfg.getString("crashMsg","")!!
 
             data.removeBuffs = cfg.getBoolean("removeBuff")//使ったときに今のバフを消す
 
@@ -128,7 +128,7 @@ class Configs(private val plugin: Man10DrugPlugin){
             }
 
             if (data.type == 1){
-                data.weakDrug = cfg.getString("weakDrug")//治療する対象のドラッグの名前を入力
+                data.weakDrug = cfg.getString("weakDrug")!!//治療する対象のドラッグの名前を入力
                 data.weakProb = cfg.getDoubleList("weakProb")//確率で1レベルダウン
                 data.stopDepend = cfg.getBoolean("stopDepend")
             }
@@ -142,16 +142,14 @@ class Configs(private val plugin: Man10DrugPlugin){
             /////////////////////////////
             //ItemStackの作成
             //////////////////////////////
-            var drugItem = ItemStack(Material.valueOf(data.material),1,data.damage)
-            val drugNbt = CraftItemStack.asNMSCopy(drugItem)
-            val drugTag = NBTTagCompound()
-            drugTag.setString("name",dataName)
-            drugNbt.tag = drugTag
-            drugItem = CraftItemStack.asBukkitCopy(drugNbt)
-
+            val drugItem = ItemStack(Material.valueOf(data.material),1)
             val meta = drugItem.itemMeta
+            //NBTTag追加
+            meta.persistentDataContainer.set(NamespacedKey(plugin,"name"), PersistentDataType.STRING,dataName)
 
-            meta.displayName = data.displayName
+            meta.setCustomModelData(data.modelData)
+
+            meta.setDisplayName(data.displayName)
             if (data.hasEnchantEffect){
                 meta.addEnchant(Enchantment.DURABILITY,0,false)
             }
@@ -179,7 +177,7 @@ class Configs(private val plugin: Man10DrugPlugin){
 
         if (cfg.getConfigurationSection(path) == null)return map
 
-        for (i in cfg.getConfigurationSection(path).getKeys(false)) {
+        for (i in cfg.getConfigurationSection(path)!!.getKeys(false)) {
             map[i.toInt()] = cfg.getStringList("$path.$i")
         }
         return map
@@ -202,7 +200,7 @@ class Configs(private val plugin: Man10DrugPlugin){
         //必須
         var displayName = "drug"
         var material = "DIAMOND_HOE"
-        var damage : Short = 0
+        var modelData = 0
         var type = 0
 
 

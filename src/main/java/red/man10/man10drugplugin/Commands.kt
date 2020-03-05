@@ -8,12 +8,12 @@ import org.bukkit.entity.Player
 
 class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
 
-    override fun onCommand(sender: CommandSender?, command: Command?, label: String?, args: Array<out String>?): Boolean {
+    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
 
         if(sender is Player && !sender.hasPermission("drug.op"))return false
 
         //help message
-        if (args == null || args.isEmpty()){
+        if (args.isEmpty()){
             //help
             if (sender is Player){
                 help(sender)
@@ -28,7 +28,7 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
         if (cmd == "using"){
             if (plugin.drugName.indexOf(args[1]) == -1)return true
 
-            val p = Bukkit.getPlayer(args[1])
+            val p = Bukkit.getPlayer(args[1])?:return true
             val drug = args[1]
 
             plugin.events.useDrug(p,args[2],plugin.drugData[drug]!!,plugin.db.playerData[Pair(p,drug)]!!)
@@ -82,7 +82,7 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
             }
             //指定プレイヤーの依存データを初期化する
             if (args.size == 2){
-                val p = Bukkit.getPlayer(args[1])
+                val p = Bukkit.getPlayer(args[1])?:return true
                 for (drug in plugin.drugName){
                     val pd = plugin.db.playerData[Pair(p,drug)]!!
 
@@ -102,7 +102,7 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
             //指定プレイヤーの指定ドラッグの依存データを初期化する
             if (args.size == 3){
                 if (plugin.drugName.indexOf(args[2]) == -1)return true
-                val p = Bukkit.getPlayer(args[1])
+                val p = Bukkit.getPlayer(args[1])?:return true
                 val pd = plugin.db.playerData[Pair(p,args[2])]!!
 
                 pd.usedCount = 0
@@ -170,7 +170,7 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
 
             sender.sendMessage("§e§lオンラインプレイヤーのデータ保存完了！")
 
-            Bukkit.getScheduler().runTask(plugin) {
+            Bukkit.getScheduler().runTask(plugin, Runnable {
                 plugin.configs.loadPluginConfig()
 
                 plugin.configs.loadDrugs()
@@ -187,7 +187,8 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
                 plugin.isReload = false
                 plugin.thread.dependThread()
                 Bukkit.broadcastMessage("§e§lドラッグプラグインのリロードが完了しました！")
-            }
+
+            })
             return true
         }
 
@@ -213,13 +214,13 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
         }
 
         if (cmd == "stat"){
-            Bukkit.getScheduler().runTask(plugin){
+            Bukkit.getScheduler().runTask(plugin, Runnable {
                 sender.sendMessage("§l現在データを取得中です...")
                 val total = plugin.db.getServerTotal(args[1])
                 sender.sendMessage("§l${args[1]}の利用統計")
                 sender.sendMessage("§lトータル:$total")
-                
-            }
+
+            })
         }
 
         if (cmd == "debug"){

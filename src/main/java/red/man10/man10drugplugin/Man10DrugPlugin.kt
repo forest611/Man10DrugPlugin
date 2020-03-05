@@ -1,7 +1,9 @@
 package red.man10.man10drugplugin
 
 import org.bukkit.Bukkit
+import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
+import sun.security.krb5.Config
 
 class Man10DrugPlugin : JavaPlugin() {
 
@@ -36,10 +38,10 @@ class Man10DrugPlugin : JavaPlugin() {
 
         configs.loadPluginConfig()
 
-        getCommand("mdp").executor = cmds
+        //getCommand("mdp").executor = cmds
 
         Bukkit.getServer().pluginManager.registerEvents(events,this)
-        db.mysql = MySQLManager(this,"DrugPluginLogin")
+        db.mysql = MySQLManager(this,"man10drug")
         db.createTable()
         db.executeDBQueue()
         thread.dependThread()
