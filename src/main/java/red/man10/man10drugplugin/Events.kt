@@ -34,7 +34,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
 
             val dataName =  meta.persistentDataContainer[NamespacedKey(plugin,"name"), PersistentDataType.STRING]?:return
 
-            if (plugin.drugName.contains(dataName))return
+            if (!plugin.drugName.contains(dataName))return
 
             e.isCancelled = true
 
