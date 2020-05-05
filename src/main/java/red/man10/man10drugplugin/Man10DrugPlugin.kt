@@ -1,9 +1,7 @@
 package red.man10.man10drugplugin
 
 import org.bukkit.Bukkit
-import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
-import sun.security.krb5.Config
 
 class Man10DrugPlugin : JavaPlugin() {
 
