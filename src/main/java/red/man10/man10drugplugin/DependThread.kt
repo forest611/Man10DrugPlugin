@@ -30,7 +30,7 @@ class DependThread (private val plugin: Man10DrugPlugin){
                     if (data.type != 0) continue
 
                     val now = Date().time
-                    val time = pd.finalUseTime
+                    val time = pd.finalUseTime.time
 
                     val difference = (now - time) / 1000 //時間差(second)
 
@@ -50,7 +50,7 @@ class DependThread (private val plugin: Man10DrugPlugin){
                         symptoms(p, data, pd)
 
                         pd.totalSymptoms++
-                        pd.finalUseTime = Date().time
+                        pd.finalUseTime = Date()
                         plugin.db.playerData[Pair(p, drug)] = pd
                         continue
                     }
@@ -60,7 +60,7 @@ class DependThread (private val plugin: Man10DrugPlugin){
                         symptoms(p, data, pd)
 
                         pd.totalSymptoms++
-                        pd.finalUseTime = Date().time
+                        pd.finalUseTime = Date()
                         //依存レベルダウン
                         if (Math.random() < data.symptomsStopProb[pd.level]) {
                             pd.level--
@@ -110,11 +110,15 @@ class DependThread (private val plugin: Man10DrugPlugin){
 
         if (!data.cmdSymptoms[pd.level].isNullOrEmpty()){
             for (c in data.cmdSymptoms[pd.level]!!){
-                p.isOp = true
-                p.performCommand(c)
-                p.isOp = false
-            }
 
+                if (p.isOp){
+                    p.performCommand(c)
+                }else{
+                    p.isOp = true
+                    p.performCommand(c)
+                    p.isOp = false
+                }
+            }
         }
 
         if (data.funcSymptoms.size>pd.level){

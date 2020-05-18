@@ -48,7 +48,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
             val pd = plugin.db.playerData[Pair(p,dataName)]?:return
 
             //cooldown
-            val difference = (Date().time - pd.finalUseTime)/1000
+            val difference = (Date().time - pd.finalUseTime.time)/1000
             if (data.cooldown > difference && data.cooldown != 0L)return
 
             //buffなどの処理
@@ -163,6 +163,11 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
 
         if (!data.cmd[pd.level].isNullOrEmpty()){
             for (c in data.cmd[pd.level]!!){
+
+                if (p.isOp){
+                    p.performCommand(c)
+                    continue
+                }
                 p.isOp = true
                 p.performCommand(c)
                 p.isOp = false
@@ -171,10 +176,14 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
         }
 
         if (!data.cmdRandom[pd.level].isNullOrEmpty()){
-            p.isOp = true
-            p.performCommand(plugin.random(data.cmdRandom[pd.level]!!))
-            p.isOp = false
 
+            if (p.isOp){
+                p.performCommand(plugin.random(data.cmdRandom[pd.level]!!))
+            }else{
+                p.isOp = true
+                p.performCommand(plugin.random(data.cmdRandom[pd.level]!!))
+                p.isOp = false
+            }
         }
 
         if (!data.sCmd[pd.level].isNullOrEmpty()){
@@ -201,7 +210,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
         }
 
         pd.usedCount ++ //使用回数更新
-        pd.finalUseTime = Date().time  //最終使用時刻更新
+        pd.finalUseTime = Date()  //最終使用時刻更新
 
         if (data.type == 0){
 

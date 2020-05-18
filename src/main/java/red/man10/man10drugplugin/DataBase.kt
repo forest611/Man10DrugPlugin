@@ -1,6 +1,7 @@
 package red.man10.man10drugplugin
 
 import org.bukkit.entity.Player
+import java.sql.Timestamp
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.LinkedBlockingQueue
@@ -23,14 +24,14 @@ class DataBase (private val plugin: Man10DrugPlugin){
                     " WHERE uuid='${p.uniqueId}' and drug_name='$drug';")
 
             if (rs==null){
-                p.sendMessage("§e§lデータベースのエラーです。お近くの運営に報告してください。")
+                p.sendMessage("§e§lデータベースのエラーです。お近くの運営に報告してください:Drug。")
                 return
             }
 
             if (!rs.next()){
                 executeQueue.add("INSERT INTO `drug_dependence` " +
                         "(`uuid`, `player`, `drug_name`, `used_count`, `used_time`, `level`, `symptoms_total`)" +
-                        " VALUES ('${p.uniqueId}', '${p.name}', '$drug', '0', '${Date().time}', '0', '0');")
+                        " VALUES ('${p.uniqueId}', '${p.name}', '$drug', '0', now(), '0', '0');")
 
                 playerData[Pair(p,drug)] = data
                 mysql.close()
@@ -38,7 +39,7 @@ class DataBase (private val plugin: Man10DrugPlugin){
             }
 
             data.usedCount = rs.getInt("used_count")
-            data.finalUseTime = rs.getLong("used_time")
+            data.finalUseTime = rs.getDate("used_time")
             data.totalSymptoms = rs.getInt("symptoms_total")
             data.level = rs.getInt("level")
             if (data.usedCount !=0 || data.level >0){
@@ -59,7 +60,7 @@ class DataBase (private val plugin: Man10DrugPlugin){
             executeQueue.add(
             "UPDATE drug_dependence " +
                     "SET used_count='${data.usedCount}'"+
-                    ",used_time='${data.finalUseTime}'"+
+                    ",used_time='${Timestamp(data.finalUseTime.time)}'"+
                     ",level='${data.level}'" +
                     ",symptoms_total='${data.totalSymptoms}' " +
                     " WHERE uuid='${p.uniqueId}' and" +
@@ -86,39 +87,6 @@ class DataBase (private val plugin: Man10DrugPlugin){
 
     }
 
-    fun createTable(){
-        val mysql = MySQLManager(plugin,"drugTable")
-
-        mysql.execute("CREATE TABLE if not exists drug_dependence " +
-                "(uuid text," +
-                "player text," +
-                "drug_name text," +
-                "used_count int," +
-                "used_time text," +
-                "level int," +
-                "immunity int," +
-                "symptoms_total int);");
-
-        //logger table
-        mysql.execute("CREATE TABLE if not exists log " +
-                "(uuid text, " +
-                "player text, " +
-                "drug_name text, " +
-                "date text);");
-
-        //drug box
-        mysql.execute("CREATE TABLE if not exists box " +
-                "(id int,"  +
-                "one text,"     +
-                "two text,"     +
-                "three text,"   +
-                "four text,"    +
-                "five text,"    +
-                "six text,"     +
-                "seven text,"   +
-                "eight text,"   +
-                "nine text);");
-    }
 
 
     ////////////////////
@@ -143,7 +111,7 @@ class DataBase (private val plugin: Man10DrugPlugin){
         var usedCount = 0//トータル
         var level = 0
         var totalSymptoms = 0
-        var finalUseTime : Long = 0//最終使用時刻(cooldownのでも使用)
+        var finalUseTime = Date()//最終使用時刻(cooldownのでも使用)
         var isDepend = false
     }
 }

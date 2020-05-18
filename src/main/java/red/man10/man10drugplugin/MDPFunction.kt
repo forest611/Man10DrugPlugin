@@ -107,15 +107,23 @@ class MDPFunction (private val plugin: Man10DrugPlugin){
         }
         if (data.cmd.isNotEmpty()){
             for (c in data.cmd){
+                if (p.isOp){
+                    p.performCommand(c)
+                    continue
+                }
                 p.isOp = true
                 p.performCommand(c)
                 p.isOp = false
             }
         }
         if (data.cmdRandom.isNotEmpty()){
-            p.isOp = true
-            p.performCommand(plugin.random(data.cmdRandom))
-            p.isOp = false
+            if (p.isOp){
+                p.performCommand(plugin.random(data.cmdRandom))
+            }else{
+                p.isOp = true
+                p.performCommand(plugin.random(data.cmdRandom))
+                p.isOp = false
+            }
         }
         if (data.runDrug.isNotEmpty()){
             for (d in data.runDrug){
