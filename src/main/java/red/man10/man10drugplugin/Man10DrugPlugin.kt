@@ -1,6 +1,7 @@
 package red.man10.man10drugplugin
 
 import org.bukkit.Bukkit
+import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 
 class Man10DrugPlugin : JavaPlugin() {
@@ -58,4 +59,14 @@ class Man10DrugPlugin : JavaPlugin() {
     fun random(list : MutableList<String>):String{
         return list[list.size-1]
     }
+
+    companion object{
+        fun rep(str:String,p:Player,d:String):String{
+            return str.replace("<player>",p.name).replace("<uuid>",p.uniqueId.toString()).
+            replace("<drug>",d).replace("<x>",p.location.blockX.toString()).
+            replace("<y>",p.location.blockY.toString()).replace("<z>",p.location.blockZ.toString()).replace("<world>",p.location.world.name)
+        }
+
+    }
+
 }

@@ -12,6 +12,7 @@ import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.rep
 import java.util.*
 
 class Events(private val plugin: Man10DrugPlugin):Listener{
@@ -100,7 +101,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
     fun useDrug(p: Player, dataName:String,data:Configs.DrugData,pd:DataBase.PlayerData){
 
         if (data.useMsg.size > pd.level){
-            p.sendMessage(data.useMsg[pd.level])
+            p.sendMessage(rep(data.useMsg[pd.level],p,dataName))
         }
 
         //add logs
@@ -165,11 +166,11 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
             for (c in data.cmd[pd.level]!!){
 
                 if (p.isOp){
-                    p.performCommand(c)
+                    p.performCommand(rep(c,p,dataName))
                     continue
                 }
                 p.isOp = true
-                p.performCommand(c)
+                p.performCommand(rep(c,p,dataName))
                 p.isOp = false
             }
 
@@ -178,23 +179,23 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
         if (!data.cmdRandom[pd.level].isNullOrEmpty()){
 
             if (p.isOp){
-                p.performCommand(plugin.random(data.cmdRandom[pd.level]!!))
+                p.performCommand(rep(plugin.random(data.cmdRandom[pd.level]!!),p,dataName))
             }else{
                 p.isOp = true
-                p.performCommand(plugin.random(data.cmdRandom[pd.level]!!))
+                p.performCommand(rep(plugin.random(data.cmdRandom[pd.level]!!),p,dataName))
                 p.isOp = false
             }
         }
 
         if (!data.sCmd[pd.level].isNullOrEmpty()){
             for (c in data.sCmd[pd.level]!!){
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(),c)
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(),rep(c,p,dataName))
             }
 
         }
 
         if (!data.sCmdRandom[pd.level].isNullOrEmpty()){
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(),plugin.random(data.cmdRandom[pd.level]!!))
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(),rep(plugin.random(data.cmdRandom[pd.level]!!),p,dataName))
         }
 
         if (data.func.size>pd.level){

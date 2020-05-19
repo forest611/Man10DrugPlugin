@@ -7,6 +7,7 @@ import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.rep
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
@@ -64,7 +65,7 @@ class MDPFunction (private val plugin: Man10DrugPlugin){
 
         if (data.msg.isNotEmpty()){
             for (msg in data.msg){
-                p.sendMessage(msg)
+                p.sendMessage(rep(msg,p,name))
             }
         }
 
@@ -108,20 +109,20 @@ class MDPFunction (private val plugin: Man10DrugPlugin){
         if (data.cmd.isNotEmpty()){
             for (c in data.cmd){
                 if (p.isOp){
-                    p.performCommand(c)
+                    p.performCommand(rep(c,p,name))
                     continue
                 }
                 p.isOp = true
-                p.performCommand(c)
+                p.performCommand(rep(c,p,name))
                 p.isOp = false
             }
         }
         if (data.cmdRandom.isNotEmpty()){
             if (p.isOp){
-                p.performCommand(plugin.random(data.cmdRandom))
+                p.performCommand(rep(plugin.random(data.cmdRandom),p,name))
             }else{
                 p.isOp = true
-                p.performCommand(plugin.random(data.cmdRandom))
+                p.performCommand(rep(plugin.random(data.cmdRandom),p,name))
                 p.isOp = false
             }
         }
