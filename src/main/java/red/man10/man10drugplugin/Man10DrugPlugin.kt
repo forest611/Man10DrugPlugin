@@ -66,7 +66,6 @@ class Man10DrugPlugin : JavaPlugin() {
             replace("<drug>",d).replace("<x>",p.location.blockX.toString()).
             replace("<y>",p.location.blockY.toString()).replace("<z>",p.location.blockZ.toString()).replace("<world>",p.location.world.name)
         }
-
     }
 
 }
