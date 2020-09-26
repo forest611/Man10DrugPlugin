@@ -3,6 +3,7 @@ package red.man10.man10drugplugin
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
+import kotlin.random.Random
 
 class Man10DrugPlugin : JavaPlugin() {
 
@@ -57,7 +58,7 @@ class Man10DrugPlugin : JavaPlugin() {
     }
 
     fun random(list : MutableList<String>):String{
-        return list[list.size-1]
+        return list[Random(list.size-1).nextInt()]
     }
 
     companion object{

@@ -3,11 +3,13 @@ package red.man10.man10drugplugin
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.Particle
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
+import org.bukkit.potion.PotionEffectType
 import java.io.File
 import java.lang.Exception
 
@@ -292,5 +294,23 @@ class Configs(private val plugin: Man10DrugPlugin){
         var defenseProb :Double = 0.0
 
     }
+//
+//    class Buff{
+//
+//        lateinit var effect : PotionEffectType
+//        var tick = 0
+//        var level = 0
+//    }
+//
+//    class Particle{
+//        lateinit var particle : org.bukkit.Particle
+//        var size = 1
+//    }
+//
+//    class Sound{
+//        var sound = ""
+//        var volume = 1.0F
+//        var speed = 1.0F
+//    }
 
 }
