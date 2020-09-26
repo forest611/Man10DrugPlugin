@@ -58,7 +58,7 @@ class Man10DrugPlugin : JavaPlugin() {
     }
 
     fun random(list : MutableList<String>):String{
-        return list[Random(list.size-1).nextInt()]
+        return list[Random.nextInt(list.size-1)]
     }
 
     companion object{
