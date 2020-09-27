@@ -26,7 +26,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
 
             val meta = item.itemMeta?:return
             if (meta.persistentDataContainer.isEmpty)return
-            if (plugin.disableWorld.indexOf(p.world.name) != -1){ return }
+            if (plugin.disableWorld.contains(p.world.name)){ return }
 
             if (plugin.isReload || !plugin.pluginEnable){
                 p.sendMessage("§e§l今は使う気分ではないようだ...")
@@ -44,7 +44,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
             val data = plugin.drugData[dataName]!!
 
             if (data.type == 2)return //マスクなど
-            if (data.disableWorld.indexOf(p.world.name) != -1)return
+            if (data.disableWorld.contains(p.world.name))return
 
             val pd = plugin.db.playerData[Pair(p,dataName)]?:return
 
