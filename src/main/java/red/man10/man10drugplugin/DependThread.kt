@@ -10,9 +10,9 @@ class DependThread (private val plugin: Man10DrugPlugin){
     //依存処理に関するスレッド プラグイン起動時にスレッドスタート
     //////////////////////
     fun dependThread(){
-        Bukkit.getScheduler().runTaskTimer(plugin, Runnable {
 
-            if (plugin.isReload || !plugin.pluginEnable) return@Runnable
+        Thread{
+            if (plugin.isReload || !plugin.pluginEnable) return@Thread
 
             for (p in Bukkit.getOnlinePlayers()) {
 
@@ -20,7 +20,6 @@ class DependThread (private val plugin: Man10DrugPlugin){
 
                     val data = plugin.drugData[drug]!!
                     val pd = plugin.db.playerData[Pair(p, drug)] ?: continue
-
 
                     if (!pd.isDepend) continue
                     if (data.type != 0) continue
@@ -33,7 +32,9 @@ class DependThread (private val plugin: Man10DrugPlugin){
                     //デバッグモード
                     if (plugin.debugMode && difference > 60) {
 
-                        symptoms(p, data, pd)
+                        Bukkit.getScheduler().runTask(plugin, Runnable {
+                            symptoms(p, data, pd)
+                        })
 
                         pd.totalSymptoms++
                         plugin.db.playerData[Pair(p, drug)] = pd
@@ -43,7 +44,9 @@ class DependThread (private val plugin: Man10DrugPlugin){
                     //最初の禁断症状
                     if (pd.totalSymptoms == 0 && data.symptomsFirstTime[pd.level] < difference) {
 
-                        symptoms(p, data, pd)
+                        Bukkit.getScheduler().runTask(plugin, Runnable {
+                            symptoms(p, data, pd)
+                        })
 
                         pd.totalSymptoms++
                         pd.finalUseTime = Date()
@@ -53,7 +56,9 @@ class DependThread (private val plugin: Man10DrugPlugin){
                     //2回目以降の禁断症状
                     if (data.symptomsTime[pd.level] < difference) {
 
-                        symptoms(p, data, pd)
+                        Bukkit.getScheduler().runTask(plugin, Runnable {
+                            symptoms(p, data, pd)
+                        })
 
                         pd.totalSymptoms++
                         pd.finalUseTime = Date()
@@ -74,7 +79,10 @@ class DependThread (private val plugin: Man10DrugPlugin){
                     }
                 }
             }
-        },200,200)
+
+            Thread.sleep(10000)
+        }
+
     }
 
     fun symptoms(p:Player, data:Configs.Drug, pd:DataBase.PlayerData){
