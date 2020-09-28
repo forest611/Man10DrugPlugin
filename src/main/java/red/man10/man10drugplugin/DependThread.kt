@@ -2,7 +2,6 @@ package red.man10.man10drugplugin
 
 import org.bukkit.Bukkit
 import org.bukkit.Particle
-import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
@@ -81,7 +80,7 @@ class DependThread (private val plugin: Man10DrugPlugin){
         },200,200)
     }
 
-    fun symptoms(p:Player,data:Configs.DrugData,pd:DataBase.PlayerData){
+    fun symptoms(p:Player, data:Configs.Drug, pd:DataBase.PlayerData){
         if (!data.buffSymptoms[pd.level].isNullOrEmpty()){
             for (b in data.buffSymptoms[pd.level]!!){
                 val s = b.split(",")

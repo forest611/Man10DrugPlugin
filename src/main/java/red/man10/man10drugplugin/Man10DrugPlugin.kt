@@ -15,7 +15,7 @@ class Man10DrugPlugin : JavaPlugin() {
     var isReload = false//リロード中かどうか
 
     val drugName = mutableListOf<String>()
-    val drugData = HashMap<String,Configs.DrugData>()
+    val drugData = HashMap<String,Configs.Drug>()
 
     lateinit var cmds : Commands
     lateinit var events : Events

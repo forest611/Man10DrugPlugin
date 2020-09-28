@@ -1,17 +1,14 @@
 package red.man10.man10drugplugin
 
-import org.bukkit.Bukkit
-import org.bukkit.Material
-import org.bukkit.NamespacedKey
-import org.bukkit.Particle
+import org.bukkit.*
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
+import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import java.io.File
-import java.lang.Exception
 
 class Configs(private val plugin: Man10DrugPlugin){
 
@@ -43,16 +40,16 @@ class Configs(private val plugin: Man10DrugPlugin){
 
             val cfg = YamlConfiguration.loadConfiguration(file)
 
-            if (cfg.getString("dataName") == null){
-                Bukkit.getLogger().info("”dataname”が設定されていません")
+            val dataName = cfg.getString("dataName")
+
+            if (dataName == null){
+                Bukkit.getLogger().info("”dataName”が設定されていません")
                 continue
             }
 
-            val dataName = cfg.getString("dataName")!!
-
             plugin.drugName.add(dataName)
 
-            val data = DrugData()
+            val data = Drug()
 
             data.displayName = cfg.getString("displayName")!!
             data.material = cfg.getString("material","DIAMOND_HOE")!!
@@ -81,14 +78,14 @@ class Configs(private val plugin: Man10DrugPlugin){
             data.sCmd = getHMList("serverCmd",cfg)
             data.sCmdRandom = getHMList("serverCmdRandom",cfg)
 
-            data.buff = getHMList("buff",cfg)
-            data.buffRandom = getHMList("buffRandom",cfg)
+            data.buff = getBuff(false,cfg)
+            data.buffRandom = getBuff(true,cfg)
 
-            data.particle = getHMList("particle",cfg)
-            data.particleRandom = getHMList("particleRandom",cfg)
+            data.particle = getParticle(false,cfg)
+            data.particleRandom = getParticle(true,cfg)
 
-            data.sound = getHMList("sound",cfg)
-            data.soundRandom = getHMList("soundRandom",cfg)
+            data.sound = getSound(false,cfg)
+            data.soundRandom = getSound(true,cfg)
 
             data.crashChance = cfg.getDoubleList("crashChance")//無記名で壊れなくなる
             data.crashMsg = cfg.getString("crashMsg","")!!
@@ -186,6 +183,87 @@ class Configs(private val plugin: Man10DrugPlugin){
 
     }
 
+
+    fun getBuff(isRandom:Boolean,cfg: YamlConfiguration):HashMap<Int,MutableList<PotionEffect>>{
+
+        val path = if (isRandom) "buffRandom" else "buff"
+
+        val retMap = HashMap<Int,MutableList<PotionEffect>>()
+
+        for (map in getHMList(path,cfg)){
+
+            val r = mutableListOf<PotionEffect>()
+
+            for (data in map.value){
+
+                val s = data.split(",")
+
+                val effect = PotionEffect(PotionEffectType.getByName(s[0])!!,s[1].toInt(),s[2].toInt(),false,false)
+
+                r.add(effect)
+            }
+
+            retMap[map.key] = r
+        }
+
+        return retMap
+
+    }
+
+    fun getSound(isRandom: Boolean,cfg: YamlConfiguration):HashMap<Int,MutableList<SoundData>>{
+
+        val path = if (isRandom) "soundRandom" else "sound"
+
+        val retMap = HashMap<Int,MutableList<SoundData>>()
+
+        for (map in getHMList(path,cfg)){
+
+            val r = mutableListOf<SoundData>()
+
+            for (data in map.value){
+                val s = data.split(",")
+
+                val sound = SoundData()
+                sound.sound = s[0]
+                sound.volume = s[1].toFloat()
+                sound.pitch = s[2].toFloat()
+
+                r.add(sound)
+            }
+
+            retMap[map.key] = r
+        }
+
+        return retMap
+    }
+
+    fun getParticle(isRandom:Boolean,cfg:YamlConfiguration): HashMap<Int, MutableList<ParticleData>> {
+
+        val path = if (isRandom) "particleRandom" else "particle"
+
+        val retMap = HashMap<Int,MutableList<ParticleData>>()
+
+        for (map in getHMList(path,cfg)){
+
+            val r = mutableListOf<ParticleData>()
+
+            for (data in map.value){
+                val s = data.split(",")
+
+                val particle = ParticleData()
+                particle.particle = Particle.valueOf(s[0])
+                particle.size = s[1].toInt()
+
+                r.add(particle)
+            }
+
+            retMap[map.key] = r
+
+        }
+
+        return retMap
+    }
+
     fun loadPluginConfig(){
         plugin.saveDefaultConfig()
 
@@ -196,7 +274,7 @@ class Configs(private val plugin: Man10DrugPlugin){
 
     }
 
-    class DrugData{
+    class Drug{
 
         var itemStack :ItemStack? = null
         //必須
@@ -239,14 +317,14 @@ class Configs(private val plugin: Man10DrugPlugin){
         var sCmd = HashMap<Int,MutableList<String>>()
         var sCmdRandom = HashMap<Int,MutableList<String>>()
         //buff    buffname,tick,bufflevel
-        var buff = HashMap<Int,MutableList<String>>()
-        var buffRandom = HashMap<Int,MutableList<String>>()
+        var buff = HashMap<Int,MutableList<PotionEffect>>()
+        var buffRandom = HashMap<Int,MutableList<PotionEffect>>()
         //particle    particlename,size
-        var particle = HashMap<Int,MutableList<String>>()
-        var particleRandom = HashMap<Int,MutableList<String>>()
+        var particle = HashMap<Int,MutableList<ParticleData>>()
+        var particleRandom = HashMap<Int,MutableList<ParticleData>>()
         //sound       soundname,volume,speed
-        var sound = HashMap<Int,MutableList<String>>()
-        var soundRandom = HashMap<Int,MutableList<String>>()
+        var sound = HashMap<Int,MutableList<SoundData>>()
+        var soundRandom = HashMap<Int,MutableList<SoundData>>()
 
         //アイテムが一定確率で消える
         var crashChance = mutableListOf<Double>()
@@ -294,23 +372,16 @@ class Configs(private val plugin: Man10DrugPlugin){
         var defenseProb :Double = 0.0
 
     }
-//
-//    class Buff{
-//
-//        lateinit var effect : PotionEffectType
-//        var tick = 0
-//        var level = 0
-//    }
-//
-//    class Particle{
-//        lateinit var particle : org.bukkit.Particle
-//        var size = 1
-//    }
-//
-//    class Sound{
-//        var sound = ""
-//        var volume = 1.0F
-//        var speed = 1.0F
-//    }
+
+    class ParticleData{
+        lateinit var particle : Particle
+        var size = 0
+    }
+
+    class SoundData{
+        var sound = ""
+        var volume = 0.0F
+        var pitch = 0.0F
+    }
 
 }

@@ -83,10 +83,10 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
 
     @EventHandler
     fun loginEvent(e : PlayerJoinEvent){
-        Thread(Runnable {
+        Thread {
             Thread.sleep(5000)
             plugin.db.loginDB(e.player)
-        }).start()
+        }.start()
     }
 
     @EventHandler
@@ -98,7 +98,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
     /////////////////////////////////
     //ドラッグ使用時の処理
     /////////////////////////////////
-    fun useDrug(p: Player, dataName:String,data:Configs.DrugData,pd:DataBase.PlayerData){
+    fun useDrug(p: Player, dataName:String, data:Configs.Drug, pd:DataBase.PlayerData){
 
         if (data.useMsg.size > pd.level){
             p.sendMessage(rep(data.useMsg[pd.level],p,dataName))
@@ -117,48 +117,45 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
 
         if (!data.buff[pd.level].isNullOrEmpty()){
             for (b in data.buff[pd.level]!!){
-                val s = b.split(",")
-                p.addPotionEffect(PotionEffect(
-                        PotionEffectType.getByName(s[0])!!,
-                        s[1].toInt(),s[2].toInt(),false,false))
+                p.addPotionEffect(b)
             }
         }
 
         if (!data.buffRandom[pd.level].isNullOrEmpty()){
-            val s = plugin.random(data.buffRandom[pd.level]!!).split(",")
-            p.addPotionEffect(PotionEffect(
-                    PotionEffectType.getByName(s[0])!!,
-                    s[1].toInt(),s[2].toInt(),false,false))
+
+            val effect = data.buffRandom[pd.level]!!
+
+            p.addPotionEffect(effect[Random().nextInt(effect.size-1)])
 
         }
 
         if (!data.sound[pd.level].isNullOrEmpty()){
-            for (so in data.sound[pd.level]!!){
-                val s = so.split(",")
-                p.location.world.playSound(p.location, s[0],
-                        s[1].toFloat(),s[2].toFloat())
+            for (s in data.sound[pd.level]!!){
+                p.location.world.playSound(p.location, s.sound, s.volume,s.pitch)
             }
 
         }
 
         if (!data.soundRandom[pd.level].isNullOrEmpty()){
-            val s = plugin.random(data.soundRandom[pd.level]!!).split(",")
-            p.location.world.playSound(p.location,s[0],
-                    s[1].toFloat(),s[2].toFloat())
+
+            val sounds = data.soundRandom[pd.level]!!
+            val s = sounds[Random().nextInt(sounds.size -1)]
+            p.location.world.playSound(p.location, s.sound, s.volume,s.pitch)
 
         }
 
         if (!data.particle[pd.level].isNullOrEmpty()){
             for (par in data.particle[pd.level]!!){
-                val s = par.split(",")
-                p.location.world.spawnParticle(Particle.valueOf(s[0]),p.location,s[1].toInt())
+                p.location.world.spawnParticle(par.particle,p.location,par.size)
             }
 
         }
 
         if (!data.particleRandom[pd.level].isNullOrEmpty()){
-            val s = plugin.random(data.particleRandom[pd.level]!!).split(",")
-            p.location.world.spawnParticle(Particle.valueOf(s[0]),p.location,s[1].toInt())
+
+            val particle = data.particleRandom[pd.level]!!
+            val par = particle[Random().nextInt(particle.size-1)]
+            p.location.world.spawnParticle(par.particle,p.location,par.size)
 
         }
 
