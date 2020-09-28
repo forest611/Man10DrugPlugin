@@ -1,5 +1,6 @@
 package red.man10.man10drugplugin
 
+import com.sun.org.apache.bcel.internal.generic.RET
 import org.bukkit.Bukkit
 import org.bukkit.Particle
 import org.bukkit.Sound
@@ -9,6 +10,7 @@ import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.rep
 import java.io.File
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class MDPFunction (private val plugin: Man10DrugPlugin){
@@ -39,18 +41,19 @@ class MDPFunction (private val plugin: Man10DrugPlugin){
 
             data.msg = yml.getStringList("msg")
 
-            //buffname tick level
-            data.buff = yml.getStringList("buff")
-            data.buffRandom = yml.getStringList("buffRandom")
 
             data.cmd = yml.getStringList("cmd")
             data.cmdRandom = yml.getStringList("cmdRandom")
 
-            data.sound = yml.getStringList("sound")
-            data.soundRandom = yml.getStringList("soundRandom")
+            //buffname tick level
+            data.buff = getBuff(yml.getStringList("buff"))
+            data.buffRandom = getBuff(yml.getStringList("buffRandom"))
 
-            data.particle = yml.getStringList("particle")
-            data.particleRandom = yml.getStringList("particleRandom")
+            data.sound = getSound(yml.getStringList("sound"))
+            data.soundRandom = getSound(yml.getStringList("soundRandom"))
+
+            data.particle = getParticle(yml.getStringList("particle"))
+            data.particleRandom = getParticle(yml.getStringList("particleRandom"))
 
             data.runDrug = yml.getStringList("runDrug")
 
@@ -71,39 +74,33 @@ class MDPFunction (private val plugin: Man10DrugPlugin){
 
         if (data.buff.isNotEmpty()){
             for (b in data.buff){
-                val s = b.split(",")
-                p.addPotionEffect(PotionEffect(
-                        PotionEffectType.getByName(s[0])!!,
-                        s[1].toInt(),s[2].toInt()))
+                p.addPotionEffect(b)
             }
         }
+
         if (data.buffRandom.isNotEmpty()){
-            val s = plugin.random(data.buffRandom).split(",")
-            p.addPotionEffect(PotionEffect(
-                    PotionEffectType.getByName(s[0])!!,
-                    s[1].toInt(),s[2].toInt()))
+            p.addPotionEffect(data.buffRandom[Random().nextInt(data.buffRandom.size-1)])
         }
+
         if (data.particle.isNotEmpty()){
             for (par in data.particle){
-                val s = par.split(",")
-                p.location.world.spawnParticle(Particle.valueOf(s[0]),p.location,s[1].toInt())
+                p.location.world.spawnParticle(par.particle,p.location,par.size)
             }
         }
         if (data.particleRandom.isNotEmpty()){
-            val s = plugin.random(data.particleRandom).split(",")
-            p.location.world.spawnParticle(Particle.valueOf(s[0]),p.location,s[1].toInt())
+            val par = data.particleRandom[Random().nextInt(data.particleRandom.size-1)]
+            p.location.world.spawnParticle(par.particle,p.location,par.size)
         }
+
         if (data.sound.isNotEmpty()){
             for (so in data.sound){
-                val s = so.split(",")
-                p.location.world.playSound(p.location,s[0],
-                        s[1].toFloat(),s[2].toFloat())
+                p.location.world.playSound(p.location,so.sound,so.volume,so.pitch)
             }
         }
+
         if (data.soundRandom.isNotEmpty()){
-            val s = plugin.random(data.soundRandom).split(",")
-            p.location.world.playSound(p.location,s[0],
-                    s[1].toFloat(),s[2].toFloat())
+            val so = data.sound[Random().nextInt(data.sound.size-1)]
+            p.location.world.playSound(p.location,so.sound,so.volume,so.pitch)
 
         }
         if (data.cmd.isNotEmpty()){
@@ -134,6 +131,56 @@ class MDPFunction (private val plugin: Man10DrugPlugin){
 
     }
 
+    fun getBuff(list: MutableList<String>):MutableList<PotionEffect>{
+
+        val r = mutableListOf<PotionEffect>()
+
+        for (data in list){
+
+            val s = data.split(",")
+
+            val effect = PotionEffect(PotionEffectType.getByName(s[0])!!,s[1].toInt(),s[2].toInt(),false,false)
+
+            r.add(effect)
+        }
+
+        return r
+    }
+
+    fun getSound(list:MutableList<String>):MutableList<Configs.SoundData>{
+
+        val r = mutableListOf<Configs.SoundData>()
+
+        for (data in list){
+            val s = data.split(",")
+
+            val sound = Configs.SoundData()
+            sound.sound = s[0]
+            sound.volume = s[1].toFloat()
+            sound.pitch = s[2].toFloat()
+
+            r.add(sound)
+        }
+
+        return r
+    }
+
+    fun getParticle(list:MutableList<String>):MutableList<Configs.ParticleData>{
+
+        val r = mutableListOf<Configs.ParticleData>()
+
+        for (data in list){
+            val s = data.split(",")
+
+            val particle = Configs.ParticleData()
+            particle.particle = Particle.valueOf(s[0])
+            particle.size = s[1].toInt()
+
+            r.add(particle)
+        }
+
+        return r
+    }
 
     class Func{
 
@@ -142,14 +189,14 @@ class MDPFunction (private val plugin: Man10DrugPlugin){
         var cmd = mutableListOf<String>()
         var cmdRandom = mutableListOf<String>()
 
-        var sound = mutableListOf<String>()
-        var soundRandom = mutableListOf<String>()
+        var sound = mutableListOf<Configs.SoundData>()
+        var soundRandom = mutableListOf<Configs.SoundData>()
 
-        var particle = mutableListOf<String>()
-        var particleRandom = mutableListOf<String>()
+        var particle = mutableListOf<Configs.ParticleData>()
+        var particleRandom = mutableListOf<Configs.ParticleData>()
 
-        var buff = mutableListOf<String>()
-        var buffRandom = mutableListOf<String>()
+        var buff = mutableListOf<PotionEffect>()
+        var buffRandom = mutableListOf<PotionEffect>()
 
         var runDrug = mutableListOf<String>()
     }
