@@ -1,6 +1,9 @@
 package red.man10.man10drugplugin
 
-import org.bukkit.*
+import org.bukkit.Bukkit
+import org.bukkit.Material
+import org.bukkit.NamespacedKey
+import org.bukkit.Particle
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemFlag

@@ -1,10 +1,7 @@
 package red.man10.man10drugplugin
 
 import org.bukkit.Bukkit
-import org.bukkit.Particle
 import org.bukkit.entity.Player
-import org.bukkit.potion.PotionEffect
-import org.bukkit.potion.PotionEffectType
 import java.util.*
 
 class DependThread (private val plugin: Man10DrugPlugin){

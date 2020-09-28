@@ -1,9 +1,7 @@
 package red.man10.man10drugplugin
 
-import com.sun.org.apache.bcel.internal.generic.RET
 import org.bukkit.Bukkit
 import org.bukkit.Particle
-import org.bukkit.Sound
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffect

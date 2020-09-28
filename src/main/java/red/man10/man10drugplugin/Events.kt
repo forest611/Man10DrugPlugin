@@ -1,6 +1,8 @@
 package red.man10.man10drugplugin
 
-import org.bukkit.*
+import org.bukkit.Bukkit
+import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -10,8 +12,6 @@ import org.bukkit.event.player.PlayerItemConsumeEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.persistence.PersistentDataType
-import org.bukkit.potion.PotionEffect
-import org.bukkit.potion.PotionEffectType
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.rep
 import java.util.*
 
