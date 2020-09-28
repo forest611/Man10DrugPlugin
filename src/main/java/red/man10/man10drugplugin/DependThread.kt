@@ -83,28 +83,20 @@ class DependThread (private val plugin: Man10DrugPlugin){
     fun symptoms(p:Player, data:Configs.Drug, pd:DataBase.PlayerData){
         if (!data.buffSymptoms[pd.level].isNullOrEmpty()){
             for (b in data.buffSymptoms[pd.level]!!){
-                val s = b.split(",")
-                p.addPotionEffect(PotionEffect(
-                        PotionEffectType.getByName(s[0])!!,
-                        s[1].toInt(),s[2].toInt(),false,false))
+                p.addPotionEffect(b)
             }
         }
 
         if (!data.soundSymptoms[pd.level].isNullOrEmpty()){
             for (so in data.soundSymptoms[pd.level]!!){
-                val s = so.split(",")
-                p.location.world.playSound(p.location, s[0],
-                        s[1].toFloat(),s[2].toFloat())
+                p.location.world.playSound(p.location, so.sound,so.volume,so.pitch)
             }
-
         }
 
         if (!data.particleSymptoms[pd.level].isNullOrEmpty()){
             for (par in data.particleSymptoms[pd.level]!!){
-                val s = par.split(",")
-                p.location.world.spawnParticle(Particle.valueOf(s[0]),p.location,s[1].toInt())
+                p.location.world.spawnParticle(par.particle,p.location,par.size)
             }
-
         }
 
         if (!data.cmdSymptoms[pd.level].isNullOrEmpty()){

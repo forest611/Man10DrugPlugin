@@ -78,14 +78,14 @@ class Configs(private val plugin: Man10DrugPlugin){
             data.sCmd = getHMList("serverCmd",cfg)
             data.sCmdRandom = getHMList("serverCmdRandom",cfg)
 
-            data.buff = getBuff(false,cfg)
-            data.buffRandom = getBuff(true,cfg)
+            data.buff = getBuff(Type.NORMAL,cfg)
+            data.buffRandom = getBuff(Type.RANDOM,cfg)
 
-            data.particle = getParticle(false,cfg)
-            data.particleRandom = getParticle(true,cfg)
+            data.particle = getParticle(Type.NORMAL,cfg)
+            data.particleRandom = getParticle(Type.RANDOM,cfg)
 
-            data.sound = getSound(false,cfg)
-            data.soundRandom = getSound(true,cfg)
+            data.sound = getSound(Type.NORMAL,cfg)
+            data.soundRandom = getSound(Type.RANDOM,cfg)
 
             data.crashChance = cfg.getDoubleList("crashChance")//無記名で壊れなくなる
             data.crashMsg = cfg.getString("crashMsg","")!!
@@ -106,11 +106,11 @@ class Configs(private val plugin: Man10DrugPlugin){
 
                 data.symptomsStopProb = cfg.getDoubleList("symptomsStopProb")//禁断症状が止まる確率
 
-                data.buffSymptoms = getHMList("buffSymptoms",cfg)
+                data.buffSymptoms = getBuff(Type.SYMPTOMS,cfg)
 
-                data.particleSymptoms = getHMList("particleSymptoms",cfg)
+                data.particleSymptoms = getParticle(Type.SYMPTOMS,cfg)
 
-                data.soundSymptoms = getHMList("soundSymptoms",cfg)
+                data.soundSymptoms = getSound(Type.SYMPTOMS,cfg)
 
                 data.cmdSymptoms = getHMList("cmdSymptoms",cfg)
 
@@ -184,9 +184,15 @@ class Configs(private val plugin: Man10DrugPlugin){
     }
 
 
-    fun getBuff(isRandom:Boolean,cfg: YamlConfiguration):HashMap<Int,MutableList<PotionEffect>>{
+    fun getBuff(type:Type,cfg: YamlConfiguration):HashMap<Int,MutableList<PotionEffect>>{
 
-        val path = if (isRandom) "buffRandom" else "buff"
+        val path = when(type){
+
+            Type.NORMAL->"buff"
+            Type.RANDOM->"buffRandom"
+            Type.SYMPTOMS->"buffSymptoms"
+
+        }
 
         val retMap = HashMap<Int,MutableList<PotionEffect>>()
 
@@ -210,9 +216,15 @@ class Configs(private val plugin: Man10DrugPlugin){
 
     }
 
-    fun getSound(isRandom: Boolean,cfg: YamlConfiguration):HashMap<Int,MutableList<SoundData>>{
+    fun getSound(type: Type,cfg: YamlConfiguration):HashMap<Int,MutableList<SoundData>>{
 
-        val path = if (isRandom) "soundRandom" else "sound"
+        val path = when(type){
+
+            Type.NORMAL->"sound"
+            Type.RANDOM->"soundRandom"
+            Type.SYMPTOMS->"soundSymptoms"
+
+        }
 
         val retMap = HashMap<Int,MutableList<SoundData>>()
 
@@ -237,10 +249,15 @@ class Configs(private val plugin: Man10DrugPlugin){
         return retMap
     }
 
-    fun getParticle(isRandom:Boolean,cfg:YamlConfiguration): HashMap<Int, MutableList<ParticleData>> {
+    fun getParticle(type: Type,cfg:YamlConfiguration): HashMap<Int, MutableList<ParticleData>> {
 
-        val path = if (isRandom) "particleRandom" else "particle"
+        val path = when(type){
 
+            Type.NORMAL->"particle"
+            Type.RANDOM->"particleRandom"
+            Type.SYMPTOMS->"particleSymptoms"
+
+        }
         val retMap = HashMap<Int,MutableList<ParticleData>>()
 
         for (map in getHMList(path,cfg)){
@@ -344,15 +361,15 @@ class Configs(private val plugin: Man10DrugPlugin){
         var symptomsTime  = mutableListOf<Long>()
         var symptomsStopProb  = mutableListOf<Double>() //禁断症状が終わる確率
 
-        var buffSymptoms = HashMap<Int,MutableList<String>>()
-
         var cmdSymptoms = HashMap<Int,MutableList<String>>()
 
         var msgSymptoms = mutableListOf<String>()
 
-        var particleSymptoms = HashMap<Int,MutableList<String>>()
+        var buffSymptoms = HashMap<Int,MutableList<PotionEffect>>()
 
-        var soundSymptoms = HashMap<Int,MutableList<String>>()
+        var particleSymptoms = HashMap<Int,MutableList<ParticleData>>()
+
+        var soundSymptoms = HashMap<Int,MutableList<SoundData>>()
 
         var funcSymptoms = mutableListOf<String>()
 
@@ -384,4 +401,10 @@ class Configs(private val plugin: Man10DrugPlugin){
         var pitch = 0.0F
     }
 
+    enum class Type{
+        NORMAL,
+        RANDOM,
+        SYMPTOMS
+
+    }
 }
