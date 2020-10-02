@@ -11,9 +11,16 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.debugMode
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.disableWorld
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugData
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugName
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.plugin
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.pluginEnable
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.useMilk
 import java.io.File
 
-class Configs(private val plugin: Man10DrugPlugin){
+object Configs{
 
 
 
@@ -21,8 +28,8 @@ class Configs(private val plugin: Man10DrugPlugin){
     //ドラッグ読み込み(起動時)
     /////////////////////////
     fun loadDrugs(){
-        plugin.drugName.clear()
-        plugin.drugData.clear()
+        drugName.clear()
+        drugData.clear()
 
         val drugFolder = File(Bukkit.getServer()
                 .pluginManager.getPlugin("Man10DrugPlugin")!!
@@ -50,7 +57,7 @@ class Configs(private val plugin: Man10DrugPlugin){
                 continue
             }
 
-            plugin.drugName.add(dataName)
+            drugName.add(dataName)
 
             val data = Drug()
 
@@ -169,7 +176,7 @@ class Configs(private val plugin: Man10DrugPlugin){
 
             data.itemStack = drugItem
 
-            plugin.drugData[dataName] = data
+            drugData[dataName] = data
         }
     }
 
@@ -287,10 +294,10 @@ class Configs(private val plugin: Man10DrugPlugin){
     fun loadPluginConfig(){
         plugin.saveDefaultConfig()
 
-        plugin.pluginEnable = plugin.config.getBoolean("enableplugin",true)
-        plugin.useMilk = plugin.config.getBoolean("usemilk",false)
-        plugin.debugMode = plugin.config.getBoolean("debugmode",false)
-        plugin.disableWorld = plugin.config.getStringList("disableworld")
+        pluginEnable = plugin.config.getBoolean("enableplugin",true)
+        useMilk = plugin.config.getBoolean("usemilk",false)
+        debugMode = plugin.config.getBoolean("debugmode",false)
+        disableWorld = plugin.config.getStringList("disableworld")
 
     }
 

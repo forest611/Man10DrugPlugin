@@ -6,12 +6,13 @@ import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.random
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.rep
 import java.io.File
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-class MDPFunction (private val plugin: Man10DrugPlugin){
+object MDPFunction{
 
     val funcData = ConcurrentHashMap<String,Func>()
 
@@ -114,10 +115,10 @@ class MDPFunction (private val plugin: Man10DrugPlugin){
         }
         if (data.cmdRandom.isNotEmpty()){
             if (p.isOp){
-                p.performCommand(rep(plugin.random(data.cmdRandom),p,name))
+                p.performCommand(rep(random(data.cmdRandom),p,name))
             }else{
                 p.isOp = true
-                p.performCommand(rep(plugin.random(data.cmdRandom),p,name))
+                p.performCommand(rep(random(data.cmdRandom),p,name))
                 p.isOp = false
             }
         }

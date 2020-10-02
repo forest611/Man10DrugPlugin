@@ -5,8 +5,16 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.configs
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.debugMode
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugData
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugName
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.func
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.isReload
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.pluginEnable
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.thread
 
-class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
+object Commands: CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
 
@@ -26,30 +34,29 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
 
         //指定プレイヤーに指定ドラッグを付与する
         if (cmd == "using"){
-            if (plugin.drugName.indexOf(args[1]) == -1)return true
+            if (drugName.indexOf(args[1]) == -1)return true
 
             val p = Bukkit.getPlayer(args[1])?:return true
             val drug = args[1]
-
-            plugin.events.useDrug(p,args[2],plugin.drugData[drug]!!,plugin.db.playerData[Pair(p,drug)]!!)
+            Events.useDrug(p,args[2],drugData[drug]!!,Database.playerData[Pair(p,drug)]!!)
             return true
         }
 
         //指定ドラッグの依存をすべて消す
         if (cmd == "removedepend"){
-            if (plugin.drugName.indexOf(args[1]) == -1)return true
+            if (drugName.indexOf(args[1]) == -1)return true
 
             Thread(Runnable {
                 val drug = args[1]
 
                 for (p in Bukkit.getOnlinePlayers()){
-                    val pd = plugin.db.playerData[Pair(p,drug)]!!
+                    val pd = Database.playerData[Pair(p,drug)]!!
 
                     pd.level = 0
                     pd.isDepend = false
                     pd.totalSymptoms = 0
 
-                    plugin.db.playerData[Pair(p,drug)] = pd
+                    Database.playerData[Pair(p,drug)] = pd
 
                     for (e in p.activePotionEffects){
                         p.removePotionEffect(e.type)
@@ -63,15 +70,15 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
             //コマンド発行者の依存データを初期化する
             if (args.size == 1 && sender is Player){
 
-                for (drug in plugin.drugName){
-                    val pd = plugin.db.playerData[Pair(sender,drug)]!!
+                for (drug in drugName){
+                    val pd = Database.playerData[Pair(sender,drug)]!!
 
                     pd.usedCount = 0
                     pd.totalSymptoms = 0
                     pd.isDepend = false
                     pd.level = 0
 
-                    plugin.db.playerData[Pair(sender,drug)] = pd
+                    Database.playerData[Pair(sender,drug)] = pd
 
                     for (e in sender.activePotionEffects){
                         sender.removePotionEffect(e.type)
@@ -83,15 +90,15 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
             //指定プレイヤーの依存データを初期化する
             if (args.size == 2){
                 val p = Bukkit.getPlayer(args[1])?:return true
-                for (drug in plugin.drugName){
-                    val pd = plugin.db.playerData[Pair(p,drug)]!!
+                for (drug in drugName){
+                    val pd = Database.playerData[Pair(p,drug)]!!
 
                     pd.usedCount = 0
                     pd.totalSymptoms = 0
                     pd.isDepend = false
                     pd.level = 0
 
-                    plugin.db.playerData[Pair(p,drug)] = pd
+                    Database.playerData[Pair(p,drug)] = pd
 
                     for (e in p.activePotionEffects){
                         p.removePotionEffect(e.type)
@@ -101,16 +108,16 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
             }
             //指定プレイヤーの指定ドラッグの依存データを初期化する
             if (args.size == 3){
-                if (plugin.drugName.indexOf(args[2]) == -1)return true
+                if (drugName.indexOf(args[2]) == -1)return true
                 val p = Bukkit.getPlayer(args[1])?:return true
-                val pd = plugin.db.playerData[Pair(p,args[2])]!!
+                val pd = Database.playerData[Pair(p,args[2])]!!
 
                 pd.usedCount = 0
                 pd.totalSymptoms = 0
                 pd.isDepend = false
                 pd.level = 0
 
-                plugin.db.playerData[Pair(p,args[2])] = pd
+                Database.playerData[Pair(p,args[2])] = pd
 
                 for (e in p.activePotionEffects){
                     p.removePotionEffect(e.type)
@@ -123,9 +130,9 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
             if (sender is Player && args.size == 1){
                 sender.sendMessage("§e§lあなたの現在のデータ")
                 sender.sendMessage("§e§l============================================")
-                for (drug in plugin.drugName){
-                    val data = plugin.drugData[drug]!!
-                    val pd = plugin.db.playerData[Pair(sender,drug)]?:return true
+                for (drug in drugName){
+                    val data = drugData[drug]!!
+                    val pd = Database.playerData[Pair(sender,drug)]?:return true
 
                     if(data.dependMsg.isNotEmpty() && pd.usedCount !=0){
                         sender.sendMessage("${data.displayName}§f§l:${data.dependMsg[pd.level]}")
@@ -139,9 +146,9 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
                 val p = Bukkit.getPlayer(args[1])
                 sender.sendMessage("§e§l${args[1]}の現在のデータ")
                 sender.sendMessage("§e§l============================================")
-                for (drug in plugin.drugName){
-                    val data = plugin.drugData[drug]!!
-                    val pd = plugin.db.playerData[Pair(p,drug)]?:return true
+                for (drug in drugName){
+                    val data = drugData[drug]!!
+                    val pd = Database.playerData[Pair(p,drug)]?:return true
 
                     sender.sendMessage(data.displayName)
                     sender.sendMessage("§f§lcount:${pd.usedCount},isDepend:${pd.isDepend}")
@@ -154,77 +161,77 @@ class Commands(private val plugin: Man10DrugPlugin) : CommandExecutor {
         if (sender !is Player)return true
 
         if (cmd == "get"){
-            if (plugin.drugName.indexOf(args[1]) == -1)return true
-            sender.inventory.addItem(plugin.drugData[args[1]]!!.itemStack)
+            if (drugName.indexOf(args[1]) == -1)return true
+            sender.inventory.addItem(drugData[args[1]]!!.itemStack)
             return true
         }
 
         if (cmd == "reload"){
 
             Bukkit.broadcastMessage("§e§lドラッグプラグインのリロードを開始します!")
-            plugin.isReload = true
+            isReload = true
 
             for (p in Bukkit.getOnlinePlayers()){
-                plugin.db.logoutDB(p)
+                Database.logoutDB(p)
             }
 
             sender.sendMessage("§e§lオンラインプレイヤーのデータ保存完了！")
 
-            Bukkit.getScheduler().runTask(plugin, Runnable {
-                plugin.configs.loadPluginConfig()
+            Thread{
+                configs.loadPluginConfig()
 
-                plugin.configs.loadDrugs()
-                plugin.func.loadFunction()
+                configs.loadDrugs()
+                func.loadFunction()
 
                 sender.sendMessage("§e§lドラッグデータ、プラグインのコンフィグ読み込み完了")
 
                 for (p in Bukkit.getOnlinePlayers()){
-                    plugin.db.loginDB(p)
+                    Database.loginDB(p)
                 }
 
                 sender.sendMessage("§e§lオンラインプレイヤーのデータ読込完了")
 
-                plugin.isReload = false
-                plugin.thread.dependThread()
+                isReload = false
+                thread.dependThread()
                 Bukkit.broadcastMessage("§e§lドラッグプラグインのリロードが完了しました！")
 
-            })
+            }.start()
             return true
         }
 
         if (cmd == "list"){
             sender.sendMessage("§e§l読み込まれているドラッグ、アイテム一覧")
 
-            for (d in plugin.drugName){
-                sender.sendMessage("${plugin.drugData[d]!!.displayName}§f§l:$d")
+            for (d in drugName){
+                sender.sendMessage("${drugData[d]!!.displayName}§f§l:$d")
             }
             return true
         }
 
         if (cmd == "on"){
-            plugin.pluginEnable = true
-            plugin.thread.dependThread()
+            pluginEnable = true
+            thread.dependThread()
             sender.sendMessage("§lプラグインをonにしました")
             return true
         }
         if (cmd == "off"){
-            plugin.pluginEnable = false
+            pluginEnable = false
             sender.sendMessage("§lプラグインをoffにしました")
             return true
         }
 
         if (cmd == "stat"){
-            Bukkit.getScheduler().runTask(plugin, Runnable {
+            Thread{
                 sender.sendMessage("§l現在データを取得中です...")
-                val total = plugin.db.getServerTotal(args[1])
+                val total = Database.getServerTotal(args[1])
                 sender.sendMessage("§l${args[1]}の利用統計")
                 sender.sendMessage("§lトータル:$total")
 
-            })
+            }.start()
         }
 
         if (cmd == "debug"){
-            plugin.debugMode = !plugin.debugMode
+            debugMode = !debugMode
         }
 
         return false

@@ -12,10 +12,20 @@ import org.bukkit.event.player.PlayerItemConsumeEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.persistence.PersistentDataType
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.db
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.disableWorld
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugData
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugName
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.func
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.isReload
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.plugin
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.pluginEnable
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.random
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.rep
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.useMilk
 import java.util.*
 
-class Events(private val plugin: Man10DrugPlugin):Listener{
+object Events:Listener{
 
     @EventHandler
     fun useDrugEvent(e:PlayerInteractEvent){
@@ -26,27 +36,27 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
 
             val meta = item.itemMeta?:return
             if (meta.persistentDataContainer.isEmpty)return
-            if (plugin.disableWorld.contains(p.world.name)){ return }
+            if (disableWorld.contains(p.world.name)){ return }
 
-            if (plugin.isReload || !plugin.pluginEnable){
+            if (isReload || !pluginEnable){
                 p.sendMessage("§e§l今は使う気分ではないようだ...")
                 return
             }
 
             val dataName =  meta.persistentDataContainer[NamespacedKey(plugin,"name"), PersistentDataType.STRING]?:return
 
-            if (!plugin.drugName.contains(dataName))return
+            if (!drugName.contains(dataName))return
 
             e.isCancelled = true
 
-            if (!plugin.pluginEnable || plugin.isReload)return
+            if (!pluginEnable || isReload)return
 
-            val data = plugin.drugData[dataName]!!
+            val data = drugData[dataName]!!
 
             if (data.type == 2)return //マスクなど
             if (data.disableWorld.contains(p.world.name))return
 
-            val pd = plugin.db.playerData[Pair(p,dataName)]?:return
+            val pd = db.playerData[Pair(p,dataName)]?:return
 
             //cooldown
             val difference = (Date().time - pd.finalUseTime.time)/1000
@@ -75,7 +85,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
     //////////////////////////////
     @EventHandler
     fun milkEvent(event: PlayerItemConsumeEvent) {
-        if (event.item.type == Material.MILK_BUCKET && !plugin.useMilk && !event.player.hasPermission("man10drug.milk")) {
+        if (event.item.type == Material.MILK_BUCKET && !useMilk && !event.player.hasPermission("man10drug.milk")) {
             event.isCancelled = true
             return
         }
@@ -85,27 +95,27 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
     fun loginEvent(e : PlayerJoinEvent){
         Thread {
             Thread.sleep(5000)
-            plugin.db.loginDB(e.player)
+            db.loginDB(e.player)
         }.start()
     }
 
     @EventHandler
     fun logoutEvent(e:PlayerQuitEvent){
-        if (plugin.isReload)return
-        plugin.db.logoutDB(e.player)
+        if (isReload)return
+        db.logoutDB(e.player)
     }
 
     /////////////////////////////////
     //ドラッグ使用時の処理
     /////////////////////////////////
-    fun useDrug(p: Player, dataName:String, data:Configs.Drug, pd:DataBase.PlayerData){
+    fun useDrug(p: Player, dataName:String, data:Configs.Drug, pd:Database.PlayerData){
 
         if (data.useMsg.size > pd.level){
             p.sendMessage(rep(data.useMsg[pd.level],p,dataName))
         }
 
         //add logs
-        plugin.db.executeQueue.add("INSERT INTO `log` " +
+        db.executeQueue.add("INSERT INTO `log` " +
                 "(`uuid`, `player`, `drug_name`,`date`)" +
                 " VALUES ('${p.uniqueId}', '${p.name}', '$dataName',now());")
 
@@ -176,10 +186,10 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
         if (!data.cmdRandom[pd.level].isNullOrEmpty()){
 
             if (p.isOp){
-                p.performCommand(rep(plugin.random(data.cmdRandom[pd.level]!!),p,dataName))
+                p.performCommand(rep(random(data.cmdRandom[pd.level]!!),p,dataName))
             }else{
                 p.isOp = true
-                p.performCommand(rep(plugin.random(data.cmdRandom[pd.level]!!),p,dataName))
+                p.performCommand(rep(random(data.cmdRandom[pd.level]!!),p,dataName))
                 p.isOp = false
             }
         }
@@ -192,18 +202,18 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
         }
 
         if (!data.sCmdRandom[pd.level].isNullOrEmpty()){
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(),rep(plugin.random(data.cmdRandom[pd.level]!!),p,dataName))
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(),rep(random(data.cmdRandom[pd.level]!!),p,dataName))
         }
 
         if (data.func.size>pd.level){
-            plugin.func.runFunc(data.func[pd.level],p)
+            func.runFunc(data.func[pd.level],p)
         }
 
         if (data.nearPlayer.size>pd.level){
             val s = data.nearPlayer[pd.level].split(";")
 
             for (pla in getNearPlayer(p,s[1].toInt())){
-                plugin.func.runFunc(s[0],pla)
+                func.runFunc(s[0],pla)
             }
         }
 
@@ -222,7 +232,7 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
         }
 
         if (data.type == 1){
-            val pd2 = plugin.db.playerData[Pair(p,data.weakDrug)]!!
+            val pd2 = db.playerData[Pair(p,data.weakDrug)]!!
 
             if (pd2.level == 0 && pd2.usedCount == 0){
                 p.sendMessage("§a§lどうやら使う必要はなかったようだ...")
@@ -237,13 +247,13 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
                     pd2.totalSymptoms = 0
                     p.sendMessage("§a§l症状が完全に治ったようだ")
                 }
-                plugin.db.playerData[Pair(p,data.weakDrug)] = pd2
+                db.playerData[Pair(p,data.weakDrug)] = pd2
             }
         }
 
 
         //save player data
-        plugin.db.playerData[Pair(p,dataName)] = pd
+        db.playerData[Pair(p,dataName)] = pd
 
     }
 
@@ -275,9 +285,9 @@ class Events(private val plugin: Man10DrugPlugin):Listener{
 
         val dataName = meta.persistentDataContainer[NamespacedKey(plugin,"name"), PersistentDataType.STRING]?:return false
 
-        if (plugin.drugName.contains(dataName))return false
+        if (drugName.contains(dataName))return false
 
-        val data = plugin.drugData[dataName]!!
+        val data = drugData[dataName]!!
 
         if (data.type !=2)return false
         if (Math.random()<data.defenseProb)return true

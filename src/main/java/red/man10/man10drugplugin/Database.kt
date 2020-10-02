@@ -1,12 +1,14 @@
 package red.man10.man10drugplugin
 
 import org.bukkit.entity.Player
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugName
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.plugin
 import java.sql.Timestamp
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.LinkedBlockingQueue
 
-class DataBase (private val plugin: Man10DrugPlugin){
+object Database{
 
     val playerData = ConcurrentHashMap<Pair<Player,String>,PlayerData>()
     val executeQueue = LinkedBlockingQueue<String>()//query
@@ -17,7 +19,7 @@ class DataBase (private val plugin: Man10DrugPlugin){
 
         if (!p.isOnline)return
 
-        for (drug in plugin.drugName){
+        for (drug in drugName){
             val data = PlayerData()
 
             val rs = mysql.query("SELECT * FROM drug_dependence" +
@@ -54,7 +56,7 @@ class DataBase (private val plugin: Man10DrugPlugin){
     }
 
     fun logoutDB(p:Player){
-        for (drug in plugin.drugName){
+        for (drug in drugName){
             val data = playerData[Pair(p,drug)]?:continue
 
             executeQueue.add(
@@ -94,17 +96,17 @@ class DataBase (private val plugin: Man10DrugPlugin){
     //executeQueueにデータを保存する
     /////////////////////
     fun executeDBQueue(){
-        Thread(Runnable {
-            try{
-                val sql = MySQLManager(plugin,"DrugPluginExecute")
-                while (true){
+        Thread {
+            try {
+                val sql = MySQLManager(plugin, "DrugPluginExecute")
+                while (true) {
                     val take = executeQueue.take()
                     sql.execute(take)
                 }
-            }catch (e:InterruptedException){
+            } catch (e: InterruptedException) {
 
             }
-        }).start()
+        }.start()
     }
 
     class PlayerData{

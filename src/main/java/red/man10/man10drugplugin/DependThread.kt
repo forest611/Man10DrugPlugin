@@ -2,9 +2,18 @@ package red.man10.man10drugplugin
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import red.man10.man10drugplugin.Database.playerData
+import red.man10.man10drugplugin.Events.getNearPlayer
+import red.man10.man10drugplugin.MDPFunction.runFunc
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.debugMode
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugData
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugName
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.isReload
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.plugin
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.pluginEnable
 import java.util.*
 
-class DependThread (private val plugin: Man10DrugPlugin){
+object DependThread{
 
     //////////////////////
     //依存処理に関するスレッド プラグイン起動時にスレッドスタート
@@ -12,14 +21,14 @@ class DependThread (private val plugin: Man10DrugPlugin){
     fun dependThread(){
 
         Thread{
-            if (plugin.isReload || !plugin.pluginEnable) return@Thread
+            if (isReload || !pluginEnable) return@Thread
 
             for (p in Bukkit.getOnlinePlayers()) {
 
-                for (drug in plugin.drugName) {
+                for (drug in drugName) {
 
-                    val data = plugin.drugData[drug]!!
-                    val pd = plugin.db.playerData[Pair(p, drug)] ?: continue
+                    val data = drugData[drug]!!
+                    val pd = playerData[Pair(p, drug)] ?: continue
 
                     if (!pd.isDepend) continue
                     if (data.type != 0) continue
@@ -30,14 +39,14 @@ class DependThread (private val plugin: Man10DrugPlugin){
                     val difference = (now - time) / 1000 //時間差(second)
 
                     //デバッグモード
-                    if (plugin.debugMode && difference > 60) {
+                    if (debugMode && difference > 60) {
 
                         Bukkit.getScheduler().runTask(plugin, Runnable {
                             symptoms(p, data, pd)
                         })
 
                         pd.totalSymptoms++
-                        plugin.db.playerData[Pair(p, drug)] = pd
+                        playerData[Pair(p, drug)] = pd
                         continue
                     }
 
@@ -50,7 +59,7 @@ class DependThread (private val plugin: Man10DrugPlugin){
 
                         pd.totalSymptoms++
                         pd.finalUseTime = Date()
-                        plugin.db.playerData[Pair(p, drug)] = pd
+                        playerData[Pair(p, drug)] = pd
                         continue
                     }
                     //2回目以降の禁断症状
@@ -74,7 +83,7 @@ class DependThread (private val plugin: Man10DrugPlugin){
                             }
                         }
 
-                        plugin.db.playerData[Pair(p, drug)] = pd
+                        playerData[Pair(p, drug)] = pd
                         continue
                     }
                 }
@@ -85,7 +94,7 @@ class DependThread (private val plugin: Man10DrugPlugin){
 
     }
 
-    fun symptoms(p:Player, data:Configs.Drug, pd:DataBase.PlayerData){
+    fun symptoms(p:Player, data:Configs.Drug, pd:Database.PlayerData){
         if (!data.buffSymptoms[pd.level].isNullOrEmpty()){
             for (b in data.buffSymptoms[pd.level]!!){
                 p.addPotionEffect(b)
@@ -118,14 +127,14 @@ class DependThread (private val plugin: Man10DrugPlugin){
         }
 
         if (data.funcSymptoms.size>pd.level){
-            plugin.func.runFunc(data.func[pd.level],p)
+            runFunc(data.func[pd.level],p)
         }
 
         if (data.symptomsNearPlayer.size>pd.level){
             val s = data.symptomsNearPlayer[pd.level].split(";")
 
-            for (pla in plugin.events.getNearPlayer(p,s[1].toInt())){
-                plugin.func.runFunc(s[0],p)
+            for (pla in getNearPlayer(p,s[1].toInt())){
+                runFunc(s[0],p)
             }
         }
 
