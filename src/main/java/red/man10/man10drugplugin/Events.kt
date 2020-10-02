@@ -12,11 +12,13 @@ import org.bukkit.event.player.PlayerItemConsumeEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.persistence.PersistentDataType
-import red.man10.man10drugplugin.Man10DrugPlugin.Companion.db
+import red.man10.man10drugplugin.Database.executeQueue
+import red.man10.man10drugplugin.Database.loginDB
+import red.man10.man10drugplugin.Database.logoutDB
+import red.man10.man10drugplugin.Database.playerData
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.disableWorld
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugData
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugName
-import red.man10.man10drugplugin.Man10DrugPlugin.Companion.func
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.isReload
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.plugin
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.pluginEnable
@@ -56,7 +58,7 @@ object Events:Listener{
             if (data.type == 2)return //マスクなど
             if (data.disableWorld.contains(p.world.name))return
 
-            val pd = db.playerData[Pair(p,dataName)]?:return
+            val pd = playerData[Pair(p,dataName)]?:return
 
             //cooldown
             val difference = (Date().time - pd.finalUseTime.time)/1000
@@ -95,14 +97,14 @@ object Events:Listener{
     fun loginEvent(e : PlayerJoinEvent){
         Thread {
             Thread.sleep(5000)
-            db.loginDB(e.player)
+            loginDB(e.player)
         }.start()
     }
 
     @EventHandler
     fun logoutEvent(e:PlayerQuitEvent){
         if (isReload)return
-        db.logoutDB(e.player)
+        logoutDB(e.player)
     }
 
     /////////////////////////////////
@@ -115,7 +117,7 @@ object Events:Listener{
         }
 
         //add logs
-        db.executeQueue.add("INSERT INTO `log` " +
+        executeQueue.add("INSERT INTO `log` " +
                 "(`uuid`, `player`, `drug_name`,`date`)" +
                 " VALUES ('${p.uniqueId}', '${p.name}', '$dataName',now());")
 
@@ -206,14 +208,14 @@ object Events:Listener{
         }
 
         if (data.func.size>pd.level){
-            func.runFunc(data.func[pd.level],p)
+            MDPFunction.runFunc(data.func[pd.level],p)
         }
 
         if (data.nearPlayer.size>pd.level){
             val s = data.nearPlayer[pd.level].split(";")
 
             for (pla in getNearPlayer(p,s[1].toInt())){
-                func.runFunc(s[0],pla)
+                MDPFunction.runFunc(s[0],pla)
             }
         }
 
@@ -232,7 +234,7 @@ object Events:Listener{
         }
 
         if (data.type == 1){
-            val pd2 = db.playerData[Pair(p,data.weakDrug)]!!
+            val pd2 = playerData[Pair(p,data.weakDrug)]!!
 
             if (pd2.level == 0 && pd2.usedCount == 0){
                 p.sendMessage("§a§lどうやら使う必要はなかったようだ...")
@@ -247,13 +249,13 @@ object Events:Listener{
                     pd2.totalSymptoms = 0
                     p.sendMessage("§a§l症状が完全に治ったようだ")
                 }
-                db.playerData[Pair(p,data.weakDrug)] = pd2
+                playerData[Pair(p,data.weakDrug)] = pd2
             }
         }
 
 
         //save player data
-        db.playerData[Pair(p,dataName)] = pd
+        playerData[Pair(p,dataName)] = pd
 
     }
 

@@ -5,14 +5,11 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import red.man10.man10drugplugin.Man10DrugPlugin.Companion.configs
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.debugMode
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugData
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugName
-import red.man10.man10drugplugin.Man10DrugPlugin.Companion.func
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.isReload
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.pluginEnable
-import red.man10.man10drugplugin.Man10DrugPlugin.Companion.thread
 
 object Commands: CommandExecutor {
 
@@ -178,10 +175,10 @@ object Commands: CommandExecutor {
             sender.sendMessage("§e§lオンラインプレイヤーのデータ保存完了！")
 
             Thread{
-                configs.loadPluginConfig()
+                Configs.loadPluginConfig()
 
-                configs.loadDrugs()
-                func.loadFunction()
+                Configs.loadDrugs()
+                MDPFunction.loadFunction()
 
                 sender.sendMessage("§e§lドラッグデータ、プラグインのコンフィグ読み込み完了")
 
@@ -192,7 +189,7 @@ object Commands: CommandExecutor {
                 sender.sendMessage("§e§lオンラインプレイヤーのデータ読込完了")
 
                 isReload = false
-                thread.dependThread()
+                DependThread.dependThread()
                 Bukkit.broadcastMessage("§e§lドラッグプラグインのリロードが完了しました！")
 
             }.start()
@@ -210,7 +207,7 @@ object Commands: CommandExecutor {
 
         if (cmd == "on"){
             pluginEnable = true
-            thread.dependThread()
+            DependThread.dependThread()
             sender.sendMessage("§lプラグインをonにしました")
             return true
         }
