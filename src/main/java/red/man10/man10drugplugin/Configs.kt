@@ -294,6 +294,8 @@ object Configs{
     fun loadPluginConfig(){
         plugin.saveDefaultConfig()
 
+        plugin.reloadConfig()
+
         pluginEnable = plugin.config.getBoolean("enableplugin",true)
         useMilk = plugin.config.getBoolean("usemilk",false)
         debugMode = plugin.config.getBoolean("debugmode",false)

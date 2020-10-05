@@ -36,9 +36,11 @@ object Events:Listener{
 
             val p = e.player
 
+            if (disableWorld.contains(p.world.name)){ return }
+
             val meta = item.itemMeta?:return
             if (meta.persistentDataContainer.isEmpty)return
-            if (disableWorld.contains(p.world.name)){ return }
+
 
             if (isReload || !pluginEnable){
                 p.sendMessage("§e§l今は使う気分ではないようだ...")
