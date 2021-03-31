@@ -1,6 +1,7 @@
 package red.man10.man10drugplugin
 
 import org.bukkit.entity.Player
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugData
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugName
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.plugin
 import java.sql.Timestamp
@@ -10,7 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue
 
 object Database{
 
-    val playerData = ConcurrentHashMap<Pair<Player,String>,PlayerData>()
+    private val playerData = ConcurrentHashMap<Pair<Player,String>,PlayerData>()
     val executeQueue = LinkedBlockingQueue<String>()//query
     lateinit var mysql : MySQLManager
 
@@ -75,7 +76,9 @@ object Database{
 
     }
 
-    fun get(p:Player,drug:String):PlayerData{
+    fun get(p:Player,drug:String): PlayerData? {
+
+        if (!drugData.contains(drug))return null
 
         var data = playerData[Pair(p,drug)]
 
@@ -90,6 +93,10 @@ object Database{
 
     fun set(p:Player,drug: String,data: PlayerData){
         playerData[Pair(p,drug)] = data
+    }
+
+    fun hasData(p:Player,drug: String):Boolean{
+        return playerData[Pair(p,drug)] != null
     }
 
     fun getServerTotal(drug:String):Int{

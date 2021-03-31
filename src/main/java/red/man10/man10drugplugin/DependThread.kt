@@ -2,8 +2,7 @@ package red.man10.man10drugplugin
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import red.man10.man10drugplugin.Database.playerData
-import red.man10.man10drugplugin.Events.getNearPlayer
+import red.man10.man10drugplugin.Event.getNearPlayer
 import red.man10.man10drugplugin.MDPFunction.runFunc
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.debugMode
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugData
@@ -28,7 +27,7 @@ object DependThread{
                 for (drug in drugName) {
 
                     val data = drugData[drug]!!
-                    val pd = playerData[Pair(p, drug)] ?: continue
+                    val pd = Database.get(p,drug)!!
 
                     if (!pd.isDepend) continue
                     if (data.type != 0) continue
@@ -46,7 +45,7 @@ object DependThread{
                         })
 
                         pd.totalSymptoms++
-                        playerData[Pair(p, drug)] = pd
+                        Database.set(p,drug,pd)
                         continue
                     }
 
@@ -59,7 +58,7 @@ object DependThread{
 
                         pd.totalSymptoms++
                         pd.finalUseTime = Date()
-                        playerData[Pair(p, drug)] = pd
+                        Database.set(p,drug,pd)
                         continue
                     }
                     //2回目以降の禁断症状
@@ -83,7 +82,7 @@ object DependThread{
                             }
                         }
 
-                        playerData[Pair(p, drug)] = pd
+                        Database.set(p,drug,pd)
                         continue
                     }
                 }
@@ -94,7 +93,7 @@ object DependThread{
 
     }
 
-    fun symptoms(p:Player, data:Config.Drug, pd:Database.PlayerData){
+    private fun symptoms(p:Player, data:Config.Drug, pd:Database.PlayerData){
         if (!data.buffSymptoms[pd.level].isNullOrEmpty()){
             for (b in data.buffSymptoms[pd.level]!!){
                 p.addPotionEffect(b)

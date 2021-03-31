@@ -15,7 +15,6 @@ import org.bukkit.persistence.PersistentDataType
 import red.man10.man10drugplugin.Database.executeQueue
 import red.man10.man10drugplugin.Database.load
 import red.man10.man10drugplugin.Database.save
-import red.man10.man10drugplugin.Database.playerData
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.disableWorld
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugData
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugName
@@ -27,7 +26,7 @@ import red.man10.man10drugplugin.Man10DrugPlugin.Companion.rep
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.useMilk
 import java.util.*
 
-object Events:Listener{
+object Event:Listener{
 
     @EventHandler
     fun useDrugEvent(e:PlayerInteractEvent){
@@ -60,7 +59,7 @@ object Events:Listener{
             if (data.type == 2)return //マスクなど
             if (data.disableWorld.contains(p.world.name))return
 
-            val pd = playerData[Pair(p,dataName)]?:return
+            val pd = Database.get(p, dataName)!!
 
             //cooldown
             val difference = (Date().time - pd.finalUseTime.time)/1000
@@ -236,7 +235,7 @@ object Events:Listener{
         }
 
         if (data.type == 1){
-            val pd2 = playerData[Pair(p,data.weakDrug)]!!
+            val pd2 = Database.get(p,data.weakDrug)!!
 
             if (pd2.level == 0 && pd2.usedCount == 0){
                 p.sendMessage("§a§lどうやら使う必要はなかったようだ...")
@@ -251,13 +250,13 @@ object Events:Listener{
                     pd2.totalSymptoms = 0
                     p.sendMessage("§a§l症状が完全に治ったようだ")
                 }
-                playerData[Pair(p,data.weakDrug)] = pd2
+                Database.set(p,data.weakDrug,pd2)
             }
         }
 
 
         //save player data
-        playerData[Pair(p,dataName)] = pd
+        Database.set(p,dataName,pd)
 
     }
 

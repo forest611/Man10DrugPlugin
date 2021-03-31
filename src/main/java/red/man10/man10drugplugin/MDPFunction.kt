@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 object MDPFunction{
 
-    val funcData = ConcurrentHashMap<String,Func>()
+    private val funcData = ConcurrentHashMap<String,Func>()
 
     fun loadFunction(){
         funcData.clear()
@@ -130,7 +130,7 @@ object MDPFunction{
 
     }
 
-    fun getBuff(list: MutableList<String>):MutableList<PotionEffect>{
+    private fun getBuff(list: MutableList<String>):MutableList<PotionEffect>{
 
         val r = mutableListOf<PotionEffect>()
 
@@ -146,7 +146,7 @@ object MDPFunction{
         return r
     }
 
-    fun getSound(list:MutableList<String>):MutableList<Config.SoundData>{
+    private fun getSound(list:MutableList<String>):MutableList<Config.SoundData>{
 
         val r = mutableListOf<Config.SoundData>()
 
@@ -164,7 +164,7 @@ object MDPFunction{
         return r
     }
 
-    fun getParticle(list:MutableList<String>):MutableList<Config.ParticleData>{
+    private fun getParticle(list:MutableList<String>):MutableList<Config.ParticleData>{
 
         val r = mutableListOf<Config.ParticleData>()
 

@@ -33,7 +33,7 @@ object Command: CommandExecutor {
 
                 val p = Bukkit.getPlayer(args[1])?:return true
                 val drug = args[1]
-                Events.useDrug(p,args[2],drugData[drug]!!,Database.playerData[Pair(p,drug)]!!)
+                Event.useDrug(p,args[2],drugData[drug]!!,Database.get(p,drug)?:return true)
                 return true
 
             }
@@ -47,13 +47,13 @@ object Command: CommandExecutor {
                 Thread {
 
                     for (p in Bukkit.getOnlinePlayers()) {
-                        val pd = Database.playerData[Pair(p, drug)]!!
+                        val pd = Database.get(p,drug)?:continue
 
                         pd.level = 0
                         pd.isDepend = false
                         pd.totalSymptoms = 0
 
-                        Database.playerData[Pair(p, drug)] = pd
+                        Database.set(p,drug,pd)
 
                         for (e in p.activePotionEffects) {
                             p.removePotionEffect(e.type)
@@ -68,14 +68,14 @@ object Command: CommandExecutor {
                 if (args.size == 1 && sender is Player){
 
                     for (drug in drugName){
-                        val pd = Database.playerData[Pair(sender,drug)]!!
+                        val pd = Database.get(sender,drug)?:continue
 
                         pd.usedCount = 0
                         pd.totalSymptoms = 0
                         pd.isDepend = false
                         pd.level = 0
 
-                        Database.playerData[Pair(sender,drug)] = pd
+                        Database.set(sender,drug,pd)
 
                         for (e in sender.activePotionEffects){
                             sender.removePotionEffect(e.type)
@@ -88,14 +88,14 @@ object Command: CommandExecutor {
                 if (args.size == 2){
                     val p = Bukkit.getPlayer(args[1])?:return true
                     for (drug in drugName){
-                        val pd = Database.playerData[Pair(p,drug)]!!
+                        val pd = Database.get(p,drug)?:continue
 
                         pd.usedCount = 0
                         pd.totalSymptoms = 0
                         pd.isDepend = false
                         pd.level = 0
 
-                        Database.playerData[Pair(p,drug)] = pd
+                        Database.set(p,drug,pd)
 
                         for (e in p.activePotionEffects){
                             p.removePotionEffect(e.type)
@@ -105,16 +105,19 @@ object Command: CommandExecutor {
                 }
                 //指定プレイヤーの指定ドラッグの依存データを初期化する
                 if (args.size == 3){
-                    if (drugName.indexOf(args[2]) == -1)return true
+
+                    val drug = args[2]
+
+                    if (!drugName.contains(drug))return true
                     val p = Bukkit.getPlayer(args[1])?:return true
-                    val pd = Database.playerData[Pair(p,args[2])]!!
+                    val pd = Database.get(p,drug)?:return true
 
                     pd.usedCount = 0
                     pd.totalSymptoms = 0
                     pd.isDepend = false
                     pd.level = 0
 
-                    Database.playerData[Pair(p,args[2])] = pd
+                    Database.set(p,drug,pd)
 
                     for (e in p.activePotionEffects){
                         p.removePotionEffect(e.type)
@@ -130,8 +133,10 @@ object Command: CommandExecutor {
                     sender.sendMessage("§e§l============================================")
                     for (drug in drugName){
                         val data = drugData[drug]!!
-                        val pd = Database.playerData[Pair(sender,drug)]?:return true
 
+                        if (!Database.hasData(sender,drug))continue
+
+                        val pd = Database.get(sender,drug)!!
                         if(data.dependMsg.isNotEmpty() && pd.usedCount !=0){
                             sender.sendMessage("${data.displayName}§f§l:${data.dependMsg[pd.level]}")
                         }
@@ -141,12 +146,15 @@ object Command: CommandExecutor {
                 }
                 //指定プレイヤーのデータを見る(詳細データも見る)
                 if (sender is Player && args.size == 2){
-                    val p = Bukkit.getPlayer(args[1])
+                    val p = Bukkit.getPlayer(args[1])?:return true
                     sender.sendMessage("§e§l${args[1]}の現在のデータ")
                     sender.sendMessage("§e§l============================================")
                     for (drug in drugName){
                         val data = drugData[drug]!!
-                        val pd = Database.playerData[Pair(p,drug)]?:return true
+
+                        if (!Database.hasData(p,drug))continue
+
+                        val pd = Database.get(p,drug)!!
 
                         sender.sendMessage(data.displayName)
                         sender.sendMessage("§f§lcount:${pd.usedCount},isDepend:${pd.isDepend}")
