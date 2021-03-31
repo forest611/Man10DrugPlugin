@@ -94,7 +94,7 @@ object DependThread{
 
     }
 
-    fun symptoms(p:Player, data:Configs.Drug, pd:Database.PlayerData){
+    fun symptoms(p:Player, data:Config.Drug, pd:Database.PlayerData){
         if (!data.buffSymptoms[pd.level].isNullOrEmpty()){
             for (b in data.buffSymptoms[pd.level]!!){
                 p.addPotionEffect(b)

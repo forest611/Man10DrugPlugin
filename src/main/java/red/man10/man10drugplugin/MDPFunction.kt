@@ -146,14 +146,14 @@ object MDPFunction{
         return r
     }
 
-    fun getSound(list:MutableList<String>):MutableList<Configs.SoundData>{
+    fun getSound(list:MutableList<String>):MutableList<Config.SoundData>{
 
-        val r = mutableListOf<Configs.SoundData>()
+        val r = mutableListOf<Config.SoundData>()
 
         for (data in list){
             val s = data.split(",")
 
-            val sound = Configs.SoundData()
+            val sound = Config.SoundData()
             sound.sound = s[0]
             sound.volume = s[1].toFloat()
             sound.pitch = s[2].toFloat()
@@ -164,14 +164,14 @@ object MDPFunction{
         return r
     }
 
-    fun getParticle(list:MutableList<String>):MutableList<Configs.ParticleData>{
+    fun getParticle(list:MutableList<String>):MutableList<Config.ParticleData>{
 
-        val r = mutableListOf<Configs.ParticleData>()
+        val r = mutableListOf<Config.ParticleData>()
 
         for (data in list){
             val s = data.split(",")
 
-            val particle = Configs.ParticleData()
+            val particle = Config.ParticleData()
             particle.particle = Particle.valueOf(s[0])
             particle.size = s[1].toInt()
 
@@ -188,11 +188,11 @@ object MDPFunction{
         var cmd = mutableListOf<String>()
         var cmdRandom = mutableListOf<String>()
 
-        var sound = mutableListOf<Configs.SoundData>()
-        var soundRandom = mutableListOf<Configs.SoundData>()
+        var sound = mutableListOf<Config.SoundData>()
+        var soundRandom = mutableListOf<Config.SoundData>()
 
-        var particle = mutableListOf<Configs.ParticleData>()
-        var particleRandom = mutableListOf<Configs.ParticleData>()
+        var particle = mutableListOf<Config.ParticleData>()
+        var particleRandom = mutableListOf<Config.ParticleData>()
 
         var buff = mutableListOf<PotionEffect>()
         var buffRandom = mutableListOf<PotionEffect>()

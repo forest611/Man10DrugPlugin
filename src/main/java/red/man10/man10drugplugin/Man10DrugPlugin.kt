@@ -3,7 +3,6 @@ package red.man10.man10drugplugin
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
-import javax.xml.crypto.Data
 import kotlin.random.Random
 
 class Man10DrugPlugin : JavaPlugin() {
@@ -15,9 +14,9 @@ class Man10DrugPlugin : JavaPlugin() {
 
         plugin = this
 
-        Configs.loadPluginConfig()
+        Config.loadPluginConfig()
 
-        getCommand("mdp")!!.setExecutor(Commands)
+        getCommand("mdp")!!.setExecutor(Command)
 
         Bukkit.getServer().pluginManager.registerEvents(Events,this)
         Database.mysql = MySQLManager(this,"man10drug")
@@ -25,7 +24,7 @@ class Man10DrugPlugin : JavaPlugin() {
         Database.executeDBQueue()
         DependThread.dependThread()
 
-        Configs.loadDrugs()
+        Config.loadDrugs()
         MDPFunction.loadFunction()
 
     }
@@ -55,7 +54,7 @@ class Man10DrugPlugin : JavaPlugin() {
         var isReload = false//リロード中かどうか
 
         val drugName = mutableListOf<String>()
-        val drugData = HashMap<String,Configs.Drug>()
+        val drugData = HashMap<String,Config.Drug>()
 
         lateinit var plugin : Man10DrugPlugin
     }

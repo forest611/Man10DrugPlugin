@@ -112,7 +112,7 @@ object Events:Listener{
     /////////////////////////////////
     //ドラッグ使用時の処理
     /////////////////////////////////
-    fun useDrug(p: Player, dataName:String, data:Configs.Drug, pd:Database.PlayerData){
+    fun useDrug(p: Player, dataName:String, data:Config.Drug, pd:Database.PlayerData){
 
         if (data.useMsg.size > pd.level){
             p.sendMessage(rep(data.useMsg[pd.level],p,dataName))

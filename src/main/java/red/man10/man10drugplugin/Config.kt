@@ -20,7 +20,7 @@ import red.man10.man10drugplugin.Man10DrugPlugin.Companion.pluginEnable
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.useMilk
 import java.io.File
 
-object Configs{
+object Config{
 
 
 
