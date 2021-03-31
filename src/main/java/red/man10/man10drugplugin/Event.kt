@@ -30,57 +30,56 @@ object Event:Listener{
 
     @EventHandler
     fun useDrugEvent(e:PlayerInteractEvent){
-        if (e.action == Action.RIGHT_CLICK_AIR || e.action == Action.RIGHT_CLICK_BLOCK){
-            val item = e.item?:return
-
-            val p = e.player
-
-            if (disableWorld.contains(p.world.name)){ return }
-
-            val meta = item.itemMeta?:return
-            if (meta.persistentDataContainer.isEmpty)return
 
 
-            if (isReload || !pluginEnable){
-                p.sendMessage("§e§l今は使う気分ではないようだ...")
-                return
-            }
+        if (e.action!=Action.RIGHT_CLICK_AIR && e.action!=Action.RIGHT_CLICK_BLOCK)return
 
-            val dataName =  meta.persistentDataContainer[NamespacedKey(plugin,"name"), PersistentDataType.STRING]?:return
+        val p = e.player
 
-            if (!drugName.contains(dataName))return
-
-            e.isCancelled = true
-
-            if (!pluginEnable || isReload)return
-
-            val data = drugData[dataName]!!
-
-            if (data.type == 2)return //マスクなど
-            if (data.disableWorld.contains(p.world.name))return
-
-            val pd = Database.get(p, dataName)!!
-
-            //cooldown
-            val difference = (Date().time - pd.finalUseTime.time)/1000
-            if (data.cooldown > difference && data.cooldown != 0L)return
-
-            //buffなどの処理
-            useDrug(p,dataName,data,pd)
-
-            //remove an item
-            if (data.isRemoveItem) {
-                item.amount = item.amount - 1
-            }
-            //remove prob
-            if (!data.isRemoveItem && data.crashChance.size >pd.level){
-                if(data.crashChance[pd.level] !=0.0 && Math.random()<data.crashChance[pd.level]){
-                    item.amount = item.amount -1
-                    p.sendMessage(data.crashMsg)
-                }
-            }
-
+        if (isReload || !pluginEnable){
+            p.sendMessage("§e§l今は使う気分ではないようだ...")
+            return
         }
+
+        if (disableWorld.contains(p.world.name))return
+
+        val item = e.item?:return
+
+//        if (item.type == Material.POTION)return
+
+        val meta = item.itemMeta?:return
+
+        val drug =  meta.persistentDataContainer[NamespacedKey(plugin,"name"), PersistentDataType.STRING]?:return
+
+        if (!drugName.contains(drug))return
+
+        e.isCancelled = true
+
+        val data = drugData[drug]!!
+
+        if (data.disableWorld.contains(p.world.name))return
+
+        val pd = Database.get(p, drug)!!
+
+        //cooldown
+        val difference = (Date().time - pd.finalUseTime.time)/1000
+        if (data.cooldown > difference && data.cooldown != 0L)return
+
+        //buffなどの処理
+        useDrug(p,drug,data,pd)
+
+        //remove an item
+        if (data.isRemoveItem) {
+            item.amount = item.amount - 1
+        }
+//        //remove prob
+//        if (!data.isRemoveItem && data.crashChance.size >pd.level){
+//            if(data.crashChance[pd.level] !=0.0 && Math.random()<data.crashChance[pd.level]){
+//                item.amount = item.amount -1
+//                p.sendMessage(data.crashMsg)
+//            }
+//        }
+
     }
 
     /////////////////////////////
@@ -122,7 +121,7 @@ object Event:Listener{
                 "(`uuid`, `player`, `drug_name`,`date`)" +
                 " VALUES ('${p.uniqueId}', '${p.name}', '$dataName',now());")
 
-        if (data.removeBuffs){
+        if (data.isRemoveBuff){
             for (e in p.activePotionEffects){
                 p.removePotionEffect(e.type)
             }
@@ -212,13 +211,13 @@ object Event:Listener{
             MDPFunction.runFunc(data.func[pd.level],p)
         }
 
-        if (data.nearPlayer.size>pd.level){
-            val s = data.nearPlayer[pd.level].split(";")
-
-            for (pla in getNearPlayer(p,s[1].toInt())){
-                MDPFunction.runFunc(s[0],pla)
-            }
-        }
+//        if (data.nearPlayer.size>pd.level){
+//            val s = data.nearPlayer[pd.level].split(";")
+//
+//            for (pla in getNearPlayer(p,s[1].toInt())){
+//                MDPFunction.runFunc(s[0],pla)
+//            }
+//        }
 
         pd.usedCount ++ //使用回数更新
         pd.finalUseTime = Date()  //最終使用時刻更新
@@ -261,42 +260,42 @@ object Event:Listener{
     }
 
     //周囲のプレイヤーを検知
-    fun getNearPlayer(centerPlayer:Player,distance:Int):MutableList<Player>{
-        val ds = distance * distance
-        val players = mutableListOf<Player>()
-        val loc = centerPlayer.location
-        val world =centerPlayer.world
-        for (p in Bukkit.getOnlinePlayers()){
-            if (p == centerPlayer)continue
-            if (p.world != world)continue
-            if (p.location.distanceSquared(loc)>=ds)continue
-
-            if (defenseCheck(p))continue //弾けた場合
-            players.add(p)
-        }
-          return players
-
-    }
-
-    //周囲からの影響を受ける確率
-    fun defenseCheck(p:Player):Boolean{
-        val helmet = p.inventory.helmet?:return false
-
-        val meta = helmet.itemMeta?:return false
-
-        if (meta.persistentDataContainer.isEmpty)return false
-
-        val dataName = meta.persistentDataContainer[NamespacedKey(plugin,"name"), PersistentDataType.STRING]?:return false
-
-        if (drugName.contains(dataName))return false
-
-        val data = drugData[dataName]!!
-
-        if (data.type !=2)return false
-        if (Math.random()<data.defenseProb)return true
-
-        return false
-    }
+//    fun getNearPlayer(centerPlayer:Player,distance:Int):MutableList<Player>{
+//        val ds = distance * distance
+//        val players = mutableListOf<Player>()
+//        val loc = centerPlayer.location
+//        val world =centerPlayer.world
+//        for (p in Bukkit.getOnlinePlayers()){
+//            if (p == centerPlayer)continue
+//            if (p.world != world)continue
+//            if (p.location.distanceSquared(loc)>=ds)continue
+//
+//            if (defenseCheck(p))continue //弾けた場合
+//            players.add(p)
+//        }
+//          return players
+//
+//    }
+//
+//    //周囲からの影響を受ける確率
+//    private fun defenseCheck(p:Player):Boolean{
+//        val helmet = p.inventory.helmet?:return false
+//
+//        val meta = helmet.itemMeta?:return false
+//
+//        if (meta.persistentDataContainer.isEmpty)return false
+//
+//        val dataName = meta.persistentDataContainer[NamespacedKey(plugin,"name"), PersistentDataType.STRING]?:return false
+//
+//        if (drugName.contains(dataName))return false
+//
+//        val data = drugData[dataName]!!
+//
+//        if (data.type !=2)return false
+//        if (Math.random()<data.defenseProb)return true
+//
+//        return false
+//    }
 
 
 }

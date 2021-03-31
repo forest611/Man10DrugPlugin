@@ -2,7 +2,6 @@ package red.man10.man10drugplugin
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import red.man10.man10drugplugin.Event.getNearPlayer
 import red.man10.man10drugplugin.MDPFunction.runFunc
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.debugMode
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugData
@@ -129,13 +128,13 @@ object DependThread{
             runFunc(data.func[pd.level],p)
         }
 
-        if (data.symptomsNearPlayer.size>pd.level){
-            val s = data.symptomsNearPlayer[pd.level].split(";")
-
-            for (pla in getNearPlayer(p,s[1].toInt())){
-                runFunc(s[0],p)
-            }
-        }
+//        if (data.symptomsNearPlayer.size>pd.level){
+//            val s = data.symptomsNearPlayer[pd.level].split(";")
+//
+//            for (pla in getNearPlayer(p,s[1].toInt())){
+//                runFunc(s[0],p)
+//            }
+//        }
 
         if (data.msgSymptoms.size > pd.level){
             p.sendMessage(data.msgSymptoms[pd.level])

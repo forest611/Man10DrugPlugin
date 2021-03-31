@@ -100,7 +100,7 @@ object Config{
             data.crashChance = cfg.getDoubleList("crashChance")//無記名で壊れなくなる
             data.crashMsg = cfg.getString("crashMsg","")!!
 
-            data.removeBuffs = cfg.getBoolean("removeBuff")//使ったときに今のバフを消す
+            data.isRemoveBuff = cfg.getBoolean("removeBuff")//使ったときに今のバフを消す
 
             data.isRemoveItem = cfg.getBoolean("removeItem",true)
             data.disableWorld = cfg.getStringList("disableWorld")
@@ -359,7 +359,7 @@ object Config{
         var crashChance = mutableListOf<Double>()
         var crashMsg = ""//消えたときのメッセージ
 
-        var removeBuffs = false //使用時 バフが消えるかどうか
+        var isRemoveBuff = false //使用時 バフが消えるかどうか
         var isRemoveItem = true //使用時 アイテムを消去するか
 
         //type0(依存薬物など)
