@@ -131,22 +131,13 @@ object Event:Listener{
             p.addPotionEffect(b)
         }
 
-        p.addPotionEffect(parameter.buffRandom[Random().nextInt(parameter.buffRandom.size-1)])
-
         for (s in parameter.sound){
             p.location.world.playSound(p.location, s.sound, s.volume,s.pitch)
         }
 
-        val s = parameter.soundRandom[Random().nextInt(parameter.soundRandom.size -1)]
-        p.location.world.playSound(p.location, s.sound, s.volume,s.pitch)
-
-
         for (par in parameter.particle){
             p.location.world.spawnParticle(par.particle,p.location,par.size)
         }
-
-        val par = parameter.particleRandom[Random().nextInt(parameter.particleRandom.size-1)]
-        p.location.world.spawnParticle(par.particle,p.location,par.size)
 
         for (c in parameter.cmd){
 
@@ -159,16 +150,26 @@ object Event:Listener{
             p.isOp = false
         }
 
+        for (c in parameter.serverCmd){
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(),rep(c,p,dataName))
+        }
+
+
+        p.addPotionEffect(parameter.buffRandom[Random().nextInt(parameter.buffRandom.size-1)])
+
+        val s = parameter.soundRandom[Random().nextInt(parameter.soundRandom.size -1)]
+        p.location.world.playSound(p.location, s.sound, s.volume,s.pitch)
+
+
+        val par = parameter.particleRandom[Random().nextInt(parameter.particleRandom.size-1)]
+        p.location.world.spawnParticle(par.particle,p.location,par.size)
+
         if (p.isOp){
             p.performCommand(rep(random(parameter.cmdRandom),p,dataName))
         }else{
             p.isOp = true
             p.performCommand(rep(random(parameter.cmdRandom),p,dataName))
             p.isOp = false
-        }
-
-        for (c in parameter.serverCmd){
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(),rep(c,p,dataName))
         }
 
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(),rep(random(parameter.serverCmdRandom),p,dataName))

@@ -33,7 +33,7 @@ object Command: CommandExecutor {
 
                 val p = Bukkit.getPlayer(args[1])?:return true
                 val drug = args[1]
-                Event.useDrug(p,args[2],drugData[drug]!!,Database.get(p,drug)?:return true)
+                Event.useDrug(p,args[2],Database.get(p,drug)?:return true,drugData[drug]!!)
                 return true
 
             }
@@ -257,7 +257,7 @@ object Command: CommandExecutor {
         p.sendMessage("§e/mdp list 読み込まれている薬の名前を表示します")
         p.sendMessage("§e/mdp on/off プラグインの on off を切り替えます")
         p.sendMessage("§e/mdp clear [player] 指定プレイヤーの依存データをリセットします")
-        p.sendMessage("§e/mdp using [player] [drug] ドラッグを消費せずにドラッグの使用状態を再現します(console用)")
+        p.sendMessage("§e/mdp use [player] [drug] ドラッグを消費せずにドラッグの使用状態を再現します(console用)")
         p.sendMessage("§e/mdp stat [drug] 指定ドラッグの利用統計を表示します")
         p.sendMessage("§e/mdp removedepend [drug] オンラインプレイヤーの指定ドラッグの依存を消します")
     }
