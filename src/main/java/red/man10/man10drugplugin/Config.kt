@@ -109,14 +109,16 @@ object Config{
                 data.parameter.add(parameter)
             }
 
-            data.level = level
-            data.cooldown = cfg.getLong("cooldown")
             data.displayName = cfg.getString("displayName")?:""
             data.material = Material.valueOf(cfg.getString("material")?:"")
             data.lore = cfg.getStringList("lore")
             data.modelData = cfg.getInt("modelData")
-            data.type = cfg.getInt("type")
+
             data.hasEnchantEffect = cfg.getBoolean("enchantEffect")
+            data.disableWorld = cfg.getStringList("disableWorld")
+            data.level = level
+            data.cooldown = cfg.getLong("cooldown")
+            data.type = cfg.getInt("type")
 
 
             /////////////////////////////
@@ -234,6 +236,7 @@ object Config{
 
         var parameter = mutableListOf<DrugParameter>()
 
+        var disableWorld = mutableListOf<String>()
 
     }
 

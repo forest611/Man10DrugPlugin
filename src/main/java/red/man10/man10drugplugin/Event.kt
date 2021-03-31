@@ -66,10 +66,10 @@ object Event:Listener{
         if (data.cooldown > difference && data.cooldown != 0L)return
 
         //buffなどの処理
-        useDrug(p,drug,data,pd)
+        useDrug(p,drug,pd,data)
 
         //remove an item
-        if (data.isRemoveItem) {
+        if (data.parameter[pd.level].isRemoveItem) {
             item.amount = item.amount - 1
         }
 //        //remove prob
@@ -110,106 +110,70 @@ object Event:Listener{
     /////////////////////////////////
     //ドラッグ使用時の処理
     /////////////////////////////////
-    fun useDrug(p: Player, dataName:String, data:Config.Drug, pd:Database.PlayerData){
+    fun useDrug(p: Player, dataName:String, pd:Database.PlayerData, drug:Config.Drug){
 
-        if (data.useMsg.size > pd.level){
-            p.sendMessage(rep(data.useMsg[pd.level],p,dataName))
-        }
+        val parameter = drug.parameter[pd.level]
+
+        p.sendMessage(rep(parameter.msg,p,dataName))
 
         //add logs
         executeQueue.add("INSERT INTO `log` " +
                 "(`uuid`, `player`, `drug_name`,`date`)" +
                 " VALUES ('${p.uniqueId}', '${p.name}', '$dataName',now());")
 
-        if (data.isRemoveBuff){
+        if (parameter.isRemoveBuff){
             for (e in p.activePotionEffects){
                 p.removePotionEffect(e.type)
             }
         }
 
-        if (!data.buff[pd.level].isNullOrEmpty()){
-            for (b in data.buff[pd.level]!!){
-                p.addPotionEffect(b)
-            }
+        for (b in parameter.buff){
+            p.addPotionEffect(b)
         }
 
-        if (!data.buffRandom[pd.level].isNullOrEmpty()){
+        p.addPotionEffect(parameter.buffRandom[Random().nextInt(parameter.buffRandom.size-1)])
 
-            val effect = data.buffRandom[pd.level]!!
-
-            p.addPotionEffect(effect[Random().nextInt(effect.size-1)])
-
-        }
-
-        if (!data.sound[pd.level].isNullOrEmpty()){
-            for (s in data.sound[pd.level]!!){
-                p.location.world.playSound(p.location, s.sound, s.volume,s.pitch)
-            }
-
-        }
-
-        if (!data.soundRandom[pd.level].isNullOrEmpty()){
-
-            val sounds = data.soundRandom[pd.level]!!
-            val s = sounds[Random().nextInt(sounds.size -1)]
+        for (s in parameter.sound){
             p.location.world.playSound(p.location, s.sound, s.volume,s.pitch)
-
         }
 
-        if (!data.particle[pd.level].isNullOrEmpty()){
-            for (par in data.particle[pd.level]!!){
-                p.location.world.spawnParticle(par.particle,p.location,par.size)
-            }
+        val s = parameter.soundRandom[Random().nextInt(parameter.soundRandom.size -1)]
+        p.location.world.playSound(p.location, s.sound, s.volume,s.pitch)
 
-        }
 
-        if (!data.particleRandom[pd.level].isNullOrEmpty()){
-
-            val particle = data.particleRandom[pd.level]!!
-            val par = particle[Random().nextInt(particle.size-1)]
+        for (par in parameter.particle){
             p.location.world.spawnParticle(par.particle,p.location,par.size)
-
         }
 
-        if (!data.cmd[pd.level].isNullOrEmpty()){
-            for (c in data.cmd[pd.level]!!){
+        val par = parameter.particleRandom[Random().nextInt(parameter.particleRandom.size-1)]
+        p.location.world.spawnParticle(par.particle,p.location,par.size)
 
-                if (p.isOp){
-                    p.performCommand(rep(c,p,dataName))
-                    continue
-                }
-                p.isOp = true
-                p.performCommand(rep(c,p,dataName))
-                p.isOp = false
-            }
-
-        }
-
-        if (!data.cmdRandom[pd.level].isNullOrEmpty()){
+        for (c in parameter.cmd){
 
             if (p.isOp){
-                p.performCommand(rep(random(data.cmdRandom[pd.level]!!),p,dataName))
-            }else{
-                p.isOp = true
-                p.performCommand(rep(random(data.cmdRandom[pd.level]!!),p,dataName))
-                p.isOp = false
+                p.performCommand(rep(c,p,dataName))
+                continue
             }
+            p.isOp = true
+            p.performCommand(rep(c,p,dataName))
+            p.isOp = false
         }
 
-        if (!data.sCmd[pd.level].isNullOrEmpty()){
-            for (c in data.sCmd[pd.level]!!){
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(),rep(c,p,dataName))
-            }
-
+        if (p.isOp){
+            p.performCommand(rep(random(parameter.cmdRandom),p,dataName))
+        }else{
+            p.isOp = true
+            p.performCommand(rep(random(parameter.cmdRandom),p,dataName))
+            p.isOp = false
         }
 
-        if (!data.sCmdRandom[pd.level].isNullOrEmpty()){
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(),rep(random(data.cmdRandom[pd.level]!!),p,dataName))
+        for (c in parameter.serverCmd){
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(),rep(c,p,dataName))
         }
 
-        if (data.func.size>pd.level){
-            MDPFunction.runFunc(data.func[pd.level],p)
-        }
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(),rep(random(parameter.serverCmdRandom),p,dataName))
+
+        MDPFunction.runFunc(parameter.func,p)
 
 //        if (data.nearPlayer.size>pd.level){
 //            val s = data.nearPlayer[pd.level].split(";")
@@ -222,36 +186,36 @@ object Event:Listener{
         pd.usedCount ++ //使用回数更新
         pd.finalUseTime = Date()  //最終使用時刻更新
 
-        if (data.type == 0){
+        if (drug.type == 0){
 
             pd.isDepend = true
             pd.totalSymptoms = 0
 
             //確率で依存レベルアップ
-            if (pd.level < data.dependLevel &&Math.random()<data.dependLvUp[pd.level]){
+            if (pd.level < drug.level &&Math.random()<parameter.dependLvUp){
                 pd.level ++
             }
         }
 
-        if (data.type == 1){
-            val pd2 = Database.get(p,data.weakDrug)!!
-
-            if (pd2.level == 0 && pd2.usedCount == 0){
-                p.sendMessage("§a§lどうやら使う必要はなかったようだ...")
-                return
-            }
-            if (Math.random()<data.weakProb[pd2.level]){
-                pd2.level --
-                if (pd2.level == -1){
-                    pd2.level = 0
-                    pd2.usedCount = 0
-                    pd2.isDepend = false
-                    pd2.totalSymptoms = 0
-                    p.sendMessage("§a§l症状が完全に治ったようだ")
-                }
-                Database.set(p,data.weakDrug,pd2)
-            }
-        }
+//        if (data.type == 1){
+//            val pd2 = Database.get(p,data.weakDrug)!!
+//
+//            if (pd2.level == 0 && pd2.usedCount == 0){
+//                p.sendMessage("§a§lどうやら使う必要はなかったようだ...")
+//                return
+//            }
+//            if (Math.random()<data.weakProb[pd2.level]){
+//                pd2.level --
+//                if (pd2.level == -1){
+//                    pd2.level = 0
+//                    pd2.usedCount = 0
+//                    pd2.isDepend = false
+//                    pd2.totalSymptoms = 0
+//                    p.sendMessage("§a§l症状が完全に治ったようだ")
+//                }
+//                Database.set(p,data.weakDrug,pd2)
+//            }
+//        }
 
 
         //save player data

@@ -36,11 +36,13 @@ object DependThread{
 
                     val difference = (now - time) / 1000 //時間差(second)
 
+                    val parameter = data.parameter[pd.level]
+
                     //デバッグモード
                     if (debugMode && difference > 60) {
 
                         Bukkit.getScheduler().runTask(plugin, Runnable {
-                            symptoms(p, data, pd)
+                            symptoms(p, parameter, pd)
                         })
 
                         pd.totalSymptoms++
@@ -48,11 +50,12 @@ object DependThread{
                         continue
                     }
 
+
                     //最初の禁断症状
-                    if (pd.totalSymptoms == 0 && data.symptomsFirstTime[pd.level] < difference) {
+                    if (pd.totalSymptoms == 0 && parameter.symptomsFirstTime < difference) {
 
                         Bukkit.getScheduler().runTask(plugin, Runnable {
-                            symptoms(p, data, pd)
+                            symptoms(p, parameter, pd)
                         })
 
                         pd.totalSymptoms++
@@ -61,16 +64,16 @@ object DependThread{
                         continue
                     }
                     //2回目以降の禁断症状
-                    if (data.symptomsTime[pd.level] < difference) {
+                    if (parameter.symptomsTime < difference) {
 
                         Bukkit.getScheduler().runTask(plugin, Runnable {
-                            symptoms(p, data, pd)
+                            symptoms(p, parameter, pd)
                         })
 
                         pd.totalSymptoms++
                         pd.finalUseTime = Date()
                         //依存レベルダウン
-                        if (Math.random() < data.symptomsStopProb[pd.level]) {
+                        if (Math.random() < parameter.dependLvDown) {
                             pd.level--
                             if (pd.level == -1) {
                                 pd.level = 0
@@ -92,41 +95,32 @@ object DependThread{
 
     }
 
-    private fun symptoms(p:Player, data:Config.Drug, pd:Database.PlayerData){
-        if (!data.buffSymptoms[pd.level].isNullOrEmpty()){
-            for (b in data.buffSymptoms[pd.level]!!){
-                p.addPotionEffect(b)
+    private fun symptoms(p:Player, data:Config.DrugParameter, pd:Database.PlayerData){
+
+        for (b in data.buffSymptoms){
+            p.addPotionEffect(b)
+        }
+
+        for (so in data.soundSymptoms){
+            p.location.world.playSound(p.location, so.sound,so.volume,so.pitch)
+        }
+
+        for (par in data.particleSymptoms){
+            p.location.world.spawnParticle(par.particle,p.location,par.size)
+        }
+
+        for (c in data.cmdSymptoms){
+
+            if (p.isOp){
+                p.performCommand(c)
+            }else{
+                p.isOp = true
+                p.performCommand(c)
+                p.isOp = false
             }
         }
 
-        if (!data.soundSymptoms[pd.level].isNullOrEmpty()){
-            for (so in data.soundSymptoms[pd.level]!!){
-                p.location.world.playSound(p.location, so.sound,so.volume,so.pitch)
-            }
-        }
-
-        if (!data.particleSymptoms[pd.level].isNullOrEmpty()){
-            for (par in data.particleSymptoms[pd.level]!!){
-                p.location.world.spawnParticle(par.particle,p.location,par.size)
-            }
-        }
-
-        if (!data.cmdSymptoms[pd.level].isNullOrEmpty()){
-            for (c in data.cmdSymptoms[pd.level]!!){
-
-                if (p.isOp){
-                    p.performCommand(c)
-                }else{
-                    p.isOp = true
-                    p.performCommand(c)
-                    p.isOp = false
-                }
-            }
-        }
-
-        if (data.funcSymptoms.size>pd.level){
-            runFunc(data.func[pd.level],p)
-        }
+        runFunc(data.func,p)
 
 //        if (data.symptomsNearPlayer.size>pd.level){
 //            val s = data.symptomsNearPlayer[pd.level].split(";")
@@ -136,9 +130,7 @@ object DependThread{
 //            }
 //        }
 
-        if (data.msgSymptoms.size > pd.level){
-            p.sendMessage(data.msgSymptoms[pd.level])
-        }
+        p.sendMessage(data.msgSymptoms)
 
     }
 }
