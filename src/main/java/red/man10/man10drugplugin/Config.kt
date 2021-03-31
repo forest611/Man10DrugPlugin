@@ -61,92 +61,9 @@ object Config{
 
             val data = Drug()
 
-            data.displayName = cfg.getString("displayName")!!
-            data.material = cfg.getString("material","DIAMOND_HOE")!!
-            data.modelData = cfg.getInt("modelData",0)
-            data.type =  cfg.getInt("type",0)
-            data.isChange = cfg.getBoolean("isChange")
-            if(data.isChange)data.changeItem = cfg.getString("changeItem")!!
-
-            data.lore = cfg.getStringList("lore")
-            //use message
-            data.useMsg = cfg.getStringList("useMsg")
-            data.hasEnchantEffect = cfg.getBoolean("hasEnchantEffect")
-
-            data.cooldown = cfg.getLong("cooldown")
-
-            data.nearPlayer = cfg.getStringList("nearPlayer")
-
-            //func lists
-            data.func = cfg.getStringList("func")
-
-            //プレイヤーが発行するコマンド
-            data.cmd = getHMList("cmd",cfg)
-            data.cmdRandom = getHMList("cmdRandom",cfg)
-
-            //鯖が発行するコマンド
-            data.sCmd = getHMList("serverCmd",cfg)
-            data.sCmdRandom = getHMList("serverCmdRandom",cfg)
-
-            data.buff = getBuff(Type.NORMAL,cfg)
-            data.buffRandom = getBuff(Type.RANDOM,cfg)
-
-            data.particle = getParticle(Type.NORMAL,cfg)
-            data.particleRandom = getParticle(Type.RANDOM,cfg)
-
-            data.sound = getSound(Type.NORMAL,cfg)
-            data.soundRandom = getSound(Type.RANDOM,cfg)
-
-            data.crashChance = cfg.getDoubleList("crashChance")//無記名で壊れなくなる
-            data.crashMsg = cfg.getString("crashMsg","")!!
-
-            data.isRemoveBuff = cfg.getBoolean("removeBuff")//使ったときに今のバフを消す
-
-            data.isRemoveItem = cfg.getBoolean("removeItem",true)
-            data.disableWorld = cfg.getStringList("disableWorld")
-
-            if (data.type == 0){
-                data.isdepend = cfg.getBoolean("isDepend")
-                data.dependLevel = cfg.getInt("dependLevel")//最大レベルを入力
-                data.dependLvUp = cfg.getDoubleList("dependLvUp")//依存レベルが下る確率
-                data.dependLvDown = cfg.getDoubleList("dependLvDown")//依存レベルが下る確率
-
-                data.symptomsFirstTime = cfg.getLongList("symptomsFirstTime")//最初の一回目
-                data.symptomsTime = cfg.getLongList("symptomsTime")//それ以降
-
-                data.symptomsStopProb = cfg.getDoubleList("symptomsStopProb")//禁断症状が止まる確率
-
-                data.buffSymptoms = getBuff(Type.SYMPTOMS,cfg)
-
-                data.particleSymptoms = getParticle(Type.SYMPTOMS,cfg)
-
-                data.soundSymptoms = getSound(Type.SYMPTOMS,cfg)
-
-                data.cmdSymptoms = getHMList("cmdSymptoms",cfg)
-
-                data.msgSymptoms = cfg.getStringList("msgSymptoms")
-
-                data.funcSymptoms = cfg.getStringList("funcSymptoms")
-
-                data.dependMsg = cfg.getStringList("dependMsg")
-
-                data.symptomsNearPlayer = cfg.getStringList("nearPlayerSymptoms")
-
-                data.funcLvUp = cfg.getStringList("funcLvUp")
-
-            }
-
-            if (data.type == 1){
-                data.weakDrug = cfg.getString("weakDrug")!!//治療する対象のドラッグの名前を入力
-                data.weakProb = cfg.getDoubleList("weakProb")//確率で1レベルダウン
-                data.stopDepend = cfg.getBoolean("stopDepend")
-            }
-
-            if (data.type == 2){
-                data.defenseProb = cfg.getDouble("defenseProb")
-            }
-
             Bukkit.getLogger().info("Loaded file $dataName (${file.name})")
+
+
 
             /////////////////////////////
             //ItemStackの作成
@@ -180,7 +97,7 @@ object Config{
         }
     }
 
-    fun getHMList(path:String,cfg:YamlConfiguration): HashMap<Int, MutableList<String>> {
+    private fun getHMList(path:String, cfg:YamlConfiguration): HashMap<Int, MutableList<String>> {
 
         val map = HashMap<Int,MutableList<String>>()
 
@@ -194,7 +111,7 @@ object Config{
     }
 
 
-    fun getBuff(type:Type,cfg: YamlConfiguration):HashMap<Int,MutableList<PotionEffect>>{
+    private fun getBuff(type:Type, cfg: YamlConfiguration):HashMap<Int,MutableList<PotionEffect>>{
 
         val path = when(type){
 
@@ -226,7 +143,7 @@ object Config{
 
     }
 
-    fun getSound(type: Type,cfg: YamlConfiguration):HashMap<Int,MutableList<SoundData>>{
+    private fun getSound(type: Type, cfg: YamlConfiguration):HashMap<Int,MutableList<SoundData>>{
 
         val path = when(type){
 
@@ -259,7 +176,7 @@ object Config{
         return retMap
     }
 
-    fun getParticle(type: Type,cfg:YamlConfiguration): HashMap<Int, MutableList<ParticleData>> {
+    private fun getParticle(type: Type, cfg:YamlConfiguration): HashMap<Int, MutableList<ParticleData>> {
 
         val path = when(type){
 
@@ -331,66 +248,7 @@ object Config{
 
         var hasEnchantEffect = false
 
-        /*
-        Func: 機能をまとめられる機能
-        あらゆるコマンド実行やメッセージ、サウンドプレイを一括にまとめる機能。
-        */
-
-        //func
-        var func = mutableListOf<String>()
-
-        //cmd
-        var cmd = HashMap<Int,MutableList<String>>()
-        var cmdRandom = HashMap<Int,MutableList<String>>()
-        //server cmd
-        var sCmd = HashMap<Int,MutableList<String>>()
-        var sCmdRandom = HashMap<Int,MutableList<String>>()
-        //buff    buffname,tick,bufflevel
-        var buff = HashMap<Int,MutableList<PotionEffect>>()
-        var buffRandom = HashMap<Int,MutableList<PotionEffect>>()
-        //particle    particlename,size
-        var particle = HashMap<Int,MutableList<ParticleData>>()
-        var particleRandom = HashMap<Int,MutableList<ParticleData>>()
-        //sound       soundname,volume,speed
-        var sound = HashMap<Int,MutableList<SoundData>>()
-        var soundRandom = HashMap<Int,MutableList<SoundData>>()
-
-        //アイテムが一定確率で消える
-        var crashChance = mutableListOf<Double>()
-        var crashMsg = ""//消えたときのメッセージ
-
-        var isRemoveBuff = false //使用時 バフが消えるかどうか
-        var isRemoveItem = true //使用時 アイテムを消去するか
-
-        //type0(依存薬物など)
-        var isdepend = false    //依存するかどうか
-        var dependLevel = 0  //依存レベル
-        var dependLvUp = mutableListOf<Double>() //レベルアップする確率
-        var dependLvDown = mutableListOf<Double>()//レベルダウンする確率
-
-        //type0 HM
-        var symptomsFirstTime = mutableListOf<Long>()
-        var symptomsTime  = mutableListOf<Long>()
-        var symptomsStopProb  = mutableListOf<Double>() //禁断症状が終わる確率
-
-        var cmdSymptoms = HashMap<Int,MutableList<String>>()
-
-        var msgSymptoms = mutableListOf<String>()
-
-        var buffSymptoms = HashMap<Int,MutableList<PotionEffect>>()
-
-        var particleSymptoms = HashMap<Int,MutableList<ParticleData>>()
-
-        var soundSymptoms = HashMap<Int,MutableList<SoundData>>()
-
-        var funcSymptoms = mutableListOf<String>()
-
-        var funcLvUp = mutableListOf<String>()
-
-        var nearPlayer = mutableListOf<String>()//周囲のプレイヤーに干渉
-        var symptomsNearPlayer = mutableListOf<String>()//禁断症状が出たときに、周囲のプレイヤーに
-        var dependMsg = mutableListOf<String>()//チェッカーで表示する依存度
-        var disableWorld = mutableListOf<String>()//使えなくするワールド
+        var parameter = mutableListOf<DrugParameter>()
 
         //type1(治療薬など)
         var weakDrug = "drug" //type2
@@ -399,6 +257,53 @@ object Config{
 
         //type2(マスクなど)
         var defenseProb :Double = 0.0
+
+    }
+
+    class DrugParameter{
+
+        var msg = ""
+
+        var func = ""
+
+        var buff = mutableListOf<PotionEffect>()
+        var buffRandom = mutableListOf<PotionEffect>()
+
+        var particle = mutableListOf<ParticleData>()
+        var particleRandom = mutableListOf<ParticleData>()
+
+        var sound = mutableListOf<SoundData>()
+        var soundRandom = mutableListOf<SoundData>()
+
+        var cmd = mutableListOf<String>()
+        var cmdRandom = mutableListOf<String>()
+
+        var serverCmd = mutableListOf<String>()
+        var serverCmdRandom = mutableListOf<String>()
+
+        var isRemoveBuff = false
+        var isRemoveItem = true
+
+        var dependLvUp : Double = 0.5
+        var dependLvDown : Double = 0.5
+
+        var symptomsFirstTime = 0 //使用時に最初の禁断症状が来る時間(秒)
+        var symptomsTime = 0 //2回目以降に禁断症状が来る時間(秒)
+
+        var symptomsMsg = ""
+        var dependMsg = ""
+
+        var buffSymptoms = mutableListOf<PotionEffect>()
+
+        var particleSymptoms = mutableListOf<ParticleData>()
+
+        var soundSymptoms = mutableListOf<SoundData>()
+
+        var cmdSymptoms = mutableListOf<String>()
+
+        var serverCmdSymptoms = mutableListOf<String>()
+
+        var funcSymptoms = ""
 
     }
 
