@@ -28,6 +28,12 @@ object Command: CommandExecutor {
 
         when(args[0]){
 
+            "help" -> {
+                if (sender !is Player)return false
+
+                help(sender)
+            }
+
             "use" ->{
                 if (!drugName.contains(args[1]))return true
 
@@ -248,7 +254,7 @@ object Command: CommandExecutor {
     }
 
 
-    fun help(p: Player) {
+    private fun help(p: Player) {
 
         p.sendMessage("§e§lMan10DrugPlugin HELP")
         p.sendMessage("§e/mdp get [drugName] 薬を手に入れる drugNameはDataNameに書いた値を入力してください")

@@ -4,6 +4,7 @@ api-version: 1.16
 softdepend:
   - Man10CommonLibs
 main: red.man10.man10drugplugin.Man10DrugPlugin
+author: 'forest611'
 commands:
   mdp:
     default: op
