@@ -109,11 +109,20 @@ object Config{
                 data.parameter.add(parameter)
             }
 
+            data.level = level
+            data.cooldown = cfg.getLong("cooldown")
+            data.displayName = cfg.getString("displayName")?:""
+            data.material = Material.valueOf(cfg.getString("material")?:"")
+            data.lore = cfg.getStringList("lore")
+            data.modelData = cfg.getInt("modelData")
+            data.type = cfg.getInt("type")
+            data.hasEnchantEffect = cfg.getBoolean("enchantEffect")
+
 
             /////////////////////////////
             //ItemStackの作成
             //////////////////////////////
-            val drugItem = ItemStack(Material.valueOf(data.material),1)
+            val drugItem = ItemStack(data.material,1)
             val meta = drugItem.itemMeta
             //NBTTag追加
             meta.persistentDataContainer.set(NamespacedKey(plugin,"name"), PersistentDataType.STRING,dataName)
@@ -211,13 +220,15 @@ object Config{
         var itemStack :ItemStack? = null
         //必須
         var displayName = "drug"
-        var material = "DIAMOND_HOE"
+        var material = Material.IRON_NUGGET
         var modelData = 0
         var type = 0
         //クールダウン
         var cooldown : Long = 0
         //lore
         var lore = mutableListOf<String>()
+
+        var level = 0
 
         var hasEnchantEffect = false
 

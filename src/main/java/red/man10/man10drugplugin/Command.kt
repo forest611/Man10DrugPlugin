@@ -137,8 +137,8 @@ object Command: CommandExecutor {
                         if (!Database.hasData(sender,drug))continue
 
                         val pd = Database.get(sender,drug)!!
-                        if(data.dependMsg.isNotEmpty() && pd.usedCount !=0){
-                            sender.sendMessage("${data.displayName}§f§l:${data.dependMsg[pd.level]}")
+                        if(pd.usedCount !=0 || pd.level != 0){
+                            sender.sendMessage("${data.displayName}§f§l:${data.parameter[pd.level].dependMsg}")
                         }
                     }
                     sender.sendMessage("§e§l============================================")
