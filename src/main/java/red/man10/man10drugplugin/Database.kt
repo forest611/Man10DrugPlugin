@@ -15,47 +15,43 @@ object Database{
     lateinit var mysql : MySQLManager
 
     @Synchronized
-    fun loginDB(p:Player){
+    fun load(p:Player){
 
         if (!p.isOnline)return
 
-        for (drug in drugName){
+        val rs = mysql.query("SELECT * FROM drug_dependence" +
+                " WHERE uuid='${p.uniqueId}';")
+
+        if (rs==null){
+            p.sendMessage("§e§lデータベースのエラーです。お近くの運営に報告してください:Drug。")
+            return
+        }
+
+        while (rs.next()){
+
+            val drug = rs.getString("drug_name")
+
             val data = PlayerData()
-
-            val rs = mysql.query("SELECT * FROM drug_dependence" +
-                    " WHERE uuid='${p.uniqueId}' and drug_name='$drug';")
-
-            if (rs==null){
-                p.sendMessage("§e§lデータベースのエラーです。お近くの運営に報告してください:Drug。")
-                return
-            }
-
-            if (!rs.next()){
-                executeQueue.add("INSERT INTO `drug_dependence` " +
-                        "(`uuid`, `player`, `drug_name`, `used_count`, `used_time`, `level`, `symptoms_total`)" +
-                        " VALUES ('${p.uniqueId}', '${p.name}', '$drug', '0', now(), '0', '0');")
-
-                playerData[Pair(p,drug)] = data
-                mysql.close()
-                continue
-            }
 
             data.usedCount = rs.getInt("used_count")
             data.finalUseTime = rs.getDate("used_time")
             data.totalSymptoms = rs.getInt("symptoms_total")
             data.level = rs.getInt("level")
+
             if (data.usedCount !=0 || data.level >0){
                 data.isDepend = true
             }
 
             playerData[Pair(p,drug)] = data
-            mysql.close()
-            rs.close()
 
         }
+        mysql.close()
+        rs.close()
+
+
     }
 
-    fun logoutDB(p:Player){
+    fun save(p:Player){
         for (drug in drugName){
             val data = playerData[Pair(p,drug)]?:continue
 
@@ -72,6 +68,29 @@ object Database{
         }
     }
 
+    private fun insert(p:Player,drug: String){
+                executeQueue.add("INSERT INTO `drug_dependence` " +
+                        "(`uuid`, `player`, `drug_name`, `used_count`, `used_time`, `level`, `symptoms_total`)" +
+                        " VALUES ('${p.uniqueId}', '${p.name}', '$drug', '0', now(), '0', '0');")
+
+    }
+
+    fun get(p:Player,drug:String):PlayerData{
+
+        var data = playerData[Pair(p,drug)]
+
+        if (data == null){
+            data= PlayerData()
+            insert(p,drug)
+        }
+
+        return data
+
+    }
+
+    fun set(p:Player,drug: String,data: PlayerData){
+        playerData[Pair(p,drug)] = data
+    }
 
     fun getServerTotal(drug:String):Int{
         val mysql = MySQLManager(plugin,"DrugStat")
@@ -88,7 +107,6 @@ object Database{
         return total
 
     }
-
 
 
     ////////////////////

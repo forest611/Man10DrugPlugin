@@ -13,8 +13,8 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.persistence.PersistentDataType
 import red.man10.man10drugplugin.Database.executeQueue
-import red.man10.man10drugplugin.Database.loginDB
-import red.man10.man10drugplugin.Database.logoutDB
+import red.man10.man10drugplugin.Database.load
+import red.man10.man10drugplugin.Database.save
 import red.man10.man10drugplugin.Database.playerData
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.disableWorld
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugData
@@ -99,14 +99,14 @@ object Events:Listener{
     fun loginEvent(e : PlayerJoinEvent){
         Thread {
             Thread.sleep(5000)
-            loginDB(e.player)
+            load(e.player)
         }.start()
     }
 
     @EventHandler
     fun logoutEvent(e:PlayerQuitEvent){
         if (isReload)return
-        logoutDB(e.player)
+        save(e.player)
     }
 
     /////////////////////////////////

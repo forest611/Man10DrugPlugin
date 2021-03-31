@@ -31,7 +31,7 @@ class Man10DrugPlugin : JavaPlugin() {
 
     override fun onDisable() { // Plugin shutdown logic
         for (p in Bukkit.getOnlinePlayers()){
-            Database.logoutDB(p)
+            Database.save(p)
         }
     }
 

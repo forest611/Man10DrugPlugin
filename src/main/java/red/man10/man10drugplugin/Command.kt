@@ -5,7 +5,6 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import red.man10.man10drugplugin.Man10DrugPlugin.Companion.debugMode
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugData
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugName
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.isReload
@@ -27,9 +26,7 @@ object Command: CommandExecutor {
             return true
         }
 
-        val cmd = args[0]
-
-        when(cmd){
+        when(args[0]){
 
             "use" ->{
                 if (!drugName.contains(args[1]))return true
@@ -174,7 +171,7 @@ object Command: CommandExecutor {
                 isReload = true
 
                 for (p in Bukkit.getOnlinePlayers()){
-                    Database.logoutDB(p)
+                    Database.save(p)
                 }
 
                 sender.sendMessage("§e§lオンラインプレイヤーのデータ保存完了！")
@@ -188,7 +185,7 @@ object Command: CommandExecutor {
                     sender.sendMessage("§e§lドラッグデータ、プラグインのコンフィグ読み込み完了")
 
                     for (p in Bukkit.getOnlinePlayers()){
-                        Database.loginDB(p)
+                        Database.load(p)
                     }
 
                     sender.sendMessage("§e§lオンラインプレイヤーのデータ読込完了")
