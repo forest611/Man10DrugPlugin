@@ -63,6 +63,51 @@ object Config{
 
             Bukkit.getLogger().info("Loaded file $dataName (${file.name})")
 
+            val level = 0
+
+            while (cfg.get("$level") != null){
+
+                val parameter = DrugParameter()
+
+                parameter.buff = getBuff(cfg.getStringList("${level}.buff"))
+                parameter.buffRandom = getBuff(cfg.getStringList("${level}.buffRandom"))
+                parameter.buffSymptoms = getBuff(cfg.getStringList("${level}.buffSymptoms"))
+
+                parameter.cmd = cfg.getStringList("${level}.cmd")
+                parameter.cmdRandom = cfg.getStringList("${level}.cmdRandom")
+                parameter.cmdSymptoms = cfg.getStringList("${level}.cmdSymptoms")
+
+                parameter.sound = getSound(cfg.getStringList("${level}.sound"))
+                parameter.soundRandom = getSound(cfg.getStringList("${level}.soundRandom"))
+                parameter.soundSymptoms = getSound(cfg.getStringList("${level}.soundSymptoms"))
+
+                parameter.particle = getParticle(cfg.getStringList("${level}.particle"))
+                parameter.particleRandom = getParticle(cfg.getStringList("${level}.particleRandom"))
+                parameter.particleSymptoms = getParticle(cfg.getStringList("${level}.particleSymptoms"))
+
+                parameter.serverCmd = cfg.getStringList("${level}.serverCmd")
+                parameter.serverCmdRandom = cfg.getStringList("${level}.serverCmdRandom")
+                parameter.serverCmdSymptoms = cfg.getStringList("${level}.serverCmdSymptoms")
+
+                parameter.msg = cfg.getString("${level}.msg")?:""
+                parameter.msgSymptoms = cfg.getString("${level}.msgSymptoms")?:""
+
+                parameter.func = cfg.getString("${level}.func")?:""
+                parameter.funcSymptoms = cfg.getString("${level}.funcSymptoms")?:""
+
+                parameter.isRemoveBuff = cfg.getBoolean("${level}.removeBuff")
+                parameter.isRemoveItem = cfg.getBoolean("${level}.removeItem")
+
+                parameter.dependLvUp = cfg.getDouble("${level}.dependLvUp")
+                parameter.dependLvDown = cfg.getDouble("${level}.dependLvDown")
+
+                parameter.symptomsFirstTime = cfg.getInt("${level}.symptomsFirstTIme")
+                parameter.symptomsTime = cfg.getInt("${level}.symptomsTIme")
+
+                parameter.dependMsg = cfg.getString("${level}.dependMsg")?:""
+
+                data.parameter.add(parameter)
+            }
 
 
             /////////////////////////////
@@ -97,115 +142,56 @@ object Config{
         }
     }
 
-    private fun getHMList(path:String, cfg:YamlConfiguration): HashMap<Int, MutableList<String>> {
+    private fun getBuff(mutableList: MutableList<String>):MutableList<PotionEffect>{
 
-        val map = HashMap<Int,MutableList<String>>()
+        val ret = mutableListOf<PotionEffect>()
 
-        if (cfg.getConfigurationSection(path) == null)return map
+        for (data in mutableList){
 
-        for (i in cfg.getConfigurationSection(path)!!.getKeys(false)) {
-            map[i.toInt()] = cfg.getStringList("$path.$i")
+            val s = data.split(",")
+
+            val effect = PotionEffect(PotionEffectType.getByName(s[0])!!,s[1].toInt(),s[2].toInt(),false,false)
+
+            ret.add(effect)
         }
-        return map
+
+        return ret
 
     }
 
+    private fun getSound(mutableList: MutableList<String>):MutableList<SoundData>{
 
-    private fun getBuff(type:Type, cfg: YamlConfiguration):HashMap<Int,MutableList<PotionEffect>>{
+        val ret = mutableListOf<SoundData>()
 
-        val path = when(type){
+        for (data in mutableList){
+            val s = data.split(",")
 
-            Type.NORMAL->"buff"
-            Type.RANDOM->"buffRandom"
-            Type.SYMPTOMS->"buffSymptoms"
+            val sound = SoundData()
+            sound.sound = s[0]
+            sound.volume = s[1].toFloat()
+            sound.pitch = s[2].toFloat()
 
+            ret.add(sound)
         }
 
-        val retMap = HashMap<Int,MutableList<PotionEffect>>()
-
-        for (map in getHMList(path,cfg)){
-
-            val r = mutableListOf<PotionEffect>()
-
-            for (data in map.value){
-
-                val s = data.split(",")
-
-                val effect = PotionEffect(PotionEffectType.getByName(s[0])!!,s[1].toInt(),s[2].toInt(),false,false)
-
-                r.add(effect)
-            }
-
-            retMap[map.key] = r
-        }
-
-        return retMap
-
+        return ret
     }
 
-    private fun getSound(type: Type, cfg: YamlConfiguration):HashMap<Int,MutableList<SoundData>>{
+    private fun getParticle(mutableList: MutableList<String>): MutableList<ParticleData> {
 
-        val path = when(type){
+        val ret = mutableListOf<ParticleData>()
 
-            Type.NORMAL->"sound"
-            Type.RANDOM->"soundRandom"
-            Type.SYMPTOMS->"soundSymptoms"
+        for (data in mutableList){
+            val s = data.split(",")
 
+            val particle = ParticleData()
+            particle.particle = Particle.valueOf(s[0])
+            particle.size = s[1].toInt()
+
+            ret.add(particle)
         }
 
-        val retMap = HashMap<Int,MutableList<SoundData>>()
-
-        for (map in getHMList(path,cfg)){
-
-            val r = mutableListOf<SoundData>()
-
-            for (data in map.value){
-                val s = data.split(",")
-
-                val sound = SoundData()
-                sound.sound = s[0]
-                sound.volume = s[1].toFloat()
-                sound.pitch = s[2].toFloat()
-
-                r.add(sound)
-            }
-
-            retMap[map.key] = r
-        }
-
-        return retMap
-    }
-
-    private fun getParticle(type: Type, cfg:YamlConfiguration): HashMap<Int, MutableList<ParticleData>> {
-
-        val path = when(type){
-
-            Type.NORMAL->"particle"
-            Type.RANDOM->"particleRandom"
-            Type.SYMPTOMS->"particleSymptoms"
-
-        }
-        val retMap = HashMap<Int,MutableList<ParticleData>>()
-
-        for (map in getHMList(path,cfg)){
-
-            val r = mutableListOf<ParticleData>()
-
-            for (data in map.value){
-                val s = data.split(",")
-
-                val particle = ParticleData()
-                particle.particle = Particle.valueOf(s[0])
-                particle.size = s[1].toInt()
-
-                r.add(particle)
-            }
-
-            retMap[map.key] = r
-
-        }
-
-        return retMap
+        return ret
     }
 
     fun loadPluginConfig(){
@@ -228,35 +214,15 @@ object Config{
         var material = "DIAMOND_HOE"
         var modelData = 0
         var type = 0
-
-
         //クールダウン
         var cooldown : Long = 0
-
-        //任意
-        var changeItem = "none" //使用後、アイテムを変更する場合
-        var isChange = false //違う変えるか
-
-        //HashMap key...Level,value...mutableList<String>
-        //type0 以外はレベルがないので、Level0のみをかく
-
-        //全レベル使用可
         //lore
         var lore = mutableListOf<String>()
-        //message
-        var useMsg = mutableListOf<String>()
 
         var hasEnchantEffect = false
 
         var parameter = mutableListOf<DrugParameter>()
 
-        //type1(治療薬など)
-        var weakDrug = "drug" //type2
-        var weakProb  = mutableListOf<Double>()//飲むときに、確率で治る
-        var stopDepend = false
-
-        //type2(マスクなど)
-        var defenseProb :Double = 0.0
 
     }
 
@@ -265,21 +231,27 @@ object Config{
         var msg = ""
 
         var func = ""
+        var funcSymptoms = ""
 
         var buff = mutableListOf<PotionEffect>()
         var buffRandom = mutableListOf<PotionEffect>()
+        var buffSymptoms = mutableListOf<PotionEffect>()
 
         var particle = mutableListOf<ParticleData>()
         var particleRandom = mutableListOf<ParticleData>()
+        var particleSymptoms = mutableListOf<ParticleData>()
 
         var sound = mutableListOf<SoundData>()
         var soundRandom = mutableListOf<SoundData>()
+        var soundSymptoms = mutableListOf<SoundData>()
 
         var cmd = mutableListOf<String>()
         var cmdRandom = mutableListOf<String>()
+        var cmdSymptoms = mutableListOf<String>()
 
         var serverCmd = mutableListOf<String>()
         var serverCmdRandom = mutableListOf<String>()
+        var serverCmdSymptoms = mutableListOf<String>()
 
         var isRemoveBuff = false
         var isRemoveItem = true
@@ -290,20 +262,9 @@ object Config{
         var symptomsFirstTime = 0 //使用時に最初の禁断症状が来る時間(秒)
         var symptomsTime = 0 //2回目以降に禁断症状が来る時間(秒)
 
-        var symptomsMsg = ""
+        var msgSymptoms = ""
         var dependMsg = ""
 
-        var buffSymptoms = mutableListOf<PotionEffect>()
-
-        var particleSymptoms = mutableListOf<ParticleData>()
-
-        var soundSymptoms = mutableListOf<SoundData>()
-
-        var cmdSymptoms = mutableListOf<String>()
-
-        var serverCmdSymptoms = mutableListOf<String>()
-
-        var funcSymptoms = ""
 
     }
 
@@ -318,10 +279,4 @@ object Config{
         var pitch = 0.0F
     }
 
-    enum class Type{
-        NORMAL,
-        RANDOM,
-        SYMPTOMS
-
-    }
 }
