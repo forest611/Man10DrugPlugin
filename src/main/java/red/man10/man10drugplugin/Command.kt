@@ -5,6 +5,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import red.man10.man10drugplugin.Man10DrugPlugin.Companion.debugMode
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugData
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugName
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.isReload
@@ -245,6 +246,11 @@ object Command: CommandExecutor {
                     sender.sendMessage("§lトータル:$total")
 
                 }.start()
+            }
+
+            "debug" ->{
+                debugMode = !debugMode
+                sender.sendMessage("$debugMode")
             }
 
         }

@@ -20,85 +20,89 @@ object DependThread{
     fun dependThread(){
 
         Thread{
-            if (isReload || !pluginEnable) return@Thread
 
-            for (p in Bukkit.getOnlinePlayers()) {
+            while (true){
 
-                for (drug in drugName) {
+                for (p in Bukkit.getOnlinePlayers()) {
 
-                    val data = drugData[drug]!!
-                    val pd = Database.get(p,drug)!!
-
-                    if (!pd.isDepend) continue
-                    if (data.type != 0) continue
-
-                    val now = Date().time
-                    val time = pd.finalUseTime.time
-
-                    val difference = (now - time) / 1000 //時間差(second)
-
-                    val parameter = data.parameter[pd.level]
-
-                    if (parameter.symptomsStopProb>Math.random()){
-                        pd.isDepend = false
-                        Database.set(p,drug,pd)
-                        return@Thread
-                    }
-
-                    //デバッグモード
-                    if (debugMode && difference > 60) {
-
-                        Bukkit.getScheduler().runTask(plugin, Runnable {
-                            symptoms(p, parameter)
-                        })
-
-                        pd.totalSymptoms++
-                        Database.set(p,drug,pd)
-                        continue
-                    }
+                    if (isReload || !pluginEnable) break
 
 
-                    //最初の禁断症状
-                    if (pd.totalSymptoms == 0 && parameter.symptomsFirstTime < difference) {
+                    for (drug in drugName) {
 
-                        Bukkit.getScheduler().runTask(plugin, Runnable {
-                            symptoms(p, parameter)
-                        })
+                        val data = drugData[drug]!!
+                        val pd = Database.get(p,drug)!!
 
-                        pd.totalSymptoms++
-                        pd.finalUseTime = Date()
-                        Database.set(p,drug,pd)
-                        continue
-                    }
-                    //2回目以降の禁断症状
-                    if (parameter.symptomsTime < difference) {
+                        if (!pd.isDepend) continue
+                        if (data.type != 0) continue
 
-                        Bukkit.getScheduler().runTask(plugin, Runnable {
-                            symptoms(p, parameter)
-                        })
+                        val time = pd.finalUseTime.time
 
-                        pd.totalSymptoms++
-                        pd.finalUseTime = Date()
-                        //依存レベルダウン
-                        if (parameter.dependLvDown>Math.random()) {
-                            pd.level--
-                            if (pd.level == -1) {
-                                pd.level = 0
-                                pd.usedCount = 0
-                                pd.isDepend = false
-                                pd.totalSymptoms = 0
-                                p.sendMessage("§e§l依存が完全に治ったようだ")
-                            }
+                        val difference = (Date().time - time) / 1000 //時間差(second)
+
+                        val parameter = data.parameter[pd.level]
+
+                        if (parameter.symptomsStopProb>Math.random()){
+                            pd.isDepend = false
+                            Database.set(p,drug,pd)
+                            continue
                         }
 
-                        Database.set(p,drug,pd)
-                        continue
+                        //デバッグモード
+                        if (debugMode && difference > 60) {
+
+                            Bukkit.getScheduler().runTask(plugin, Runnable {
+                                symptoms(p, parameter)
+                            })
+
+                            pd.totalSymptoms++
+                            Database.set(p,drug,pd)
+                            continue
+                        }
+
+
+                        //最初の禁断症状
+                        if (pd.totalSymptoms == 0 && parameter.symptomsFirstTime < difference) {
+
+                            Bukkit.getScheduler().runTask(plugin, Runnable {
+                                symptoms(p, parameter)
+                            })
+
+                            pd.totalSymptoms++
+                            pd.finalUseTime = Date()
+                            Database.set(p,drug,pd)
+                            continue
+                        }
+                        //2回目以降の禁断症状
+                        if (parameter.symptomsTime < difference) {
+
+                            Bukkit.getScheduler().runTask(plugin, Runnable {
+                                symptoms(p, parameter)
+                            })
+
+                            pd.totalSymptoms++
+                            pd.finalUseTime = Date()
+                            //依存レベルダウン
+                            if (parameter.dependLvDown>Math.random()) {
+                                pd.level--
+                                if (pd.level == -1) {
+                                    pd.level = 0
+                                    pd.usedCount = 0
+                                    pd.isDepend = false
+                                    pd.totalSymptoms = 0
+                                    p.sendMessage("§e§l依存が完全に治ったようだ")
+                                }
+                            }
+
+                            Database.set(p,drug,pd)
+                            continue
+                        }
                     }
                 }
-            }
 
-            Thread.sleep(10000)
-        }
+                Thread.sleep(10000)
+            }
+        }.start()
 
     }
 

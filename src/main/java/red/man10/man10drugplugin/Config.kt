@@ -63,9 +63,9 @@ object Config{
 
             Bukkit.getLogger().info("Loaded file $dataName (${file.name})")
 
-            val level = 0
+            var level = 0
 
-            while (cfg.get("$level") != null){
+            while (cfg.getConfigurationSection("$level") != null){
 
                 val parameter = DrugParameter()
 
@@ -108,6 +108,8 @@ object Config{
                 parameter.dependMsg = cfg.getString("${level}.dependMsg")?:""
 
                 data.parameter.add(parameter)
+
+                level++
             }
 
             data.displayName = cfg.getString("displayName")?:""
