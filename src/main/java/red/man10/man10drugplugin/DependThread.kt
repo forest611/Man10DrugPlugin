@@ -10,7 +10,6 @@ import red.man10.man10drugplugin.Man10DrugPlugin.Companion.isReload
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.plugin
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.pluginEnable
 import java.util.*
-import javax.xml.crypto.Data
 
 object DependThread{
 
@@ -107,6 +106,10 @@ object DependThread{
     }
 
     private fun symptoms(p:Player, data:Config.DrugParameter){
+
+        for (e in p.activePotionEffects){
+            p.removePotionEffect(e.type)
+        }
 
         for (b in data.buffSymptoms){
             p.addPotionEffect(b)
