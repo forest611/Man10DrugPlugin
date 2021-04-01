@@ -70,23 +70,23 @@ object Config{
                 val parameter = DrugParameter()
 
                 parameter.buff = getBuff(cfg.getStringList("${level}.buff"))
-                parameter.buffRandom = getBuff(cfg.getStringList("${level}.buffRandom"))
+                parameter.buffRandom = getBuffRandom(cfg.getStringList("${level}.buffRandom"))
                 parameter.buffSymptoms = getBuff(cfg.getStringList("${level}.buffSymptoms"))
 
                 parameter.cmd = cfg.getStringList("${level}.cmd")
-                parameter.cmdRandom = cfg.getStringList("${level}.cmdRandom")
+                parameter.cmdRandom = getRandom(cfg.getStringList("${level}.cmdRandom"))
                 parameter.cmdSymptoms = cfg.getStringList("${level}.cmdSymptoms")
 
                 parameter.sound = getSound(cfg.getStringList("${level}.sound"))
-                parameter.soundRandom = getSound(cfg.getStringList("${level}.soundRandom"))
+                parameter.soundRandom = getSoundRandom(cfg.getStringList("${level}.soundRandom"))
                 parameter.soundSymptoms = getSound(cfg.getStringList("${level}.soundSymptoms"))
 
                 parameter.particle = getParticle(cfg.getStringList("${level}.particle"))
-                parameter.particleRandom = getParticle(cfg.getStringList("${level}.particleRandom"))
+                parameter.particleRandom = getParticleRandom(cfg.getStringList("${level}.particleRandom"))
                 parameter.particleSymptoms = getParticle(cfg.getStringList("${level}.particleSymptoms"))
 
                 parameter.serverCmd = cfg.getStringList("${level}.serverCmd")
-                parameter.serverCmdRandom = cfg.getStringList("${level}.serverCmdRandom")
+                parameter.serverCmdRandom = getRandom(cfg.getStringList("${level}.serverCmdRandom"))
                 parameter.serverCmdSymptoms = cfg.getStringList("${level}.serverCmdSymptoms")
 
                 parameter.msg = cfg.getString("${level}.msg")?:""
@@ -101,8 +101,9 @@ object Config{
                 parameter.dependLvUp = cfg.getDouble("${level}.dependLvUp")
                 parameter.dependLvDown = cfg.getDouble("${level}.dependLvDown")
 
-                parameter.symptomsFirstTime = cfg.getInt("${level}.symptomsFirstTIme")
-                parameter.symptomsTime = cfg.getInt("${level}.symptomsTIme")
+                parameter.symptomsFirstTime = cfg.getInt("${level}.symptomsFirstTime")
+                parameter.symptomsTime = cfg.getInt("${level}.symptomsTime")
+                parameter.symptomsStopProb = cfg.getDouble("${level}.symptomsStopProb")
 
                 parameter.dependMsg = cfg.getString("${level}.dependMsg")?:""
 
@@ -204,6 +205,79 @@ object Config{
 
         return ret
     }
+    private fun getBuffRandom(mutableList: MutableList<String>):MutableList<Pair<PotionEffect,Double>>{
+
+        val ret = mutableListOf<Pair<PotionEffect,Double>>()
+
+        for (data in mutableList){
+
+            val split = data.split(";")
+
+            val param = split[0].split(",")
+
+            val effect = PotionEffect(PotionEffectType.getByName(param[0])!!,param[1].toInt(),param[2].toInt(),false,false)
+
+            ret.add(Pair(effect,split[1].toDouble()))
+        }
+
+        return ret
+
+    }
+
+    private fun getSoundRandom(mutableList: MutableList<String>):MutableList<Pair<SoundData,Double>>{
+
+        val ret = mutableListOf<Pair<SoundData,Double>>()
+
+        for (data in mutableList){
+
+            val split = data.split(";")
+
+            val param = split[0].split(",")
+
+            val sound = SoundData()
+            sound.sound = param[0]
+            sound.volume = param[1].toFloat()
+            sound.pitch = param[2].toFloat()
+
+            ret.add(Pair(sound,split[1].toDouble()))
+        }
+
+        return ret
+    }
+
+    private fun getParticleRandom(mutableList: MutableList<String>): MutableList<Pair<ParticleData,Double>> {
+
+        val ret = mutableListOf<Pair<ParticleData,Double>>()
+
+        for (data in mutableList){
+
+            val split = data.split(";")
+
+            val param = split[0].split(",")
+
+            val particle = ParticleData()
+            particle.particle = Particle.valueOf(param[0])
+            particle.size = param[1].toInt()
+
+            ret.add(Pair(particle,split[1].toDouble()))
+        }
+
+        return ret
+    }
+
+    private fun getRandom(mutableList: MutableList<String>):MutableList<Pair<String,Double>>{
+
+        val list = mutableListOf<Pair<String,Double>>()
+
+        for (str in mutableList){
+            val split = str.split(";")
+            list.add(Pair(split[0],split[1].toDouble()))
+        }
+
+        return list
+
+    }
+
 
     fun loadPluginConfig(){
         plugin.saveDefaultConfig()
@@ -248,23 +322,23 @@ object Config{
         var funcSymptoms = ""
 
         var buff = mutableListOf<PotionEffect>()
-        var buffRandom = mutableListOf<PotionEffect>()
+        var buffRandom = mutableListOf<Pair<PotionEffect,Double>>()
         var buffSymptoms = mutableListOf<PotionEffect>()
 
         var particle = mutableListOf<ParticleData>()
-        var particleRandom = mutableListOf<ParticleData>()
+        var particleRandom = mutableListOf<Pair<ParticleData,Double>>()
         var particleSymptoms = mutableListOf<ParticleData>()
 
         var sound = mutableListOf<SoundData>()
-        var soundRandom = mutableListOf<SoundData>()
+        var soundRandom = mutableListOf<Pair<SoundData,Double>>()
         var soundSymptoms = mutableListOf<SoundData>()
 
         var cmd = mutableListOf<String>()
-        var cmdRandom = mutableListOf<String>()
+        var cmdRandom = mutableListOf<Pair<String,Double>>()
         var cmdSymptoms = mutableListOf<String>()
 
         var serverCmd = mutableListOf<String>()
-        var serverCmdRandom = mutableListOf<String>()
+        var serverCmdRandom = mutableListOf<Pair<String,Double>>()
         var serverCmdSymptoms = mutableListOf<String>()
 
         var isRemoveBuff = false
@@ -275,6 +349,7 @@ object Config{
 
         var symptomsFirstTime = 0 //使用時に最初の禁断症状が来る時間(秒)
         var symptomsTime = 0 //2回目以降に禁断症状が来る時間(秒)
+        var symptomsStopProb = 0.0
 
         var msgSymptoms = ""
         var dependMsg = ""

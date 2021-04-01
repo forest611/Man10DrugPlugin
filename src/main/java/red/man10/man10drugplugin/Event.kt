@@ -24,9 +24,12 @@ import red.man10.man10drugplugin.Man10DrugPlugin.Companion.pluginEnable
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.random
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.rep
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.useMilk
+import java.security.SecureRandom.getInstance
 import java.util.*
 
 object Event:Listener{
+
+    val random = getInstance("NativePRNGNonBlocking")
 
     @EventHandler
     fun useDrugEvent(e:PlayerInteractEvent){
@@ -131,12 +134,28 @@ object Event:Listener{
             p.addPotionEffect(b)
         }
 
+        for (b in parameter.buffRandom){
+            if (b.second<= random.nextDouble())continue
+            p.addPotionEffect(b.first)
+        }
+
         for (s in parameter.sound){
             p.location.world.playSound(p.location, s.sound, s.volume,s.pitch)
         }
 
+        for (s in parameter.soundRandom){
+            if (s.second<= random.nextDouble())continue
+
+            p.location.world.playSound(p.location, s.first.sound, s.first.volume,s.first.pitch)
+        }
+
         for (par in parameter.particle){
             p.location.world.spawnParticle(par.particle,p.location,par.size)
+        }
+
+        for (par in parameter.particleRandom){
+            if (par.second<= random.nextDouble())continue
+            p.location.world.spawnParticle(par.first.particle,p.location,par.first.size)
         }
 
         for (c in parameter.cmd){
@@ -150,29 +169,26 @@ object Event:Listener{
             p.isOp = false
         }
 
+        for (c in parameter.cmdRandom){
+            if (c.second<= random.nextDouble())continue
+
+            if (p.isOp){
+                p.performCommand(rep(c.first,p,dataName))
+                continue
+            }
+            p.isOp = true
+            p.performCommand(rep(c.first,p,dataName))
+            p.isOp = false
+        }
+
         for (c in parameter.serverCmd){
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(),rep(c,p,dataName))
         }
 
-
-        p.addPotionEffect(parameter.buffRandom[Random().nextInt(parameter.buffRandom.size-1)])
-
-        val s = parameter.soundRandom[Random().nextInt(parameter.soundRandom.size -1)]
-        p.location.world.playSound(p.location, s.sound, s.volume,s.pitch)
-
-
-        val par = parameter.particleRandom[Random().nextInt(parameter.particleRandom.size-1)]
-        p.location.world.spawnParticle(par.particle,p.location,par.size)
-
-        if (p.isOp){
-            p.performCommand(rep(random(parameter.cmdRandom),p,dataName))
-        }else{
-            p.isOp = true
-            p.performCommand(rep(random(parameter.cmdRandom),p,dataName))
-            p.isOp = false
+        for (c in parameter.serverCmdRandom){
+            if (c.second<= random.nextDouble())continue
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(),rep(c.first,p,dataName))
         }
-
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(),rep(random(parameter.serverCmdRandom),p,dataName))
 
         MDPFunction.runFunc(parameter.func,p)
 

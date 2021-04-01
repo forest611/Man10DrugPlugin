@@ -10,6 +10,7 @@ import red.man10.man10drugplugin.Man10DrugPlugin.Companion.isReload
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.plugin
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.pluginEnable
 import java.util.*
+import javax.xml.crypto.Data
 
 object DependThread{
 
@@ -38,11 +39,17 @@ object DependThread{
 
                     val parameter = data.parameter[pd.level]
 
+                    if (parameter.symptomsStopProb>Math.random()){
+                        pd.isDepend = false
+                        Database.set(p,drug,pd)
+                        return@Thread
+                    }
+
                     //デバッグモード
                     if (debugMode && difference > 60) {
 
                         Bukkit.getScheduler().runTask(plugin, Runnable {
-                            symptoms(p, parameter, pd)
+                            symptoms(p, parameter)
                         })
 
                         pd.totalSymptoms++
@@ -55,7 +62,7 @@ object DependThread{
                     if (pd.totalSymptoms == 0 && parameter.symptomsFirstTime < difference) {
 
                         Bukkit.getScheduler().runTask(plugin, Runnable {
-                            symptoms(p, parameter, pd)
+                            symptoms(p, parameter)
                         })
 
                         pd.totalSymptoms++
@@ -67,13 +74,13 @@ object DependThread{
                     if (parameter.symptomsTime < difference) {
 
                         Bukkit.getScheduler().runTask(plugin, Runnable {
-                            symptoms(p, parameter, pd)
+                            symptoms(p, parameter)
                         })
 
                         pd.totalSymptoms++
                         pd.finalUseTime = Date()
                         //依存レベルダウン
-                        if (Math.random() < parameter.dependLvDown) {
+                        if (parameter.dependLvDown>Math.random()) {
                             pd.level--
                             if (pd.level == -1) {
                                 pd.level = 0
@@ -95,7 +102,7 @@ object DependThread{
 
     }
 
-    private fun symptoms(p:Player, data:Config.DrugParameter, pd:Database.PlayerData){
+    private fun symptoms(p:Player, data:Config.DrugParameter){
 
         for (b in data.buffSymptoms){
             p.addPotionEffect(b)
