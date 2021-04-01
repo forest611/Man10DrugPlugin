@@ -21,7 +21,6 @@ import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugName
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.isReload
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.plugin
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.pluginEnable
-import red.man10.man10drugplugin.Man10DrugPlugin.Companion.random
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.rep
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.useMilk
 import java.security.SecureRandom.getInstance
