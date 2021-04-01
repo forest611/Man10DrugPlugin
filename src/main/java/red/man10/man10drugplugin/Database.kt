@@ -49,6 +49,10 @@ object Database{
         mysql.close()
         rs.close()
 
+        for (drug in drugName){
+            if (playerData[Pair(p,drug)] != null)continue
+            insert(p,drug)
+        }
 
     }
 
@@ -70,25 +74,15 @@ object Database{
     }
 
     private fun insert(p:Player,drug: String){
-                executeQueue.add("INSERT INTO `drug_dependence` " +
-                        "(`uuid`, `player`, `drug_name`, `used_count`, `used_time`, `level`, `symptoms_total`)" +
-                        " VALUES ('${p.uniqueId}', '${p.name}', '$drug', '0', now(), '0', '0');")
+        executeQueue.add("INSERT INTO `drug_dependence` " +
+                "(`uuid`, `player`, `drug_name`, `used_count`, `used_time`, `level`, `symptoms_total`)" +
+                " VALUES ('${p.uniqueId}', '${p.name}', '$drug', '0', now(), '0', '0');")
 
     }
 
-    fun get(p:Player,drug:String): PlayerData? {
-
-        if (!drugData.contains(drug))return null
-
-        var data = playerData[Pair(p,drug)]
-
-        if (data == null){
-            data= PlayerData()
-            insert(p,drug)
-        }
-
-        return data
-
+    fun get(p: Player, drug: String): PlayerData? {
+        if (!drugData.contains(drug)) return null
+        return playerData[Pair(p, drug)] ?: PlayerData()
     }
 
     fun set(p:Player,drug: String,data: PlayerData){
