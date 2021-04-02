@@ -95,8 +95,8 @@ object Config{
                 parameter.func = cfg.getString("${level}.func")?:""
                 parameter.funcSymptoms = cfg.getString("${level}.funcSymptoms")?:""
 
-                parameter.isRemoveBuff = cfg.getBoolean("${level}.removeBuff")
-                parameter.isRemoveItem = cfg.getBoolean("${level}.removeItem")
+                parameter.isRemoveBuff = cfg.getBoolean("${level}.removeBuff",true)
+                parameter.isRemoveItem = cfg.getBoolean("${level}.removeItem",true)
 
                 parameter.dependLvUp = cfg.getDouble("${level}.dependLvUp")
                 parameter.dependLvDown = cfg.getDouble("${level}.dependLvDown")
@@ -113,7 +113,7 @@ object Config{
             }
 
             data.displayName = cfg.getString("displayName")?:""
-            data.material = Material.valueOf(cfg.getString("material")?:"")
+            data.material = Material.valueOf(cfg.getString("material")?:"IRON_NUGGET")
             data.lore = cfg.getStringList("lore")
             data.modelData = cfg.getInt("modelData")
 
