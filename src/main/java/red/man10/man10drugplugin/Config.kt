@@ -58,8 +58,6 @@ object Config{
                 continue
             }
 
-            drugName.add(dataName)
-
             val data = Drug()
 
             Bukkit.getLogger().info("Loaded file $dataName (${file.name})")
@@ -123,7 +121,7 @@ object Config{
 
             data.level = data.parameter.size-1
 
-            if (data.level <= 0){
+            if (data.level < 0){
                 Bukkit.getLogger().info("${dataName}パラメータが設定されていません")
                 continue
             }
@@ -169,6 +167,7 @@ object Config{
             data.itemStack = drugItem
 
             drugData[dataName] = data
+            drugName.add(dataName)
         }
     }
 
