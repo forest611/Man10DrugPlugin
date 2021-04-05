@@ -109,7 +109,15 @@ object Config{
 
                 data.parameter.add(parameter)
 
-                level++
+                level ++
+
+            }
+
+            data.level = data.parameter.size-1
+
+            if (data.level <= 0){
+                Bukkit.getLogger().info("${dataName}パラメータが設定されていません")
+                continue
             }
 
             data.displayName = cfg.getString("displayName")?:""
@@ -119,7 +127,7 @@ object Config{
 
             data.hasEnchantEffect = cfg.getBoolean("enchantEffect")
             data.disableWorld = cfg.getStringList("disableWorld")
-            data.level = level
+            data.level = data.parameter.size-1
             data.cooldown = cfg.getLong("cooldown")
             data.type = cfg.getInt("type")
 
