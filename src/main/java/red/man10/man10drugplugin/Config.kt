@@ -19,6 +19,7 @@ import red.man10.man10drugplugin.Man10DrugPlugin.Companion.plugin
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.pluginEnable
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.useMilk
 import java.io.File
+import java.lang.Exception
 
 object Config{
 
@@ -63,54 +64,61 @@ object Config{
 
             Bukkit.getLogger().info("Loaded file $dataName (${file.name})")
 
-            var level = 0
+            try {
+                var level = 0
 
-            while (cfg.getConfigurationSection("$level") != null){
+                while (cfg.getConfigurationSection("$level") != null){
 
-                val parameter = DrugParameter()
+                    val parameter = DrugParameter()
 
-                parameter.buff = getBuff(cfg.getStringList("${level}.buff"))
-                parameter.buffRandom = getBuffRandom(cfg.getStringList("${level}.buffRandom"))
-                parameter.buffSymptoms = getBuff(cfg.getStringList("${level}.buffSymptoms"))
+                    parameter.buff = getBuff(cfg.getStringList("${level}.buff"))
+                    parameter.buffRandom = getBuffRandom(cfg.getStringList("${level}.buffRandom"))
+                    parameter.buffSymptoms = getBuff(cfg.getStringList("${level}.buffSymptoms"))
 
-                parameter.cmd = cfg.getStringList("${level}.cmd")
-                parameter.cmdRandom = getRandom(cfg.getStringList("${level}.cmdRandom"))
-                parameter.cmdSymptoms = cfg.getStringList("${level}.cmdSymptoms")
+                    parameter.cmd = cfg.getStringList("${level}.cmd")
+                    parameter.cmdRandom = getRandom(cfg.getStringList("${level}.cmdRandom"))
+                    parameter.cmdSymptoms = cfg.getStringList("${level}.cmdSymptoms")
 
-                parameter.sound = getSound(cfg.getStringList("${level}.sound"))
-                parameter.soundRandom = getSoundRandom(cfg.getStringList("${level}.soundRandom"))
-                parameter.soundSymptoms = getSound(cfg.getStringList("${level}.soundSymptoms"))
+                    parameter.sound = getSound(cfg.getStringList("${level}.sound"))
+                    parameter.soundRandom = getSoundRandom(cfg.getStringList("${level}.soundRandom"))
+                    parameter.soundSymptoms = getSound(cfg.getStringList("${level}.soundSymptoms"))
 
-                parameter.particle = getParticle(cfg.getStringList("${level}.particle"))
-                parameter.particleRandom = getParticleRandom(cfg.getStringList("${level}.particleRandom"))
-                parameter.particleSymptoms = getParticle(cfg.getStringList("${level}.particleSymptoms"))
+                    parameter.particle = getParticle(cfg.getStringList("${level}.particle"))
+                    parameter.particleRandom = getParticleRandom(cfg.getStringList("${level}.particleRandom"))
+                    parameter.particleSymptoms = getParticle(cfg.getStringList("${level}.particleSymptoms"))
 
-                parameter.serverCmd = cfg.getStringList("${level}.serverCmd")
-                parameter.serverCmdRandom = getRandom(cfg.getStringList("${level}.serverCmdRandom"))
-                parameter.serverCmdSymptoms = cfg.getStringList("${level}.serverCmdSymptoms")
+                    parameter.serverCmd = cfg.getStringList("${level}.serverCmd")
+                    parameter.serverCmdRandom = getRandom(cfg.getStringList("${level}.serverCmdRandom"))
+                    parameter.serverCmdSymptoms = cfg.getStringList("${level}.serverCmdSymptoms")
 
-                parameter.msg = cfg.getString("${level}.msg")?:""
-                parameter.msgSymptoms = cfg.getString("${level}.msgSymptoms")?:""
+                    parameter.msg = cfg.getString("${level}.msg")?:""
+                    parameter.msgSymptoms = cfg.getString("${level}.msgSymptoms")?:""
 
-                parameter.func = cfg.getString("${level}.func")?:""
-                parameter.funcSymptoms = cfg.getString("${level}.funcSymptoms")?:""
+                    parameter.func = cfg.getString("${level}.func")?:""
+                    parameter.funcSymptoms = cfg.getString("${level}.funcSymptoms")?:""
 
-                parameter.isRemoveBuff = cfg.getBoolean("${level}.removeBuff",true)
-                parameter.isRemoveItem = cfg.getBoolean("${level}.removeItem",true)
+                    parameter.isRemoveBuff = cfg.getBoolean("${level}.removeBuff",true)
+                    parameter.isRemoveItem = cfg.getBoolean("${level}.removeItem",true)
 
-                parameter.dependLvUp = cfg.getDouble("${level}.dependLvUp")
-                parameter.dependLvDown = cfg.getDouble("${level}.dependLvDown")
+                    parameter.dependLvUp = cfg.getDouble("${level}.dependLvUp")
+                    parameter.dependLvDown = cfg.getDouble("${level}.dependLvDown")
 
-                parameter.symptomsFirstTime = cfg.getInt("${level}.symptomsFirstTime")
-                parameter.symptomsTime = cfg.getInt("${level}.symptomsTime")
-                parameter.symptomsStopProb = cfg.getDouble("${level}.symptomsStopProb")
+                    parameter.symptomsFirstTime = cfg.getInt("${level}.symptomsFirstTime")
+                    parameter.symptomsTime = cfg.getInt("${level}.symptomsTime")
+                    parameter.symptomsStopProb = cfg.getDouble("${level}.symptomsStopProb")
 
-                parameter.dependMsg = cfg.getString("${level}.dependMsg")?:""
+                    parameter.dependMsg = cfg.getString("${level}.dependMsg")?:""
 
-                data.parameter.add(parameter)
+                    data.parameter.add(parameter)
 
-                level ++
+                    level ++
 
+                }
+
+            }catch (e:Exception){
+                Bukkit.getLogger().info("ドラッグファイルのエラー：${dataName}")
+                Bukkit.getLogger().info(e.message)
+                continue
             }
 
             data.level = data.parameter.size-1
