@@ -68,7 +68,7 @@ object Command: CommandExecutor {
                     sender.sendMessage("§e§lドラッグデータ、プラグインのコンフィグ読み込み完了")
 
                     Bukkit.broadcastMessage("§e§lドラッグプラグインのリロードが完了しました！")
-
+                    isReload = false
                 }.start()
 
             }
