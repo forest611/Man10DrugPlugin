@@ -9,12 +9,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerItemConsumeEvent
-import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.persistence.PersistentDataType
-import red.man10.man10drugplugin.Database.executeQueue
-import red.man10.man10drugplugin.Database.load
-import red.man10.man10drugplugin.Database.save
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.disableWorld
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugData
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.drugName
@@ -23,12 +18,14 @@ import red.man10.man10drugplugin.Man10DrugPlugin.Companion.plugin
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.pluginEnable
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.rep
 import red.man10.man10drugplugin.Man10DrugPlugin.Companion.useMilk
-import java.security.SecureRandom.getInstance
 import java.util.*
+import kotlin.collections.HashMap
 
 object Event:Listener{
 
-    val random = getInstance("NativePRNGNonBlocking")
+    private val random = Random()
+
+    private val coolDown = HashMap<Pair<UUID,String>,Long>()
 
     @EventHandler
     fun useDrugEvent(e:PlayerInteractEvent){
@@ -61,17 +58,15 @@ object Event:Listener{
 
         if (data.disableWorld.contains(p.world.name))return
 
-        val pd = Database.get(p, drug)!!
-
         //cooldown
-        val difference = (Date().time - pd.finalUseTime.time)/1000
+        val difference = (Date().time - coolDown[Pair(p.uniqueId,drug)]!!)/1000
         if (data.cooldown > difference && data.cooldown != 0L)return
 
         //buffなどの処理
-        useDrug(p,drug,pd,data)
+        useDrug(p,drug,data)
 
         //remove an item
-        if (data.parameter[pd.level].isRemoveItem) {
+        if (data.parameter[0].isRemoveItem) {
             item.amount = item.amount - 1
         }
 //        //remove prob
@@ -95,33 +90,16 @@ object Event:Listener{
         }
     }
 
-    @EventHandler
-    fun loginEvent(e : PlayerJoinEvent){
-        Thread {
-            Thread.sleep(5000)
-            load(e.player)
-        }.start()
-    }
-
-    @EventHandler
-    fun logoutEvent(e:PlayerQuitEvent){
-        if (isReload)return
-        save(e.player)
-    }
-
     /////////////////////////////////
     //ドラッグ使用時の処理
     /////////////////////////////////
-    fun useDrug(p: Player, dataName:String, pd:Database.PlayerData, drug:Config.Drug){
+    fun useDrug(p: Player, dataName:String, drug:Config.Drug){
 
-        val parameter = drug.parameter[pd.level]
+        val parameter = drug.parameter[0]
 
         p.sendMessage(rep(parameter.msg,p,dataName))
 
-        //add logs
-        executeQueue.add("INSERT INTO `log` " +
-                "(`uuid`, `player`, `drug_name`,`date`)" +
-                " VALUES ('${p.uniqueId}', '${p.name}', '$dataName',now());")
+        Bukkit.getLogger().info("[DRUG]${p.name} used ${drug.displayName}")
 
         if (parameter.isRemoveBuff){
             for (e in p.activePotionEffects){
@@ -199,20 +177,6 @@ object Event:Listener{
 //            }
 //        }
 
-        pd.usedCount ++ //使用回数更新
-        pd.finalUseTime = Date()  //最終使用時刻更新
-
-        if (drug.type == 0){
-
-            pd.isDepend = true
-            pd.totalSymptoms = 0
-
-            //確率で依存レベルアップ
-            if (pd.level < drug.level &&Math.random()<parameter.dependLvUp){
-                pd.level ++
-            }
-        }
-
 //        if (data.type == 1){
 //            val pd2 = Database.get(p,data.weakDrug)!!
 //
@@ -234,8 +198,6 @@ object Event:Listener{
 //        }
 
 
-        //save player data
-        Database.set(p,dataName,pd)
 
     }
 

@@ -19,10 +19,6 @@ class Man10DrugPlugin : JavaPlugin() {
         getCommand("mdp")!!.setExecutor(Command)
 
         Bukkit.getServer().pluginManager.registerEvents(Event,this)
-        Database.mysql = MySQLManager(this,"man10drug")
-
-        Database.executeDBQueue()
-        DependThread.dependThread()
 
         Config.loadDrugs()
         MDPFunction.loadFunction()
@@ -30,9 +26,6 @@ class Man10DrugPlugin : JavaPlugin() {
     }
 
     override fun onDisable() { // Plugin shutdown logic
-        for (p in Bukkit.getOnlinePlayers()){
-            Database.save(p)
-        }
     }
 
     companion object{
