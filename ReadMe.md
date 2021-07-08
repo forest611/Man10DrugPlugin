@@ -24,10 +24,7 @@
 - displayName 　・・・アイテムの表示名
 - material    ・・・使うアイテム[アイテムタイプ一覧](https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html)
 - modelData    ・・・割り当てるCustomModelData  (初期値0)
-- type   ・・・アイテムのタイプ[^1]  (初期値0)
 - lore　　・・・アイテムの説明(リスト形式)
-
-[^1]:type0...依存するドラッグ type1...依存ドラッグの治療薬 type3...依存しない普通のアイテム(type2は未実装)
 
 ### その他の項目
 
@@ -64,27 +61,6 @@
 - isRemoveItem  ・・・消費アイテムにするかどうか
 - disableWorld  ・・・指定したワールドでは使えなくなる(リスト形式)
 
-### Type0 Only
-
-- isDepend  ・・・依存するかどうか(デフォルトtrue)
-- dependLevel  ・・・最大レベル
-- dependLvUp  ・・・依存レベルが上がる確率(リスト形式)
-- dependLvDown  ・・・依存レベルが下がる確率(リスト形式)
-- symptomsFirstTime  ・・・最初に禁断症状が出るまでの秒数(リスト形式)
-- symptomsTime  ・・・２回目移行の秒数(リスト形式)
-- symptomsStopProb  ・・・禁断症状が止まる確率(リスト形式)
-- buffSymptoms  ・・・禁断症状のバフ[^2]
-- particleSymptoms  ・・・禁断症状のパーティクル[^2]
-- soundSymptoms  ・・・禁断症状のサウンド[^2]
-- cmdSymptoms  ・・・禁断症状のプレイヤーコマンド[^2]
-- dependMsg  ・・・禁断症状時のメッセージ(リスト形式)
-- symptomsNearPlayer  ・・・禁断症状発生時に周囲のプレイヤーに処理をする(リスト形式)
-
-### Type1 Only
-
-- weakDrug  ・・・どのドラッグの依存を治療するか(dataNameの値)
-- wakProb  ・・・確率で依存が１レベルダウンする(リスト形式)
-- stopDepend  ・・・使ったら次にドラッグを使うまで依存が止まるかどうか
 
 [^2]:記入方法
 
