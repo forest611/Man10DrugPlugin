@@ -59,7 +59,7 @@ object Event:Listener{
         if (data.disableWorld.contains(p.world.name))return
 
         //cooldown
-        val difference = (Date().time - coolDown[Pair(p.uniqueId,drug)]!!)/1000
+        val difference = (Date().time - (coolDown[Pair(p.uniqueId,drug)]?:0))/1000
         if (data.cooldown > difference && data.cooldown != 0L)return
 
         //buffなどの処理
