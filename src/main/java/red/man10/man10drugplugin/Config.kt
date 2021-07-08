@@ -63,63 +63,53 @@ object Config{
             Bukkit.getLogger().info("Loaded file $dataName (${file.name})")
 
             try {
-                var level = 0
+                val parameter = DrugParameter()
 
-                while (cfg.getConfigurationSection("$level") != null){
+                parameter.buff = getBuff(cfg.getStringList("buff"))
+                parameter.buffRandom = getBuffRandom(cfg.getStringList("buffRandom"))
+                parameter.buffSymptoms = getBuff(cfg.getStringList("buffSymptoms"))
 
-                    val parameter = DrugParameter()
+                parameter.cmd = cfg.getStringList("cmd")
+                parameter.cmdRandom = getRandom(cfg.getStringList("cmdRandom"))
+                parameter.cmdSymptoms = cfg.getStringList("cmdSymptoms")
 
-                    parameter.buff = getBuff(cfg.getStringList("${level}.buff"))
-                    parameter.buffRandom = getBuffRandom(cfg.getStringList("${level}.buffRandom"))
-                    parameter.buffSymptoms = getBuff(cfg.getStringList("${level}.buffSymptoms"))
+                parameter.sound = getSound(cfg.getStringList("sound"))
+                parameter.soundRandom = getSoundRandom(cfg.getStringList("soundRandom"))
+                parameter.soundSymptoms = getSound(cfg.getStringList("soundSymptoms"))
 
-                    parameter.cmd = cfg.getStringList("${level}.cmd")
-                    parameter.cmdRandom = getRandom(cfg.getStringList("${level}.cmdRandom"))
-                    parameter.cmdSymptoms = cfg.getStringList("${level}.cmdSymptoms")
+                parameter.particle = getParticle(cfg.getStringList("particle"))
+                parameter.particleRandom = getParticleRandom(cfg.getStringList("particleRandom"))
+                parameter.particleSymptoms = getParticle(cfg.getStringList("particleSymptoms"))
 
-                    parameter.sound = getSound(cfg.getStringList("${level}.sound"))
-                    parameter.soundRandom = getSoundRandom(cfg.getStringList("${level}.soundRandom"))
-                    parameter.soundSymptoms = getSound(cfg.getStringList("${level}.soundSymptoms"))
+                parameter.serverCmd = cfg.getStringList("serverCmd")
+                parameter.serverCmdRandom = getRandom(cfg.getStringList("serverCmdRandom"))
+                parameter.serverCmdSymptoms = cfg.getStringList("serverCmdSymptoms")
 
-                    parameter.particle = getParticle(cfg.getStringList("${level}.particle"))
-                    parameter.particleRandom = getParticleRandom(cfg.getStringList("${level}.particleRandom"))
-                    parameter.particleSymptoms = getParticle(cfg.getStringList("${level}.particleSymptoms"))
+                parameter.msg = cfg.getString("msg")?:""
+                parameter.msgSymptoms = cfg.getString("msgSymptoms")?:""
 
-                    parameter.serverCmd = cfg.getStringList("${level}.serverCmd")
-                    parameter.serverCmdRandom = getRandom(cfg.getStringList("${level}.serverCmdRandom"))
-                    parameter.serverCmdSymptoms = cfg.getStringList("${level}.serverCmdSymptoms")
+                parameter.func = cfg.getString("func")?:""
+                parameter.funcSymptoms = cfg.getString("funcSymptoms")?:""
 
-                    parameter.msg = cfg.getString("${level}.msg")?:""
-                    parameter.msgSymptoms = cfg.getString("${level}.msgSymptoms")?:""
+                parameter.isRemoveBuff = cfg.getBoolean("removeBuff",true)
+                parameter.isRemoveItem = cfg.getBoolean("removeItem",true)
 
-                    parameter.func = cfg.getString("${level}.func")?:""
-                    parameter.funcSymptoms = cfg.getString("${level}.funcSymptoms")?:""
+                parameter.dependLvUp = cfg.getDouble("dependLvUp")
+                parameter.dependLvDown = cfg.getDouble("dependLvDown")
 
-                    parameter.isRemoveBuff = cfg.getBoolean("${level}.removeBuff",true)
-                    parameter.isRemoveItem = cfg.getBoolean("${level}.removeItem",true)
+                parameter.symptomsFirstTime = cfg.getInt("symptomsFirstTime")
+                parameter.symptomsTime = cfg.getInt("symptomsTime")
+                parameter.symptomsStopProb = cfg.getDouble("symptomsStopProb")
 
-                    parameter.dependLvUp = cfg.getDouble("${level}.dependLvUp")
-                    parameter.dependLvDown = cfg.getDouble("${level}.dependLvDown")
+                parameter.dependMsg = cfg.getString("dependMsg")?:""
 
-                    parameter.symptomsFirstTime = cfg.getInt("${level}.symptomsFirstTime")
-                    parameter.symptomsTime = cfg.getInt("${level}.symptomsTime")
-                    parameter.symptomsStopProb = cfg.getDouble("${level}.symptomsStopProb")
-
-                    parameter.dependMsg = cfg.getString("${level}.dependMsg")?:""
-
-                    data.parameter.add(parameter)
-
-                    level ++
-
-                }
+                data.parameter = parameter
 
             }catch (e:Exception){
                 Bukkit.getLogger().info("ドラッグファイルのエラー：${dataName}")
                 Bukkit.getLogger().info(e.message)
                 continue
             }
-
-            data.level = data.parameter.size-1
 
             if (data.level < 0){
                 Bukkit.getLogger().info("${dataName}パラメータが設定されていません")
@@ -133,7 +123,6 @@ object Config{
 
             data.hasEnchantEffect = cfg.getBoolean("enchantEffect")
             data.disableWorld = cfg.getStringList("disableWorld")
-            data.level = data.parameter.size-1
             data.cooldown = cfg.getLong("cooldown")
             data.type = cfg.getInt("type")
 
@@ -325,7 +314,7 @@ object Config{
 
         var hasEnchantEffect = false
 
-        var parameter = mutableListOf<DrugParameter>()
+        var parameter = DrugParameter()
 
         var disableWorld = mutableListOf<String>()
 

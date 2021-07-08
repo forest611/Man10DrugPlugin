@@ -66,7 +66,7 @@ object Event:Listener{
         useDrug(p,drug,data)
 
         //remove an item
-        if (data.parameter[0].isRemoveItem) {
+        if (data.parameter.isRemoveItem) {
             item.amount = item.amount - 1
         }
 //        //remove prob
@@ -95,7 +95,7 @@ object Event:Listener{
     /////////////////////////////////
     fun useDrug(p: Player, dataName:String, drug:Config.Drug){
 
-        val parameter = drug.parameter[0]
+        val parameter = drug.parameter
 
         p.sendMessage(rep(parameter.msg,p,dataName))
 
