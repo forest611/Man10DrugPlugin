@@ -97,8 +97,9 @@ object Event:Listener{
 
         val parameter = drug.parameter
 
-        p.sendMessage(rep(parameter.msg,p,dataName))
-
+        if (parameter.msg.isNotEmpty()){
+            p.sendMessage(rep(parameter.msg,p,dataName))
+        }
         Bukkit.getLogger().info("[DRUG]${p.name} used ${drug.displayName}")
 
         if (parameter.isRemoveBuff){
